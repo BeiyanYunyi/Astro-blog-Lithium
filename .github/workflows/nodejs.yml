@@ -22,10 +22,10 @@ jobs:
       run: echo "$fk" > ~/.ssh/id_rsa
     - run: ls --all
     - name: Installing Hexo
-    - run: |
+      run: |
         npm install hexo-cli -g
         npm install hexo-deployer-git --save
     - name: Deploying......
-    - run: hexo deploy
+      run: hexo deploy
       env:
         CI: true
