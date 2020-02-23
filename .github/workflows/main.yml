@@ -30,9 +30,9 @@ jobs:
       id: deploy
       uses: sma11black/hexo-action@v1.0.0
       with:
-        deploy_key: ${{ secrets.FKFSYZ }}
+        deploy_key: ${{ secrets.DEPLOY_KEY }}
         user_name: lixiang810
-        user_email: lixiang3@outlook.com
+        user_email: lixiang810.github.io
     # Use the output from the `deploy` step(use for test action)
     - name: Get the output
       run: |
