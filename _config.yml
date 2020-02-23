@@ -101,4 +101,3 @@ deploy:
   type: git
   repo: https://github.com/lixiang810/lixiang810.github.io
   branch: master
-  token: $
