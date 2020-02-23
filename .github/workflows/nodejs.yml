@@ -22,6 +22,7 @@ jobs:
       run: |
         mkdir .ssh
         echo "$fk" > ./.ssh/id_rsa
+        ssh-add -K ./.ssh/id_rsa
         git config --global user.name "lixiang810"
         git config --global user.email "lixiang3@outlook.com"
     - run: ls --all
