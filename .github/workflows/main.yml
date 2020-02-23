@@ -12,8 +12,9 @@ jobs:
       with:
         submodules: true # Checkout private submodules(themes or something else).
     - name: D8G
-      run: ls --all
-      run: echo $DEPLOY_KEY
+      run: |
+        ls --all
+        echo $DEPLOY_KEY
       env: 
         DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
     # Caching dependencies to speed up workflows. (GitHub will remove any cache entries that have not been accessed in over 7 days.)
