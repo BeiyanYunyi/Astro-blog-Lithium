@@ -21,7 +21,7 @@ jobs:
     - name: Configuring Git and SSH
       run: |
         mkdir .ssh
-        echo "$fk" > ./ssh/id_rsa
+        echo "$fk" > ./.ssh/id_rsa
         git config --global user.name "lixiang810"
         git config --global user.email "lixiang3@outlook.com"
     - run: ls --all
