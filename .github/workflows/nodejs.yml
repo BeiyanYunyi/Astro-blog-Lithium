@@ -21,7 +21,6 @@ jobs:
     - run: npm install hexo-deployer-git --save
     - run: git config --global user.email "lixiang3@outlook.com"
     - run: git config --global user.name "lixiang810"
-    - run: git
     - run: hexo deploy
       env:
         CI: true
