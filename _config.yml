@@ -98,4 +98,7 @@ theme: Sakura
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
-  type: ''
+  type: git
+  repo: https://github.com/lixiang810/lixiang810.github.io
+  branch: master
+  token: 552d2f4a30972ff0d127aaa2af6f93ae7032ed13
