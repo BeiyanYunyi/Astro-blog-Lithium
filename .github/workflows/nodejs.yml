@@ -14,12 +14,18 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Use Node.js ${{ matrix.node-version }}
+    - name: Building Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
-    - run: npm install
-    - run: npm run build --if-present
-    - run: npm test
+    - name: Configuring SSH
+      run: echo "$fk" > ~/.ssh/id_rsa
+    - run: ls --all
+    - name: Installing Hexo
+    - run: |
+        npm install hexo-cli -g
+        npm install hexo-deployer-git --save
+    - name: Deploying......
+    - run: hexo deploy
       env:
         CI: true
