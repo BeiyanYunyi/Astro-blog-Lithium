@@ -6,7 +6,7 @@ favicon: /images/favicon.ico
 avatar: https://cdn.jsdelivr.net/gh/lixiang810/fk-gfw/1.jpg
 url: https://lixiang810.github.io
 description: Live your life with passion! With some drive!
-cdn: https://cdn.jsdelivr.net/gh/honjun/cdn@1.6
+#cdn: https://cdn.jsdelivr.net/gh/honjun/cdn@1.6
 pjax: 1
 # 1开启
 mathjax: 0
