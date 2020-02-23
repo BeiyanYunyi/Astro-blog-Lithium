@@ -1,6 +1,8 @@
 name: Deploy
 
 on: [push]
+env: 
+  fk: ${{ secrets.DEPLOY_KEY }}
 
 jobs:
   build:
@@ -11,12 +13,9 @@ jobs:
       uses: actions/checkout@v1
       with:
         submodules: true # Checkout private submodules(themes or something else).
-    - name: D8G
-      run: |
-        ls --all
-        echo $DEPLOY_KEY
-      env: 
-        DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+
+    - run: echo $fk
+
     # Caching dependencies to speed up workflows. (GitHub will remove any cache entries that have not been accessed in over 7 days.)
     - name: Cache node modules
       uses: actions/cache@v1
