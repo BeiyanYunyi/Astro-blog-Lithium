@@ -13,7 +13,7 @@ timezone: ''
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
-url: http://yoursite.com
+url: https://lixiang810.github.io
 root: /
 permalink: :year/:month/:day/:title/
 permalink_defaults:
@@ -99,6 +99,6 @@ theme: Sakura
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
   type: git
-  repo: git@github.com:lixiang810/lixiang810.github.io.git
+  repo: https://github.com/lixiang810/lixiang810.github.io/
   branch: master
   token: 47c285cbbf004ceb6d4ebbedfb0b945ebba2faba
