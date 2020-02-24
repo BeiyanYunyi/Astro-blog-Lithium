@@ -65,24 +65,25 @@ siteBuildingTime: 07/17/2018
 
 #social  url, img PC端配置
 social:
-  github: {url: http://github.com/honjun, img: https://cdn.jsdelivr.net/gh/honjun/cdn@1.6/img/social/github.png}
-  sina: {url: http://weibo.com/mashirozx?is_all=1, img: https://cdn.jsdelivr.net/gh/honjun/cdn@1.6/img/social/sina.png}
-  wangyiyun: {url: http://weibo.com/mashirozx?is_all=1, img: https://cdn.jsdelivr.net/gh/honjun/cdn@1.6/img/social/wangyiyun.png}
-  zhihu: {url: http://weibo.com/mashirozx?is_all=1, img: https://cdn.jsdelivr.net/gh/honjun/cdn@1.6/img/social/zhihu.png}
-  email: {url: http://weibo.com/mashirozx?is_all=1, img: https://cdn.jsdelivr.net/gh/honjun/cdn@1.6/img/social/email.svg}
-  wechat: {url: /#, qrcode: /img/custom/wechat.jpg, img: https://cdn.jsdelivr.net/gh/honjun/cdn@1.6/img/social/wechat.png}
+  github: {url: http://github.com/lixiang810, img: https://cdn.jsdelivr.net/gh/honjun/cdn@1.6/img/social/github.png}
+  #sina: {url: http://weibo.com/mashirozx?is_all=1, img: https://cdn.jsdelivr.net/gh/honjun/cdn@1.6/img/social/sina.png}
+  wangyiyun: {url: https://music.163.com/#/user/home?id=319502712, img: https://cdn.jsdelivr.net/gh/honjun/cdn@1.6/img/social/wangyiyun.png}
+  #zhihu: {url: http://weibo.com/mashirozx?is_all=1, img: https://cdn.jsdelivr.net/gh/honjun/cdn@1.6/img/social/zhihu.png}
+  #email: {url: http://weibo.com/mashirozx?is_all=1, img: https://cdn.jsdelivr.net/gh/honjun/cdn@1.6/img/social/email.svg}
+  #wechat: {url: /#, qrcode: /img/custom/wechat.jpg, img: https://cdn.jsdelivr.net/gh/honjun/cdn@1.6/img/social/wechat.png}
 
 #social  url, img 移动端配置
 msocial:
-  github: {url: http://github.com/honjun, fa: fa-github, color: 333}
-  weibo: {url: http://weibo.com/mashirozx?is_all=1, fa: fa-weibo, color: dd4b39}
-  qq: {url: https://wpa.qq.com/msgrd?v=3&uin=954655431&site=qq&menu=yes, fa: fa-qq, color: 25c6fe}
+  github: {url: http://github.com/lixiang810, fa: fa-github, color: 333}
+  wangyiyun: {url: https://music.163.com/#/user/home?id=319502712, fa: fa-wangyiyun, color: 333}
+  #weibo: {url: http://weibo.com/mashirozx?is_all=1, fa: fa-weibo, color: dd4b39}
+  #qq: {url: https://wpa.qq.com/msgrd?v=3&uin=954655431&site=qq&menu=yes, fa: fa-qq, color: 25c6fe}
 
 donate:
-  paypal: https://www.paypal.me/hojuncn
-  alipay: https://cdn.jsdelivr.net/gh/honjun/cdn@1.6/img/custom/donate/AliPayQR.jpg
-  wechat: https://cdn.jsdelivr.net/gh/honjun/cdn@1.6/img/custom/donate/WeChanQR.jpg
-  wechatSQ: https://cdn.jsdelivr.net/gh/honjun/cdn@1.6/img/custom/donate/WeChanSQ.jpg
+  #paypal: https://www.paypal.me/hojuncn
+  #alipay: https://cdn.jsdelivr.net/gh/honjun/cdn@1.6/img/custom/donate/AliPayQR.jpg
+  #wechat: https://cdn.jsdelivr.net/gh/honjun/cdn@1.6/img/custom/donate/WeChanQR.jpg
+  #wechatSQ: https://cdn.jsdelivr.net/gh/honjun/cdn@1.6/img/custom/donate/WeChanSQ.jpg
 
 # 视频地址为https://cdn.jsdelivr.net/gh/honjun/hojun@1.2/Unbroken.mp4，配置如下
 movies:
