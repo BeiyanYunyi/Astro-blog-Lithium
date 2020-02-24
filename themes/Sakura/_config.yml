@@ -67,7 +67,7 @@ siteBuildingTime: 07/17/2018
 social:
   github: {url: http://github.com/lixiang810, img: https://cdn.jsdelivr.net/gh/honjun/cdn@1.6/img/social/github.png}
   #sina: {url: http://weibo.com/mashirozx?is_all=1, img: https://cdn.jsdelivr.net/gh/honjun/cdn@1.6/img/social/sina.png}
-  wangyiyun: {url: https://music.163.com/#/user/home?id=319502712, img: https://cdn.jsdelivr.net/gh/honjun/cdn@1.6/img/social/wangyiyun.png}
+  网易云: {url: https://music.163.com/#/user/home?id=319502712, img: https://cdn.jsdelivr.net/gh/honjun/cdn@1.6/img/social/wangyiyun.png}
   #zhihu: {url: http://weibo.com/mashirozx?is_all=1, img: https://cdn.jsdelivr.net/gh/honjun/cdn@1.6/img/social/zhihu.png}
   #email: {url: http://weibo.com/mashirozx?is_all=1, img: https://cdn.jsdelivr.net/gh/honjun/cdn@1.6/img/social/email.svg}
   #wechat: {url: /#, qrcode: /img/custom/wechat.jpg, img: https://cdn.jsdelivr.net/gh/honjun/cdn@1.6/img/social/wechat.png}
@@ -75,7 +75,7 @@ social:
 #social  url, img 移动端配置
 msocial:
   github: {url: http://github.com/lixiang810, fa: fa-github, color: 333}
-  wangyiyun: {url: https://music.163.com/#/user/home?id=319502712, fa: fa-wangyiyun, color: 333}
+  wangyiyun: {url: https://music.163.com/#/user/home?id=319502712, img: https://cdn.jsdelivr.net/gh/honjun/cdn@1.6/img/social/wangyiyun.png}
   #weibo: {url: http://weibo.com/mashirozx?is_all=1, fa: fa-weibo, color: dd4b39}
   #qq: {url: https://wpa.qq.com/msgrd?v=3&uin=954655431&site=qq&menu=yes, fa: fa-qq, color: 25c6fe}
 
