@@ -5,7 +5,7 @@ siteName: ——Hexo试验品
 favicon: /images/favicon.ico
 avatar: https://cdn.jsdelivr.net/gh/lixiang810/fk-gfw/1.jpg
 url: https://lixiang810.github.io
-description: 这里是黎想的Hexo博客试验品，由github托管代码，netlify部署。
+description: 少女祈祷中……
 #cdn: https://cdn.jsdelivr.net/gh/honjun/cdn@1.6
 pjax: 1
 # 1开启
@@ -55,7 +55,7 @@ bgclass: filter-dot
 # startdash url, title, desc img
 startdash: 
   - {url: /theme-sakura/, title: Sakura, desc: 本站 hexo 主题, img: https://cdn.jsdelivr.net/gh/honjun/cdn@1.6/img/startdash/sakura.md.png}
-  - {url: http://space.bilibili.com/271849279, title: Bilibili, desc: 博主的b站视频, img: https://cdn.jsdelivr.net/gh/honjun/cdn@1.6/img/startdash/bilibili.jpg}
+  - {url: https://space.bilibili.com/525468, title: Bilibili, desc: 博主的b站视频, img: https://cdn.jsdelivr.net/gh/honjun/cdn@1.6/img/startdash/bilibili.jpg}
   - {url: /, title: hojun的万事屋, desc: 技术服务, img: https://cdn.jsdelivr.net/gh/honjun/cdn@1.6v/img/startdash/wangshiwu.jpg}
 
 
