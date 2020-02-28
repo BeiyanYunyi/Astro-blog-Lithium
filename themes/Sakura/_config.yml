@@ -36,7 +36,7 @@ menus:
   #  我？: {path: /about/, fa: fa-meetup}, 
   #  主题: {path: /theme-sakura/, fa: iconfont icon-sakura },
   #  Lab: {path: /lab/, fa: fa-cogs },
-  } }
+  #} }
   #客户端: { path: /client/, fa: fa-android faa-vertical }
   #RSS: { path: /atom.xml, fa: fa-rss faa-pulse }
 
