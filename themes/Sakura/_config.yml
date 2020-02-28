@@ -30,7 +30,7 @@ menus:
     图集: {path: /tags/图集/, fa: fa-photo }
   } }
   留言板: { path: /comment/, fa: fa-pencil-square-o faa-tada }
-  外♂交: { path: /links/, fa: fa-link faa-shake }
+  我链/友链: { path: /links/, fa: fa-link faa-shake }
   赞赏: { path: /donate/, fa: fa-heart faa-pulse }
   关于: { path: /, fa: fa-leaf faa-wrench , submenus: { 
     我？: {path: /about/, fa: fa-meetup}, 
