@@ -56,7 +56,7 @@ bgclass: filter-dot
 startdash: 
   - {url: https://sakura.hojun.cn/theme-sakura/, title: Sakura, desc: 本站 hexo 主题, img: https://cdn.jsdelivr.net/gh/honjun/cdn@1.6/img/startdash/sakura.md.png}
   - {url: https://space.bilibili.com/525468, title: Bilibili, desc: 博主的b站视频, img: https://cdn.jsdelivr.net/gh/honjun/cdn@1.6/img/startdash/bilibili.jpg}
-  - {url: https://sakura.hojun.cn/, title: hojun的万事屋, desc: 技术服务, img: https://cdn.jsdelivr.net/gh/honjun/cdn@1.6v/img/startdash/wangshiwu.jpg}
+  - {url: https://sakura.hojun.cn/, title: hojun的万事屋, desc: 技术服务, img: https://cdn.jsdelivr.net/gh/honjun/cdn/img/startdash/wangshiwu.jpg}
 
 
 
