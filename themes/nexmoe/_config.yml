@@ -67,14 +67,14 @@ site_verification: # 向搜索引擎验证你对站点的所有权，用于向�
   google:
   baidu:
 
-#analytics: # 统计系统，目前支持 Google analytics.js 统计、Google Tag Manager 统计、CNZZ 统计、腾讯统计、51.La统计、百度统计
-#  google_site_id: #<ID>
-#  gtags_site_id: #<ID>
-#  cnzz_site_id: #<ID>
-#  tencent_site_id: #<ID>
-#  la_site_id: #<ID>
-#  baidu_site_id: #<ID>
-#  gtm_container_id: #<ID>
+analytics: # 统计系统，目前支持 Google analytics.js 统计、Google Tag Manager 统计、CNZZ 统计、腾讯统计、51.La统计、百度统计
+  google_site_id: #<ID>
+  gtags_site_id: #<ID>
+  cnzz_site_id: #<ID>
+  tencent_site_id: #<ID>
+  la_site_id: #<ID>
+  baidu_site_id: #<ID>
+  gtm_container_id: #<ID>
 
 comment: gitalk # 评论框，目前支持 gitalk,gitment,valine,disqus,disqusjs,changyan,livere,DiscussBot
 
