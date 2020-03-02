@@ -81,7 +81,7 @@ comment: gitalk # 评论框，目前支持 gitalk,gitment,valine,disqus,disqusjs
 gitalk:
   admin: lixiang810 # 拥有对该repo进行操作的 GitHub username
   owner: lixiang810 # 持有该 repo 的 GitHub username
-  repo: backend-of-my-website # 存放评论的 issue 所在的 repo
+  repo: lixiang810.github.io # 存放评论的 issue 所在的 repo
   clientID: 4b0da82ff57492e3c6f9 # GitHub Client ID
   clientSecret: a3cc4a9238e8519eb3f971eda2be37fe6db05895 # GitHub Client Secret
 
