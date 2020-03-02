@@ -76,7 +76,7 @@ analytics: # 统计系统，目前支持 Google analytics.js 统计、Google Tag
   baidu_site_id: #<ID>
   gtm_container_id: #<ID>
 
-comment: gitalk # 评论框，目前支持 gitalk,gitment,valine,disqus,disqusjs,changyan,livere,DiscussBot
+comment: disqusjs # 评论框，目前支持 gitalk,gitment,valine,disqus,disqusjs,changyan,livere,DiscussBot
 
 #gitalk:
 #  admin: lixiang810 # 拥有对该repo进行操作的 GitHub username
