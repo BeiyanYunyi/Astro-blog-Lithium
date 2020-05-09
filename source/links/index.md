@@ -16,4 +16,4 @@ links:
       desc: 黄冈最速传说
 ---
 - [![黄冈最速传说](https://pics.xn--6n2ao17b.com/images/2020/02/27/ed9fb11994a5937a3c24e1d7584f68e9.png)](https://麻衣.com/ "Aiden's World")
-- [![Sukuna's Blog](http://sukunahust-com-static.smartgslb.com/wp-content/uploads/2020/05/cropped-697301d8a960cba8.jpg)](http://sukunahust.com “Sukuna's Blog”)
+- [![Sukuna's Blog](http://sukunahust-com-static.smartgslb.com/wp-content/uploads/2020/05/cropped-697301d8a960cba8.jpg)](http://sukunahust.com "Sukuna's Blog")
