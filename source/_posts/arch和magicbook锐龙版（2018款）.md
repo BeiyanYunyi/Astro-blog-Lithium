@@ -4,6 +4,7 @@ date: 2020-05-13 20:37:55
 tags: [教程]
 ---
 我的2018款魔法书锐龙版对linux的兼容性极差。  
+<!--more-->
 1. deepin v15（注：2018款魔法书均预装windows，2019才有deepin pro）直接调不了背光。
 2. opensuse tumbleweed运行中卡死，只能强制重启。
 3. ubuntu同上。
