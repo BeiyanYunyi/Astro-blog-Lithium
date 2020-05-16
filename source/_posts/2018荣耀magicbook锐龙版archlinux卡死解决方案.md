@@ -1,5 +1,5 @@
 ---
-title: 荣耀magicbook锐龙版（2018款）archlinux卡死解决方案
+title: 2018荣耀magicbook锐龙版archlinux卡死解决方案
 date: 2020-05-13 20:37:55
 tags: [教程]
 ---
