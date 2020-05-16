@@ -22,7 +22,9 @@ MODULES=(amdgpu radeon)
 不过我觉得大概还是治标不治本。这篇文章会经常更新。  
 > 修订于2020年5月15日  
 
-经过多方查找如[bugzilla](https://bugzilla.redhat.com/show_bug.cgi?id=1562530#c66)、[manjaro forum](https://forum.manjaro.org/t/amd-ryzen-problems-and-fixes/55533)，禁止cpu进入C6状态似乎是一个办法。但需要配置zenstates之类太烦，因此我姑且加内核参数了事。  
+经过多方查找如[bugzilla](https://bugzilla.redhat.com/show_bug.cgi?id=1562530#c66)、[manjaro forum](https://forum.manjaro.org/t/amd-ryzen-problems-and-fixes/55533)，我决定：
+
+1. 修改内核参数  
 
 */etc/default/grub*
 ```
@@ -31,5 +33,33 @@ GRUB_CMDLINE_LINUX_DEFAULT="quiet splash……"
 将quiet splash改为"noapic noacpi nosplash irqroll idle=nomwait"
 ……
 ```
-这是我病急乱投医综合两个回答的结果。修改后，目前暂时一切正常。  
+
+2. 禁用C6状态  
+```
+$ yay zenstates-git
+# vim /etc/modules-load.d/modules.conf（可能是新文件）加入如下单词：“msr”。
+# vim /etc/systemd/system/disable_c6.service （新文件）
+```  
+内容如下：
+```
+[Unit]
+Description=Ryzen Disable C6
+DefaultDependencies=no
+After=sysinit.target local-fs.target
+Before=basic.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/zenstates --c6-disable
+
+[Install]
+WantedBy=basic.target
+
+```
+然后
+```
+# systemctl enable disable_c6.service
+```
+最后重启。  
+这是我病急乱投医综合三四个回答的结果。修改后，目前暂时一切正常。  
 > 修订于2020年5月16日
