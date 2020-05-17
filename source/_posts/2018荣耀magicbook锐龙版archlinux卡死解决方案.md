@@ -30,7 +30,7 @@ MODULES=(amdgpu radeon)
 ```
 ……
 GRUB_CMDLINE_LINUX_DEFAULT="quiet splash……"
-将quiet splash改为"noapic noacpi nosplash irqroll idle=nomwait"
+加入idle=nomwait
 ……
 ```
 
