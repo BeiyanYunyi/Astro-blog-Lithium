@@ -29,8 +29,8 @@ MODULES=(amdgpu radeon)
 */etc/default/grub*
 ```
 ……
-GRUB_CMDLINE_LINUX_DEFAULT="quiet splash……"
-加入idle=nomwait
+GRUB_CMDLINE_LINUX_DEFAULT="quiet splash ……"
+改为“noacpi nosplash idle=nomwait irqpoll ……”
 ……
 ```
 
