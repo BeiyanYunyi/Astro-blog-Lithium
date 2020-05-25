@@ -75,3 +75,5 @@ WantedBy=basic.target
 然后还有吧友提供了[另一个方案](https://tieba.baidu.com/p/6686363600)  
 （/etc/default/grub）：  
 acpi_osi="Windows 2015" reboot=kbd ivrs_ioapic[32]=00:14.0 amd_iommu=on idle=nomwait amdgpu.vm_fragment_size=9 initrd=/boot/amd-ucode.img
+
+> 修订于2020年5月25日
