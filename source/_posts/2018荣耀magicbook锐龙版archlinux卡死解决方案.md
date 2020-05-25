@@ -69,3 +69,9 @@ WantedBy=basic.target
 最后重启。  
 这是我病急乱投医综合三四个回答的结果。修改后，目前暂时一切正常。  
 > 修订于2020年5月16日
+
+然而并没有。  
+于是我把kde的混成器设置从OpenGL3.1改成了2.0，现在暂时没事了。  
+然后还有吧友提供了[另一个方案](https://tieba.baidu.com/p/6686363600)  
+（/etc/default/grub）：  
+acpi_osi="Windows 2015" reboot=kbd ivrs_ioapic[32]=00:14.0 amd_iommu=on idle=nomwait amdgpu.vm_fragment_size=9 initrd=/boot/amd-ucode.img
