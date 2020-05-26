@@ -82,4 +82,4 @@ acpi_osi=\"Windows 2015\" reboot=kbd ivrs_ioapic[32]=00:14.0 amd_iommu=on idle=n
 
 然后`sudo grub-mkconfig -o /boot/grub/grub.cfg` 
 
-> 修订于2020年5月25日
+> 修订于2020年5月26日
