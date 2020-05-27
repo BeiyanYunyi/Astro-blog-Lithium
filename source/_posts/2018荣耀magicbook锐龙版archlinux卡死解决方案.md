@@ -83,3 +83,13 @@ acpi_osi=\"Windows 2015\" reboot=kbd ivrs_ioapic[32]=00:14.0 amd_iommu=on idle=n
 然后`sudo grub-mkconfig -o /boot/grub/grub.cfg` 
 
 > 修订于2020年5月26日
+
+然而还是有问题！！！！！！！
+
+然后我又找到了一个内核参数，使用方法同上，加入 `/etc/default/grub`里然后 `grub-mkconfig -o /boot/grub/grub.cfg`吧：
+
+`amdgpu.noretry=0`
+
+这博文在我高中毕业换电脑以前（2020.7.8以前）不会停更，因为我现在本子上只装了arch，所以我一定会和这错误死磕到底！！！特地格了win10，就为了逼自己干掉你！！！
+
+> 修订于2020年5月27日
