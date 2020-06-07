@@ -94,7 +94,14 @@ ignore:
 # Extensions
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
-theme: nexmoe
+theme: Sakura
+plugins: 
+  gitalk:
+    admin: lixiang810 # 拥有对该repo进行操作的 GitHub username
+    owner: lixiang810 # 持有该 repo 的 GitHub username
+    repo: fk-gfw # 存放评论的 issue 所在的 repo
+    clientID: dfd0fe7cb49bf35347c6 # GitHub Client ID
+    clientSecret: b09f2ec0211b19659e56f98db3580e1ad46fce4b # GitHub Client Secret
 
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
