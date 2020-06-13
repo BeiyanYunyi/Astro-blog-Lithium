@@ -28,7 +28,7 @@ jobs:
     - name: Install Dependencies
       if: steps.cache.outputs.cache-hit != 'true'
       run: |
-        npm install hexo
+        npm install hexo --save
         npm install
     
     # Deploy hexo blog website.
