@@ -33,18 +33,14 @@ jobs:
     
     # Deploy hexo blog website.
     - name: Deploy
-#      id: deploy
-#      uses: sma11black/hexo-action@v1.0.0
-#      with:
-#        deploy_key: ${{ secrets.DEPLOY_KEY }}
-      run: |
-          git config --global user.email "lixiang3@outlook.com"
-          git config --global user.name "lixiang810"
-          hexo deploy
+      id: deploy
+      uses: sma11black/hexo-action@v1.0.0
+      with:
+        deploy_key: ${{ secrets.DEPLOY_KEY }}
+        user_name: lixiang810  # (or delete this input setting to use bot account)
+        user_email: lixiang3@outlook.com  # (or delete this input setting to use bot account)
+
     # Use the output from the `deploy` step(use for test action)
     - name: Get the output
       run: |
         echo "${{ steps.deploy.outputs.notify }}"
-        echo $fk
-        echo "$fk"
-        echo "${{ secrets.DEPLOY_KEY }}"
