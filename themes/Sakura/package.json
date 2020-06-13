@@ -4,6 +4,7 @@
   "description": "Simple three column theme for Hexo.Inspired by JianShu.com",
   "license": "MIT",
   "dependencies": {
+    "gitalk": "^1.6.2",
     "hexo-plugin-gitalk": "^0.2.0",
     "hexo-renderer-ejs": "^0.2.0",
     "hexo-renderer-marked": "^0.2.11"
