@@ -94,7 +94,7 @@ ignore:
 # Extensions
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
-theme: landscape
+theme: Sakura
 plugins: 
   gitalk:
     admin: lixiang810 # 拥有对该repo进行操作的 GitHub username
