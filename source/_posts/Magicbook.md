@@ -2,6 +2,8 @@
 title: 2018荣耀magicbook锐龙版archlinux卡死解决方案
 date: 2020-05-13 20:37:55
 tags: [教程]
+description: >
+  我的2018款魔法书锐龙版对linux的兼容性极差。
 ---
 我的2018款魔法书锐龙版对linux的兼容性极差。  
 <!--more-->
