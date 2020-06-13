@@ -1,13 +1,13 @@
 ---
-layout: py
+layout: links
 title: 我链/友链
 date: 2020-03-02 21:40:06
-keywords: 各种链接
+keywords: 我链/友链
 description: 
 comments: true
 photos: https://cdn.jsdelivr.net/gh/honjun/cdn@1.4/img/banner/links.jpg
 links:
-  - group: 小伙伴们
+  - group: 友链
     desc: 欢迎交换友链 ꉂ(ˊᗜˋ)
     items:
     - url: https://麻衣.com
