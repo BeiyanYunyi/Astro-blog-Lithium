@@ -13,7 +13,7 @@ timezone: ''
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
-url: https://stblog.penclub.club
+url: https://lixiang3.imfast.io
 root: /
 permalink: :year/:title/
 permalink_defaults:
@@ -105,7 +105,7 @@ plugins:
 
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
-#deploy:
+deploy:
   type: git
   repo: git@github.com:lixiang810/lixiang3.imfast.io.git
   branch: master
