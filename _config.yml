@@ -109,4 +109,4 @@ plugins:
   type: git
   repo: git@github.com:lixiang810/lixiang3.imfast.io.git
   branch: master
-  token: 552d2f4a30972ff0d127aaa2af6f93ae7032ed13
+  token: 15be3e31ac5b4897f95f5ea0f7e8f9b9fe7d5204
