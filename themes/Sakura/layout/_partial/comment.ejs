@@ -15,6 +15,7 @@
 </script>
 <% } %>
 -->
+<% if (theme.valine && post.comments) { %>
 <link rel="stylesheet" href="<%- theme.cdn.gitalk.css %>">
 <div id="gitalk"></div>
 <script src="<%- theme.cdn.gitalk.js %>"></script>
@@ -30,3 +31,4 @@
     })
     gitalk.render('gitalk')
 </script>
+<% } %>
