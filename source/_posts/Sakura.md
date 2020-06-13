@@ -27,11 +27,11 @@ description: >
 先咕着。（屑颜）  
 # 最终进行的修改  
 先装 gitalk （不确定这一步是否必须）  
-```
+```bash
 $ npm install gitalk --save
 ```
 然后修改themes/Sakura/layout/_partial/comments.ejs，以下是修改后的文本：  
-```
+```js
 <!--这一堆是原内容，我全部注释了
 <% if (theme.valine && post.comments) { %>
 <div id="vcomments"></div>
@@ -70,7 +70,7 @@ $ npm install gitalk --save
 <% } %>
 ```
 最后修改themes/Sakura/_config.yml：  
-```
+```yaml
 # Valine
 valine: true
 #v_appId: ############
@@ -84,7 +84,7 @@ gitalk:
   clientSecret: 我的 Secret # GitHub Client Secret
 ```
 保存。  
-```
+```bash
 $ hexo clean
 #以下两条命令默认你是把你的hexo托管在github上：
 $ git commit -a
@@ -93,5 +93,5 @@ $ git push
 然后你就拥有了一个 gitalk 匿名评论区。虽说也得注册账号，但只需要程序员们人人都有的 github 账号就可以了。  
 这些方法对于防止公权力的滥用来说是远远不够的，因为你总得在公权力的眼皮子底下传播你的链接。如果你搞的事儿足够大，他们不需要在墙外解决问题，只需要在墙内溯源第一个发布链接的人就行。  
 但是，这个办法可以稍微提高一点追踪成本，也能让被公权力以及`被天天作死的你整得`神经过敏的境内私人服务提供商稍微松口气，还能让你的评论区不由境内私人服务提供商进行过分严格的审核，何乐而不为呢？  
-  黎想  
-  2020年6月13日于家中  
+> 黎想  
+2020年6月13日于家中  
