@@ -106,7 +106,7 @@ plugins:
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
 #deploy:
-#  type: git
-#  repo: git@github.com:lixiang810/lixiang810.github.io.git
-#  branch: master
-#  token: 552d2f4a30972ff0d127aaa2af6f93ae7032ed13
+  type: git
+  repo: git@github.com:lixiang810/lixiang3.imfast.io.git
+  branch: master
+  token: 552d2f4a30972ff0d127aaa2af6f93ae7032ed13
