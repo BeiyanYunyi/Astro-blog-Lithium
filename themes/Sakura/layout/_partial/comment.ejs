@@ -16,23 +16,17 @@
 <% } %>
 -->
 <% if (theme.valine && post.comments) { %>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
-<div id="gitalk"></div>
-<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/blueimp-md5@2.12.0/js/md5.min.js"></script>
-<!--
 <link rel="stylesheet" href="https://unpkg.com/vssue/dist/vssue.min.css">
+<div id="vssue"></div>
 <script src="https://unpkg.com/vue/dist/vue.runtime.min.js"></script>
 <script src="https://unpkg.com/vssue/dist/vssue.github.min.js"></script>
 <script>
   new Vue({
     el: '#vssue',
-
     render: h => h('Vssue', {
       props: {
         // 在这里设置当前页面对应的 Issue 标题
         title: 'Vssue',
-
         // 在这里设置你使用的平台的 OAuth App 配置
         options: {
           owner: '<%= theme.gitalk.owner %>',
@@ -44,7 +38,11 @@
     })
   })
 </script>
--->
+<!--
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<div id="gitalk"></div>
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/blueimp-md5@2.12.0/js/md5.min.js"></script>
   <script type="text/javascript">
     var gitalk = new Gitalk({
         clientID: '<%= theme.gitalk.clientID %>',
@@ -56,4 +54,5 @@
     })
     gitalk.render('gitalk')
 </script>
+-->
 <% } %>
