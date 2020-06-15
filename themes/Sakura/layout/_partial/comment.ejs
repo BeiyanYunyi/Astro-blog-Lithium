@@ -16,6 +16,7 @@
 <% } %>
 -->
 <% if (theme.valine && post.comments) { %>
+<!--
 <p>  评论采用Vssue，功能强大<br>
   可惜不登录看不了评论<br>
   如果你没github账号却来到这里<br>
@@ -44,7 +45,14 @@
     })
   })
 </script>
-<!--
+-->
+<p>
+  评论采用gitalk，匿名免翻<br>
+  没有评论区请刷新页面<br>
+  如果你没github账号却来到这里<br>
+  想必你在现实中认识我<br>
+  那么直接联系我就好了——黎想
+</p>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
 <div id="gitalk"></div>
 <script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
@@ -60,5 +68,5 @@
     })
     gitalk.render('gitalk')
 </script>
--->
+
 <% } %>
