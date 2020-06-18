@@ -3,12 +3,12 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: 黎想的又一个博客
-subtitle: 'Hexo试验品'
+title: 黎想的博客 (Hexo版) 
+subtitle: 'Hexo版'
 description: ''
 keywords:
 author: 黎想
-language: en
+language: zh_CN
 timezone: ''
 
 # URL
@@ -94,7 +94,7 @@ ignore:
 # Extensions
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
-theme: Sakura
+theme: icarus
 #plugins: 
 #  gitalk:
 #    admin: lixiang810 # 拥有对该repo进行操作的 GitHub username
