@@ -75,7 +75,7 @@ navbar:
     # Naviagtion menu items
     menu:
         主页: /
-        更多友链: /links
+        文章收藏: /links
 
     # Links to be shown on the right of the navigation bar
     links:
