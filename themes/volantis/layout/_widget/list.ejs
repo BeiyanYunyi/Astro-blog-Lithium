@@ -1,0 +1,33 @@
+<%- partial('_pre') %>
+<section class="widget <%- item.class == 'list' ? item.class : 'list ' + item.class %> <%- page.widget_style %> <%- page.widget_platform %>">
+  <%- partial('header', {item: item}) %>
+  <div class='content'>
+    <ul class="list entry navigation">
+      <% (item.rows||[]).forEach(function(row){ %>
+        <li><a class="flat-box" title="<%- url_for(row.url) %>" href="<%- url_for(row.url) %>"
+          <% if (row.rel) { %>
+            rel="<%- row.rel %>"
+          <% } %>
+          <% if (row.target) { %>
+            target="<%- row.target %>"
+          <% } %>
+          id="<%= url_for(row.url).replace(/\/|%|\./g, "")?url_for(row.url).replace(/\/|%|\./g, ""):"home" %>"
+          >
+          <div class='name'>
+            <% if (row.img) { %>
+              <img src="<%- row.img %>">
+            <% } else if (row.avatar) { %>
+              <img src="<%- row.avatar %>" id="round">
+            <% } else if (row.icon) { %>
+              <i class="<%= row.icon %> fa-fw" aria-hidden="true"></i>
+            <% } %>
+            <%- row.name || url_for(row.url) %>
+          </div>
+          <% if(row.desc) { %>
+            <div class='badge'>(<%- row.desc %>)</div>
+          <% } %>
+        </a></li>
+      <% }) %>
+    </ul>
+  </div>
+</section>

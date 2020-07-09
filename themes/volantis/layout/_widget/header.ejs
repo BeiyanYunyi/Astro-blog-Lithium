@@ -1,0 +1,9 @@
+<% if (item.header) { %>
+  <header>
+    <% if (item.header.url) { %>
+      <a href='<%- item.header.url %>'><i class="<%- item.header.icon %> fa-fw" aria-hidden="true"></i><span class='name'><%- item.header.title %></span></a>
+    <% } else { %>
+      <i class="<%- item.header.icon %> fa-fw" aria-hidden="true"></i><span class='name'><%- item.header.title %></span>
+    <% } %>
+  </header>
+<% } %>

@@ -1,0 +1,158 @@
+<head hexo-theme='https://volantis.js.org/#<%- theme.info.version %>'>
+  <meta charset="utf-8">
+  <!-- SEO相关 -->
+  <% if (page.robots) { %>
+    <meta name="robots" content="<%- page.robots %>">
+  <% } else if (theme.seo && theme.seo.robots) { %>
+    <% if (is_home()) { %>
+      <% if (page.prev == 0) { %>
+        <meta name="robots" content="<%- theme.seo.robots.home_first_page %>">
+      <% } else { %>
+        <meta name="robots" content="<%- theme.seo.robots.home_other_pages %>">
+      <% } %>
+    <% } else if (is_archive()) { %>
+      <meta name="robots" content="<%- theme.seo.robots.archive %>">
+    <% } else if (is_category()) { %>
+      <meta name="robots" content="<%- theme.seo.robots.category %>">
+    <% } else if (is_tag()) { %>
+      <meta name="robots" content="<%- theme.seo.robots.tag %>">
+    <% } %>
+  <% } %>
+  <!-- 渲染优化 -->
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <!-- 页面元数据 -->
+  <%
+    var title = page.seo_title || page.title;
+    var keywords = page.keywords || '';
+    var description = page.description || '';
+    if (is_archive()) {
+      title = __('navbar.archive');
+      if (is_month()) {
+        title += __('symbol.colon') + page.year + '/' + page.month;
+      } else if (is_year()) {
+        title += __('symbol.colon') + page.year;
+      }
+    } else if (is_category()) {
+      title = __('navbar.category') + __('symbol.colon') + page.category;
+    } else if (is_tag()) {
+      title = __('navbar.tag') + __('symbol.colon') + page.tag;
+    } else if (is_home() && page.prev == 0) {
+      keywords = config.keywords || '';
+      description = config.description || '';
+    }
+    if (theme.seo && theme.seo.use_tags_as_keywords) {
+      if (!keywords && page.tags && page.tags.length > 0) {
+        let tags = page.tags.map(function(t){return t.name}).join(',');
+        if (tags.length > 0) {
+          keywords += tags;
+        }
+      }
+    }
+    if (theme.seo && theme.seo.use_excerpt_as_description) {
+      if (page.description == undefined) {
+        if (page.excerpt) {
+          description = truncate(strip_html(page.excerpt), {length: 160});
+        }
+      }
+    }
+  %>
+    <title><% if (title) { %><%= title %> - <% } %><%= config.title %></title>
+  <% if (keywords){ %>
+    <meta name="keywords" content="<%- keywords %>">
+  <% } %>
+  <% if (description){ %>
+    <meta name="description" content="<%- description %>">
+  <% } %>
+
+  <!-- feed -->
+  <% if (config.feed && config.feed.path){ %>
+    <%- feed_tag(config.feed.path, {title: config.title}) %>
+  <% } %>
+
+  <!-- import meta -->
+  <% if (config.import && config.import.meta){ %>
+    <% (config.import.meta||[]).forEach(function(item){ %>
+      <%- item %>
+    <% }) %>
+  <% } %>
+
+  <!-- link -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.13/css/all.min.css">
+  <%- css('https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css') %>
+  
+  <% if (theme.plugins.nodewaves && theme.plugins.nodewaves.css) { %>
+    <%- css(theme.plugins.nodewaves.css) %>
+  <% } %>
+
+  <% if (config.favicon) { %>
+  <link rel="shortcut icon" type='image/x-icon' href="<%- url_for(config.favicon) %>">
+  <% } %>
+
+  <% if (theme.plugins.aplayer.enable) { %>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10/dist/APlayer.min.css">
+  <% } %>
+
+  <% if (theme.comments.vssue && theme.comments.vssue.clientId) { %>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/meteorlxy/vssue@1.4.4/packages/vssue/dist/vssue.min.css">
+  <% } %>
+
+  <!-- import link -->
+  <% if (config.import && config.import.link){ %>
+  <% (config.import.link||[]).forEach(function(item){ %>
+  <%- item %><% }) %>
+  <% } %>
+
+  <% if (config.highlight.enable != true) { %>
+    <% if (theme.plugins.highlightjs && theme.plugins.highlightjs.css) { %>
+      <%- css(theme.plugins.highlightjs.css) %>
+    <% } %>
+  <% } %>
+  <% if (config.use_cdn && theme.info.cdn && theme.info.cdn.css) { %>
+    <%- css(theme.info.cdn.css) %>
+  <% } else { %>
+    <%- css('css/style.css') %>
+  <% } %>
+
+  <script>
+    function setLoadingBarProgress(num) {
+      document.getElementById('loading-bar').style.width=num+"%";
+    }
+  </script>
+
+  <% if (config.google_analytics_key) { %>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script>
+	setTimeout(function() {
+	  let script = document.createElement('script');
+	  script.src = "https://www.googletagmanager.com/gtag/js?id=<%- config.google_analytics_key %>";
+	  script.defer=true;
+	  document.body.appendChild(script);
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', '<%- config.google_analytics_key %>');
+	}, 5000);
+    </script>
+  <% } %>
+  <% if (config.baidu_analytics_key) { %>
+    <!-- ba -->
+    <script>
+    var _hmt = _hmt || [];
+    (function() {
+	  setTimeout(function() { 
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?<%= config.baidu_analytics_key %>";
+		hm.defer=true;
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+	  }, 5000);
+    })();
+    </script>
+  <% } %>
+</head>
