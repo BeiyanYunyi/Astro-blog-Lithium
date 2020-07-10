@@ -8,7 +8,7 @@ comments: true
 photos: https://cdn.jsdelivr.net/gh/honjun/cdn@1.4/img/banner/links.jpg
 links:
   - group: 友链
-    desc: 欢迎交换友链 ꉂ(ˊᗜˋ)
+    desc: 欢迎交换友链 ꉂ(ˊᗜˋ)评论里面打出来就好啦，需包含标题、简介、头像地址和博客地址
     items:
     - url: https://麻衣.com
       avatar: https://pics.xn--6n2ao17b.com/images/2020/02/27/ed9fb11994a5937a3c24e1d7584f68e9.png
@@ -25,5 +25,6 @@ links:
 ---
 
 # 他人文章收藏
+以下是我看到的一些好文：  
 [墙与梯的较量——那些年我们一起用过的翻墙手段 - Yandere@萌](https://blog.yandere.moe/moe/gfw-vs-proxy/97.html)  
 [注册域名时的注意事项 - 影子屋](https://blog.bgme.me/posts/precautions-for-registering-domains/)
