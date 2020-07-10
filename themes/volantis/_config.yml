@@ -59,13 +59,13 @@ style:
     logofont:
       fontfamily: '"Varela Round", "PingFang SC", "Microsoft YaHei", Helvetica, Arial'
       name: 'Varela Round'
-      url: https://cdn.jsdelivr.net/gh/xaoxuu/cdn-fonts/VarelaRound/VarelaRound-Regular.ttf
+      url: https://cdn.jsdelivr.net/gh/lixiang810/fk-gfw/SourceHanSansCN-Regular.otf
       weight: normal
       style: normal
     bodyfont:
       fontfamily: 'DejaVuSans, "PingFang SC", "Microsoft YaHei", Helvetica, Arial'
       name: 'DejaVuSans'
-      url: https://cdn.jsdelivr.net/npm/dejavu-fonts-ttf/ttf/DejaVuSans.ttf
+      url: https://cdn.jsdelivr.net/gh/lixiang810/fk-gfw/SourceHanSansCN-Regular.otf
       weight: normal
       style: normal
       offset: 0.1rem # Correct baseline for zh-CN
