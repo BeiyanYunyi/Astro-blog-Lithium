@@ -510,7 +510,7 @@ plugins:
 comments:
   title: <i class='fas fa-comments'></i> 评论
   subtitle:
-  service: isso # valine, minivaline, disqus, gitalk, vssue, livere, isso
+  service: hashover # valine, minivaline, disqus, gitalk, vssue, livere, isso, hashover
   # Valine
   # https://valine.js.org/
   valine: # 请将 appId appKey 修改为自己的，否则评论数据是共享的。
@@ -598,6 +598,8 @@ comments:
   isso:
     url: https://aipi.penclub.club/isso/
     src: https://aipi.penclub.club/isso/js/embed.min.js
+  hashover:
+    src: https://htgr.penclub.club/hashover-next/comments.php
 
 
 
