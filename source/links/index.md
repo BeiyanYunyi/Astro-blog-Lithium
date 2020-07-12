@@ -22,6 +22,14 @@ links:
       avatar: https://www.umr2333.com/wp-content/uploads/2019/08/cropped-5633172a952df16c-3.jpg
       name: 土间被活埋の小破站
       desc: B 站沙雕月更 up 的破站～
+    - url: https://www.cnblogs.com/borber
+      avatar: https://cdn.jsdelivr.net/gh/Borber/PublicPic1/headImg/head.png
+      name: BORBER
+      desc: 跌宕歌词 纵横书卷 不与遣年华
+    - url: https://www.wallen.xyz/
+      avatar: https://cdn.jsdelivr.net/gh/lixiang810/fk-gfw/11361768.jpg
+      name: 上海喫茶館
+      desc: 是变态
 ---
 
 # 他人文章收藏
