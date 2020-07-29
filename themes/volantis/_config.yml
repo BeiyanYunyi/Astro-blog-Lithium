@@ -373,8 +373,8 @@ footer:
       url: mailto:admin@penclub.club
     - icon: fab fa-github
       url: https://github.com/lixiang810
-    - icon: fas fa-headphones-alt
-      url: https://music.163.com/#/user/home?id=319502712
+#    - icon: fas fa-headphones-alt
+#      url: https://music.163.com/#/user/home?id=319502712
   copyright: '[Copyright © 2020-2020 黎想](https://stblog.penclub.club)'
   # You can add your own property here. (Support markdown, for example: br: '<br>')
   br: '<br>'
