@@ -30,6 +30,10 @@ links:
       avatar: https://cdn.jsdelivr.net/gh/lixiang810/fk-gfw/11361768.jpg
       name: 上海喫茶館
       desc: 是变态
+    - url: https://lekvwa.wixsite.com/home
+      avatar: https://lh3.googleusercontent.com/a-/AOh14GjDsjKnRFOKcLKEI2zllURuvlIV_3oEvAWhiZpw%3Ds96-c
+      name: Lekvwa
+      desc: I want to finish writing three online novels by 2025.
 ---
 
 # 他人文章收藏
