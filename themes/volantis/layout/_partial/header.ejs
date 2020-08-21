@@ -3,7 +3,7 @@
   <div class='wrapper'>
     <div class='nav-sub'>
       <p class="title"></p>
-      <ul class='switcher nav-list-h'>
+      <ul class='switcher nav-list-h m-phone' id="pjax-header-nav-list">
         <li><a class="s-comment fas fa-comments fa-fw" target="_self" href='javascript:void(0)'></a></li>
         <% if (page.sidebar == undefined || page.sidebar != false) { %>
           <li><a class="s-toc fas fa-list fa-fw" target="_self" href='javascript:void(0)'></a></li>
@@ -15,7 +15,7 @@
         <% let logo = theme.navbar.logo %>
         <a class="title flat-box" target="_self" href='<%- url_for("/") %>'>
           <% if (logo.img) { %>
-            <img class='logo' src='<%- logo.img %>'/>
+            <img no-lazy class='logo' src='<%- logo.img %>'/>
           <% } %>
           <% if (logo.icon) { %>
             <i class='<%- logo.icon %>'></i>
@@ -23,14 +23,11 @@
           <% if (logo.title) { %>
             <%- logo.title %>
           <% } %>
-          <% if (logo.title == undefined && logo.icon == undefined && logo.img == undefined) { %>
-            <%- theme.info.name.toUpperCase() %> <b><sup style='color:<%- theme.info.version.indexOf('beta') > 0 ? '#ff9800':'#3AA757' %>'><%- theme.info.version %></sup></b>
-          <% } %>
         </a>
       <% } %>
 
 			<div class='menu navigation'>
-				<ul class='nav-list-h'>
+				<ul class='nav-list-h m-pc'>
           <%
           let menu_list;
           if (site.data && site.data.menu && site.data.menu) {
@@ -46,7 +43,7 @@
             <% } else if (value.icon && value.icon.indexOf('fa-compact-disc') > -1 && value.url  == undefined && value.rows  == undefined) { %>
               <% if (type == 'pc') { %>
                 <li>
-                  <a class="flat-box">
+                  <a class="menuitem flat-box">
                     <i class='<%= value.icon %> fa-fw music'></i><%- value.name %>
                   </a>
                   <ul class="list-v">
@@ -64,7 +61,7 @@
               </li>
             <% } else { %>
               <li>
-                <a class="flat-box" <%= value.url ? 'href='+ url_for(value.url)+'' : ''%>
+                <a class="menuitem flat-box faa-parent animated-hover" <%= value.url ? 'href='+ url_for(value.url)+'' : ''%>
                   <% if (value.rel) { %>
                     rel="<%- value.rel %>"
                   <% } %>
@@ -99,7 +96,7 @@
         </form>
       </div>
 
-			<ul class='switcher nav-list-h'>
+			<ul class='switcher nav-list-h m-phone'>
 				<% if (theme.search.enable === true) { %>
 					<li><a class="s-search fas fa-search fa-fw" target="_self" href='javascript:void(0)'></a></li>
 				<% } %>

@@ -11,6 +11,7 @@
   align-content: center
   color: $color-site-inner
   padding: $gap
+  disable-user-select()
   .cover-body
     div.b
       margin-top: 8vh
@@ -72,7 +73,7 @@
   .subtitle
     font-size: $fontsize-meta
   .logo
-    max-height: 100px
+    max-height: 120px
     max-width: "calc(100% - 4 * %s)" % $gap
   @media screen and (min-height: 1024px)
     .title
@@ -122,34 +123,121 @@
         background: alpha($color-card, .8)
       &:focus
         background: alpha($color-card, 1)
-  .menu
+
+
+.cover .list-h
+  display: flex
+  flex-direction: row
+  flex-wrap: wrap
+  align-items: stretch
+  border-radius: $border-button
+  disable-user-select()
+  a
+    flex: 1
+    display: flex
+    img
+      display: block
+      border-radius: 2px
+      margin: $gap * 0.5 $gap * 0.25
+      min-width: 40px
+      max-width: 44px
+      @media screen and (max-width: $device-tablet)
+        min-width: 36px
+        max-width: 40px
+      @media screen and (max-width: $device-mobile)
+        min-width: 32px
+        max-width: 36px
+      @media screen and (max-width: $device-mobile-m)
+        min-width: 28px
+        max-width: 32px
+
+
+.cover-wrapper .cover .cover-body .menu
+  max-width: 100%
+  &.search
     margin-top: $gap
-    ul
-      display: flex
-      flex-wrap: wrap
+    .list-h a
+      white-space: nowrap
+      flex-direction: row
       align-items: baseline
-      justify-content: center
-      li
-        display: flex
-        flex-wrap: wrap
-        align-items: center
-        padding: 0
-        height: auto
-    ul>li>a
-      font-size: $fontsize-meta
+      font-size: $fontsize-body
       padding: 2px
       margin: 4px
-      trans()
-      color: alpha($color-site-inner, .65)
+      color: alpha($color-site-inner, .75)
       text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05)
       border-bottom: 2px solid transparent
       i
         margin-right: 4px
+      p
+        font-size: $fontsize-body
       &:hover, &.active, &:active
         color: $color-site-inner
         border-bottom: 2px solid $color-site-inner
-  .switcher
-    & > li
-      a
-        &:hover
-          background: alpha($color-text, .15)
+  &.dock, &.featured, &.focus
+    border-radius: $border-button + 2px
+    .list-h a
+      flex-direction: column
+      align-items: center
+      padding: $gap * 0.75
+      @media screen and (max-width: $device-mobile)
+        padding: $gap * 0.75 $gap * 0.5
+      border-radius: $border-button
+      border-bottom: none
+      text-align: center
+      align-content: flex-end
+      color: alpha($color-site-inner, .85)
+      font-size: 1.5rem
+      i
+        margin: $gap * 0.5
+      p
+        font-size: $fontsize-meta
+      &.active
+        i, i+p
+          color: $color-theme
+        img+p
+          color: $color-site-inner
+        background: $color-card
+        backdrop-filter: none
+      &:hover
+        background: $color-card
+
+
+
+.cover-wrapper .cover .cover-body .menu.dock
+  background: alpha($color-card, .5)
+  .list-h
+    flex-wrap: nowrap
+    margin: 4px
+    a+a
+      margin-left: 4px
+    @media screen and (max-width: $device-mobile)
+      overflow-x: scroll
+      scrollbar(0, 0)
+  @supports (backdrop-filter: blur(20px))
+    background: alpha($color-card, .5)
+    backdrop-filter: saturate(200%) blur(20px)
+
+.cover-wrapper .cover .cover-body .menu.featured
+  .list-h
+    margin: -2px
+  .list-h a
+    margin: 2px
+    background: alpha($color-card, .5)
+    @supports (backdrop-filter: blur(20px))
+      background: alpha($color-card, .5)
+      backdrop-filter: saturate(200%) blur(20px)
+
+.cover-wrapper .cover .cover-body .menu.focus
+  .list-h
+    margin: 2px
+  trans()
+  &:hover
+    background: alpha($color-card, .5)
+    @supports (backdrop-filter: blur(20px))
+      background: alpha($color-card, .5)
+      backdrop-filter: saturate(200%) blur(20px)
+  .list-h a
+    margin: 2px
+    &:hover
+      opacity: 1
+      background: $color-card

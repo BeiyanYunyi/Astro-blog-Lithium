@@ -12,7 +12,7 @@ pre
       top: 0
       right: 0
       color: $color-meta
-      font-size: $fontsize-footnote
+      font-size: 12px
       padding: 4px 8px
     &.md:before,&.markdown:before
       content: "md"
@@ -74,22 +74,35 @@ pre
   width: 100%
   margin: $gap-row 0
   display: block
-  background: $color-codeblock
+  background: $color-block
   font-size: $fontsize-code
   font-family: $fontfamily-code
   border-radius: $border-codeblock
-  border: 1px solid darken($color-codeblock, 6)
+  // border: 1px solid transparent
   line-height: 1.5
   -webkit-font-smoothing: auto
   -moz-osx-font-smoothing: auto
+  overflow: hidden
   trans()
+  if hexo-config('style.body.highlight.grayscale') == true
+    filter: grayscale(100%)
+  &:hover
+    background: $color-codeblock
+    if hexo-config('style.body.highlight.grayscale') == true
+      filter: grayscale(0%)
+    figcaption
+      trans()
+      background: darken($color-codeblock, 5%)
+    .gutter
+      background: darken($color-codeblock, 5)
   figcaption
+    font-size: 12px
     position: sticky
     left: 0
     padding: $gap * 0.25 $gap * 0.5 $gap * 0.25 $gap * 0.5
-    background-color: darken($color-codeblock, 5%)
-    border-top-left-radius: $border-codeblock
-    border-top-right-radius: $border-codeblock
+    background: darken($color-block, 5%)
+    border-top-left-radius: "calc(%s - 1px)" % $border-codeblock
+    border-top-right-radius: "calc(%s - 1px)" % $border-codeblock
 
   >table
     overflow: auto
@@ -116,7 +129,7 @@ pre
       position: sticky
       left: 0
       z-index: 1
-      background-color: darken($color-codeblock, 5)
+      background: darken($color-block, 5)
       pre
         color: $color-meta
 
@@ -137,7 +150,7 @@ pre
         top: 0
         right: 0
         color: $color-meta
-        font-size: $fontsize-footnote
+        font-size: 12px
         padding: 4px 8px
 
   if hexo-config('style.body.highlight.language') == true

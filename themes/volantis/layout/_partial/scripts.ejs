@@ -1,4 +1,4 @@
-<%- js('https://cdn.jsdelivr.net/npm/jquery@3.4/dist/jquery.min.js') %>
+<%- js(theme.plugins.jquery) %>
 
 <% if (theme.search && theme.search.enable) { %>
   <script>
@@ -20,46 +20,6 @@
     var ROOT = "<%- config.root %>" || "/";
     if (!ROOT.endsWith('/')) ROOT += '/';
   </script>
-<% } %>
-
-<% if (theme.plugins.Artitalk && theme.plugins.Artitalk.enable && page.layout == "artitalk") { %>
-  <script>
-    var appID ="<%=  theme.plugins.Artitalk.appID  %>";
-    var appKEY ="<%=  theme.plugins.Artitalk.appKEY  %>";
-    <% if(theme.plugins.Artitalk.severurl){ %>
-        var severurl="<%=  theme.plugins.Artitalk.severurl  %>";
-    <% } %>
-    <% if(theme.plugins.Artitalk.slanguage){ %>
-        var slanguage="<%=  theme.plugins.Artitalk.slanguage  %>";
-    <% } %>
-    <% if(theme.plugins.Artitalk.per){ %>
-        var per="<%=  theme.plugins.Artitalk.per  %>";
-    <% } %>
-    <% if(theme.plugins.Artitalk.placeholder1){ %>
-        var placeholder1="<%=  theme.plugins.Artitalk.placeholder1  %>";
-    <% } %>
-    <% if(theme.plugins.Artitalk.placeholder2){ %>
-        var placeholder2="<%=  theme.plugins.Artitalk.placeholder2  %>";
-    <% } %>
-    <% if(theme.plugins.Artitalk.lazy==0){ %>
-        var lazy=0;
-    <% }else{ %>
-        var lazy=1;
-    <% }  %>
-    <% if(theme.plugins.Artitalk.bgimg){ %>
-        var bgimg="<%=  theme.plugins.Artitalk.bgimg  %>";
-    <% } %>
-    <% if(theme.plugins.Artitalk.color1){ %>
-        var color1="<%=  theme.plugins.Artitalk.color1  %>";
-    <% } %>
-    <% if(theme.plugins.Artitalk.color2){ %>
-        var color2="<%=  theme.plugins.Artitalk.color2  %>";
-    <% } %>
-    <% if(theme.plugins.Artitalk.color3){ %>
-        var color3="<%=  theme.plugins.Artitalk.color3  %>";
-    <% } %>
-  </script>
-  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/artitalk"></script>
 <% } %>
 
 <% if (theme.plugins.instant_page) { %>
@@ -112,21 +72,35 @@
 <% } %>
 
 <% if (theme.plugins.aplayer && theme.plugins.aplayer.enable && theme.plugins.aplayer.js) { %>
+  <script>
+    let APlayerController = new Object();
+    APlayerController.id = '<%= theme.plugins.aplayer.id %>';  // 设定全局音乐播放ID
+    APlayerController.volume = '<%= theme.plugins.aplayer.volume %>';
+  </script>
   <% (theme.plugins.aplayer.js||[]).forEach(function(item){ %>
     <%- js({src:item}) %>
   <% }) %>
 <% } %>
 
-<!-- 评论 （PS：只对 valine 做了 Pjax 兼容） -->
+
 <% if (theme.comments.service && theme.comments.service.length > 0) { %>
   <%- partial('../_third-party/comments/' + theme.comments.service + '/script') %>
 <% } %>
 
 
 <!-- darkmodejs -->
-<% if (config.darkmode) { %>
-  <script aysc src="https://cdn.jsdelivr.net/npm/darkmode-js@1.5/lib/darkmode-js.min.js"></script>
+<% if (theme.plugins.darkmodejs.enable) { %>
+  <%- js({src: theme.plugins.darkmodejs.js,aysc:true}) %>
   <script type="text/javascript">
+	function getClientHeight(){
+	  var clientHeight=0;
+	  if(document.body.clientHeight&&document.documentElement.clientHeight){
+	  var clientHeight = (document.body.clientHeight<document.documentElement.clientHeight)?document.body.clientHeight:document.documentElement.clientHeight;
+	  }else{
+	  var clientHeight = (document.body.clientHeight>document.documentElement.clientHeight)?document.body.clientHeight:document.documentElement.clientHeight;
+	  }
+	  return clientHeight;
+	}
 	function supportCss3(style) {
 		var prefix = ['webkit', 'Moz', 'ms', 'o'],
 		i,
@@ -146,25 +120,26 @@
 	};
 	//配置信息
 	var options = {
-	  bottom: '64px', // default: '32px'
-	  right: 'unset', // default: '32px'
-	  left: '32px', // default: 'unset'
-	  time: '0.5s', // default: '0.3s'
-	  mixColor: '#fff', // default: '#fff'
-	  backgroundColor: '#fff',  // default: '#fff'
-	  buttonColorDark: '#100f2c',  // default: '#100f2c'
-	  buttonColorLight: '#fff', // default: '#fff'
-	  saveInCookies: true, // default: true,
-	  label: '🌓', // default: ''
-	  autoMatchOsTheme: true // default: true
+	  bottom: '<%- theme.plugins.darkmodejs.bottom %>',
+	  right: '<%- theme.plugins.darkmodejs.right %>',
+	  left: '<%- theme.plugins.darkmodejs.left %>',
+	  time: '<%- theme.plugins.darkmodejs.time %>',
+	  mixColor: '<%- theme.plugins.darkmodejs.mixColor %>',
+	  backgroundColor: '<%- theme.plugins.darkmodejs.backgroundColor %>',
+	  buttonColorDark: '<%- theme.plugins.darkmodejs.buttonColorDark %>',
+	  buttonColorLight: '<%- theme.plugins.darkmodejs.buttonColorLight %>',
+	  saveInCookies: <%- theme.plugins.darkmodejs.saveInCookies %>,
+	  label: '<%- theme.plugins.darkmodejs.label %>',
+	  autoMatchOsTheme: <%- theme.plugins.darkmodejs.autoMatchOsTheme %>
 	};
-	// 卡片兼容处理
+	// 卡片兼容处理 mix-blend-mode 与 effect: [shadow, floatable, blur] 冲突???
 	function pjax_darkmodejs(){
+		<% if (theme.plugins.darkmodejs.compatible) { %>
 		if(!supportCss3('mix-blend-mode'))return;
 		var checkExist2 = setInterval(function() {
 		   if (typeof jQuery == 'undefined'){return;}
 		   clearInterval(checkExist2);
-		   var TopFlag=document.documentElement.scrollHeight+500;
+		   var TopFlag=getClientHeight();
 			$(window).scroll(function(){
 				var top = $(document).scrollTop();
 				if(top > TopFlag) {
@@ -176,6 +151,7 @@
 				}
 			})
 		}, 100);
+		<% } %>
 	}
 	// mix-blend-mode support?
 	if(supportCss3('mix-blend-mode')){
@@ -185,7 +161,6 @@
 	}
   </script>
 <% } %>
-
 
 <!-- 复制 -->
 <% if (theme.plugins.clipboard && (theme.style.body.highlight.copy_btn == true)) { %>

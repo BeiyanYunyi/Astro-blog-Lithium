@@ -8,6 +8,10 @@
     width: 100%
   .widget
     overflow: hidden
+    &.sticky
+      position: sticky
+      top: $navbar-height + $gap
+      z-index: 1
     >.content
       max-height: "calc(100vh - %s)" % ($gap * 5 + $navbar-height)
       @media screen and (max-width: $device-tablet)
@@ -79,6 +83,7 @@
     ul.entry, ul.popular-posts
       list-style: none
       a
+        border-bottom: 1px solid transparent
         .name
           flex: auto
           // txt-ellipsis()
@@ -123,7 +128,7 @@
         border-top-left-radius: $border-card
         border-top-right-radius: $border-card
         line-height: 0
-        if hexo-config('widget.blogger.shape') == 'circle'
+        &.circle
           border-radius: 100%
           width: 128px
           height: 128px
@@ -296,10 +301,12 @@
       a
         display: inline-block
         trans()
-        line-height: 1.6em
+        line-height: 1.2em
+        margin: 4px 0
+        border-bottom: 1px solid transparent
         &:hover
           color: $color-hover !important //to cover inline style.
-          text-decoration: underline
+          border-bottom: 1px solid $color-hover
 
 
 
@@ -359,3 +366,15 @@
     text-align: left
   @media screen and (max-width: $device-mobile)
     border-radius: $border-card
+
+.webinfo
+  padding 0.2rem 1rem
+  .webinfo-item
+    display block
+    padding 4px 0 0
+    div
+      &:first-child
+        display inline-block
+      &:last-child
+        display inline-block
+        float right

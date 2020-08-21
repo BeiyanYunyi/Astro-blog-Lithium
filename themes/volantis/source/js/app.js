@@ -22,7 +22,7 @@ var customSearch;
 
 	// 校正页面定位（被导航栏挡住的区域）
 	function scrolltoElement(elem, correction = scrollCorrection) {
-		const $elem = elem.href ? $(elem.getAttribute('href')) : $(elem);
+		const $elem = elem.href ? $(decodeURI(elem.getAttribute('href'))) : $(elem);
 		$('html, body').animate({
 			'scrollTop': $elem.offset().top - correction
 		}, 500);
@@ -42,6 +42,7 @@ var customSearch;
 				if($postsBtn.attr("href") != "/")       // TODO: fix it
 					scrolltoElement($bodyAnchor);
 				e.stopImmediatePropagation();
+				$postsBtn.unbind('click');
 			});
 		}
 		if ($titleBtn.length && $bodyAnchor) {
@@ -50,6 +51,7 @@ var customSearch;
 				e.stopPropagation();
 				scrolltoElement($bodyAnchor);
 				e.stopImmediatePropagation();
+				$titleBtn.unbind('click');
 			});
 		}
 		if ($topBtn.length && $bodyAnchor) {
@@ -118,7 +120,6 @@ var customSearch;
 		const $comment = $('.s-comment', $wrapper);   // 评论按钮  桌面端 移动端
 		const $toc = $('.s-toc', $wrapper);           // 目录按钮  仅移动端
 
-		$comment.show(); // 显示 (某些文章可能关闭了评论，故先行显示)
 		$wrapper.find('.nav-sub .title').text(window.subData.title);   // 二级导航文章标题
 
 		// 决定一二级导航栏的切换
@@ -144,7 +145,7 @@ var customSearch;
 				scrolltoElement($('.l_body .comments'));
 				e.stopImmediatePropagation();
 			});
-		} else $comment.hide();   // 关闭了评论，则隐藏
+		} else $comment.remove(); // 关闭了评论，则隐藏
 
 		const $tocTarget = $('.l_body .toc-wrapper');     // 侧边栏的目录列表  PC
 		if ($tocTarget.length && $tocTarget.children().length) {
@@ -170,6 +171,7 @@ var customSearch;
 		var $headerMenu = $('body .navigation');
 		// 先把已经激活的取消激活
 		$headerMenu.find('li a.active').removeClass('active');
+		$headerMenu.find('div a.active').removeClass('active');
 		// var $underline = $headerMenu.find('.underline');
 		function setUnderline($item) {
 			// if (!transition) $underline.addClass('disable-trans');
@@ -200,6 +202,31 @@ var customSearch;
 		}
 	}
 
+	// 设置全局事件
+	function setGlobalHeaderMenuEvent() {
+		// PC端 hover时展开子菜单，点击时隐藏子菜单
+		$('.m-pc li > a[href]').parent().click(function (e) {
+			e.stopPropagation();
+			$('.m-pc .list-v').hide();
+		});
+		// 手机端 点击展开子菜单
+		$('.m-phone li').click(function (e) {
+			e.stopPropagation();
+			$($(e.currentTarget).children('ul')).show();
+		});
+		setPageHeaderMenuEvent();
+	}
+
+	function setPageHeaderMenuEvent() {
+		// 手机端 点击空白处隐藏子菜单
+		$(document).click(function (e) {
+			$('.m-phone .list-v').hide();
+		});
+		// 手机端 滚动时隐藏子菜单
+		$(window).scroll(() => {
+			$('.m-phone .list-v').hide();
+		});
+	}
 	// 设置导航栏搜索框   fix √
 	function setHeaderSearch() {
 		var $switcher = $('.l_header .switcher .s-search');   // 搜索按钮   移动端
@@ -276,7 +303,7 @@ var customSearch;
 
 		let liElements = Array.from($toc.find('li a'));
 		//function animate above will convert float to int.
-		let getAnchor = () => liElements.map(elem => Math.floor($(elem.getAttribute('href')).offset().top - scrollCorrection));
+		let getAnchor = () => liElements.map(elem => Math.floor($(decodeURI(elem.getAttribute('href'))).offset().top - scrollCorrection));
 
 		let anchor = getAnchor();
 		let domHeigth = $(document).height();
@@ -377,6 +404,7 @@ var customSearch;
 	$(function () {
 		setHeader();
 		setHeaderMenuSelection();
+		setGlobalHeaderMenuEvent();
 		setHeaderSearch();
 		setTocToggle();
 		setScrollAnchor();
@@ -396,11 +424,22 @@ var customSearch;
 					restData();
 					setHeader();
 					setHeaderMenuSelection();
+					setPageHeaderMenuEvent();
 					setTocToggle();
 					setScrollAnchor();
 					setTabs();
+
+					// 处理点击事件 setHeaderSearch 没有重载，需要重新绑定单个事件
+					var $switcher = $('.l_header .switcher .s-search'); // 搜索按钮   移动端
+					var $header = $('.l_header'); // 移动端导航栏
+					if ($switcher.length !== 0) {
+						$(document).click(function (e) {
+							$header.removeClass('z_search-open');
+							$switcher.removeClass('active');
+						});
+					}
 				});
-				
+
 			});
 		} catch (error) {
 			// console.log(error);
@@ -415,7 +454,7 @@ if(window.location.hash){
 	var checkExist = setInterval(function() {
 	   if (typeof jQuery == 'undefined'){return;}
 	   if ($("#"+decodeURI(window.location.hash.split("#")[1]).replace(/\ /g,"-")).length) {
-		  $('html, body').animate({scrollTop: $("#"+decodeURI(window.location.hash.split("#")[1]).replace(/\ /g,"-")).offset().top-10}, 500);
+		  $('html, body').animate({scrollTop: $("#"+decodeURI(window.location.hash.split("#")[1]).replace(/\ /g,"-")).offset().top-40}, 500);
 		  clearInterval(checkExist);
 	   }
 	}, 100);
