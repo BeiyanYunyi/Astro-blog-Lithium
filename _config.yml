@@ -107,6 +107,6 @@ theme: volantis
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
   type: git
-  repo: https://github.com/lixiang810/lixiang3.imfast.io.git
+  repo: git@github.com:lixiang810/lixiang3.imfast.io.git
   branch: master
   token: 15be3e31ac5b4897f95f5ea0f7e8f9b9fe7d5204
