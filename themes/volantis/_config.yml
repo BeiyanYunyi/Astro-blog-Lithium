@@ -541,7 +541,7 @@ plugins:
     list_max_height: 320px # list max height
     list_folded: true
   pjax:
-    enable: true
+    enable: false
     timeout: 5000        # The timeout in milliseconds for the XHR requests. Set to 0 to disable the timeout.
     cacheBust: false     # When set to true, Pjax appends a timestamp  to skip the browser cache.
     animation: nprogress # nprogress, circle
