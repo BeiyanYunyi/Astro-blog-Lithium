@@ -33,7 +33,7 @@ links:
     - url: https://lekvwa.wixsite.com/home
       avatar: https://lh3.googleusercontent.com/a-/AOh14GjDsjKnRFOKcLKEI2zllURuvlIV_3oEvAWhiZpw%3Ds96-c
       name: Lekvwa
-      desc: I want to finish writing three online novels by 2025.
+      desc: I might finish 3 of my own novels before 2025.
 ---
 
 # 他人文章收藏
