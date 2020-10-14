@@ -1,28 +1,32 @@
-.article a.link-card
-  margin: $gap-row * 0.5 auto
-  background: $color-block
+.md .tag.link
+  margin-top: $gap-p
+  margin-bottom: $gap-p
+
+.md .link-card
+  margin-right: $gap-p
+  background: var(--color-block)
   display: inline-flex
   align-items: center
   cursor: pointer
   text-align: center
-  min-width: 200px
-  max-width: $device-mobile-l - 4 * $gap
+  width: $device-mobile-l - 4 * $gap
+  max-width: 100%
+  box-shadow: $boxshadow-card
   @media screen and (max-width: $device-mobile-l)
     max-width: 100%
-  @media screen and (max-width: $device-mobile-m)
     width: 100%
-  color: $color-p
+  color: var(--color-p)
   border-radius: $border-card
   &:hover
-    box-shadow: $boxshadow-float
+    box-shadow: $boxshadow-float, $boxshadow-card-float
 
 
-.article a.link-card
+.md .link-card
   div.left,div.right
     pointer-events: none
   div.left
-    width: 48px
-    height: 48px
+    width: 54px
+    height: 54px
     margin: 12px
     overflow: hidden
     flex-shrink: 0
@@ -40,7 +44,7 @@
       transform: translate(-50%, -50%)
   div.right
     overflow: hidden
-    margin-right: 12px
+    margin-right: 16px
   p
     margin: 0
     txt-ellipsis()
@@ -48,5 +52,5 @@
     font-weight: bold
   p.url
     flex-shrink: 0
-    color: $color-meta
+    color: var(--color-meta)
     font-size: $fontsize-code

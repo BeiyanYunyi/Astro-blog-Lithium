@@ -5,12 +5,12 @@ div.note
   border($c)
     return mix($c, $color-card, 100)
   position: relative
-  margin-top: $gap-row
-  margin-bottom: $gap-row
-  padding: $gap + $fontoffset  $gap $gap $gap
+  margin-top: $gap-p
+  margin-bottom: $gap-p
+  padding: $gap
   padding-left: "calc(16px + %s)" % $gap
   border-radius: $border-codeblock
-
+  font-size: $fontsize-list
   h2,
   h3,
   h4,
@@ -30,10 +30,10 @@ div.note
   ol,
   blockquote,
   img
-    font-size: $fontsize-body
-    margin-top: $gap-row
-    margin-bottom: $gap-row
-
+    margin-top: $gap-p * 0.5
+    margin-bottom: $gap-p * 0.5
+  .link-card
+    background: var(--color-card)
   &::before
     position: absolute
     top: "calc(50% - %s * 0.5)" % (24px)
@@ -44,18 +44,18 @@ div.note
     font-weight: 600
     line-height: 24px
     vertical-align: middle
-    font-family: hexo-config('style.fontfamily.note-tag.fontfamily')
+    font-family: hexo-config('tag_plugins.note.iconfont')
 
-  background: bgcolor($color-blockquote)
-  border-left: $border-codeblock solid $color-blockquote
+  background: var(--color-block)
+  border-left: $border-codeblock solid $color-theme
   &::before
-    color: $color-blockquote
+    color: $color-theme
     content: '\f054'
-  if hexo-config('style.body.note') && hexo-config('style.body.note.icon')
+  if hexo-config('tag_plugins.note') && hexo-config('tag_plugins.note.icon')
     &::before
-      content: hexo-config('style.body.note.icon') || '\f054'
-    if hexo-config('style.body.note.color')
-      $c = convert(hexo-config('style.body.note.color')) || mix($color-text, $color-card, 80)
+      content: hexo-config('tag_plugins.note.icon') || '\f054'
+    if hexo-config('tag_plugins.note.color')
+      $c = convert(hexo-config('tag_plugins.note.color')) || mix($color-text, $color-card, 80)
       background: bg($c)
       border-color: border($c)
       &::before

@@ -1,4 +1,4 @@
-// color lib
+// -------- 这些是方便开发预定义的颜色，不需要动态改变 --------
 $color-md-red = #f44336
 $color-md-pink = #E91E63
 $color-md-purple = #9c27b0
@@ -31,36 +31,45 @@ $color-google-red = #E8453C
 
 
 // common
-$color-site = convert(hexo-config('style.color.site')) || #f4f4f4
-$color-site-inner = convert(hexo-config('style.color.site_inner')) || #555
-$color-site-footer = convert(hexo-config('style.color.site_footer')) || #666
-$color-card = convert(hexo-config('style.color.card')) || white
-$color-text = convert(hexo-config('style.color.text')) || #444
-$color-theme = convert(hexo-config('style.color.theme')) || #44D7B6
-$color-link = convert(hexo-config('style.color.link')) || #32C5FF
-$color-hover = convert(hexo-config('style.color.hover')) || #ff5722
-$color-inner = convert(hexo-config('style.color.inner')) || white
-$color-block = convert(hexo-config('style.color.block')) || #f6f6f6
-$color-selection = alpha(#2196f3, 0.2)
+$color-theme = convert(hexo-config('color_scheme.common.theme'))
+$color-link = convert(hexo-config('color_scheme.common.link'))
+$color-button = convert(hexo-config('color_scheme.common.button'))
+$color-hover = convert(hexo-config('color_scheme.common.hover'))
+$color-inner = convert(hexo-config('color_scheme.common.inner'))
+$color-selection = convert(hexo-config('color_scheme.common.selection'))
 
-// code
-$color-inlinecode = convert(hexo-config('style.color.inlinecode')) || #D56D28
-$color-codeblock = convert(hexo-config('style.color.codeblock')) || #FFF7EA
-// blockquote
-$color-blockquote = convert(hexo-config('style.color.blockquote')) || $color-theme
-// mathjax
-$color-mathjax = #fff0
 
-// title color
-$color-h1 = convert(hexo-config('style.color.h1')) || $color-text
-$color-h2 = convert(hexo-config('style.color.h2')) || $color-text
-$color-h3 = convert(hexo-config('style.color.h3')) || $color-text
-$color-h4 = convert(hexo-config('style.color.h4')) || $color-text
-$color-h5 = convert(hexo-config('style.color.h5')) || $color-text
-$color-h6 = convert(hexo-config('style.color.h6')) || $color-text
-$color-p = convert(hexo-config('style.color.p')) || #444
+// -------- 动态配色方案 --------
+// 默认浅色
+$color-site-bg = convert(hexo-config('color_scheme.light.site_bg'))
+$color-site-inner = convert(hexo-config('color_scheme.light.site_inner'))
+$color-site-footer = convert(hexo-config('color_scheme.light.site_footer'))
+$color-card = convert(hexo-config('color_scheme.light.card'))
+$color-text = convert(hexo-config('color_scheme.light.text'))
 
-$color-meta = alpha($color-text, .65)
+$color-block = convert(hexo-config('color_scheme.light.block'))
+$color-codeblock = convert(hexo-config('color_scheme.light.codeblock'))
+$color-inlinecode = convert(hexo-config('color_scheme.light.inlinecode'))
+$color-h1 = convert(hexo-config('color_scheme.light.h1'))
+$color-h2 = convert(hexo-config('color_scheme.light.h2'))
+$color-h3 = convert(hexo-config('color_scheme.light.h3'))
+$color-h4 = convert(hexo-config('color_scheme.light.h4'))
+$color-h5 = convert(hexo-config('color_scheme.light.h5'))
+$color-h6 = convert(hexo-config('color_scheme.light.h6'))
+$color-p = convert(hexo-config('color_scheme.light.p'))
+$color-list = convert(hexo-config('color_scheme.light.list'))
+$color-list-hl = convert(hexo-config('color_scheme.light.list_hl'))
+$color-meta = convert(hexo-config('color_scheme.light.meta'))
+
+// 深色配色方案在 darkmode.styl 中按需加载
+
+
 
 bgcolor($c, $mix = 10)
   return mix($c, $color-card, $mix)
+
+list_active()
+  color: var(--color-list-hl)
+list_hover()
+  color: var(--color-list-hl)
+  background: var(--color-site-bg)

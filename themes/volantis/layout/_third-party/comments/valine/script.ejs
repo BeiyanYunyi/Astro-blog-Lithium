@@ -35,20 +35,22 @@
   }
 
   function pjax_valine() {
-    let pageUrl = $.trim($('#pjax-comment-path').text()) === "none" ? 
-      decodeURI(window.location.pathname) : $.trim($('#pjax-comment-path').text());
-    let pagePlaceholder = $.trim($('#pjax-comment-placeholder').text()) === "none" ?
-      "<%= theme.comments.placeholder %>" : $.trim($('#pjax-comment-placeholder').text());
+    if(!document.querySelectorAll("#valine_container")[0])return;
 
-    let ALLPATH = '<%= theme.comments.path %>';
-    if(ALLPATH != '') pageUrl = ALLPATH;
+    let pagePlaceholder = pdata.commentPlaceholder || "<%= theme.comments.valine.placeholder %>";
+
+    let path = pdata.commentPath;
+    if (path.length == 0) {
+      let defaultPath = '<%= theme.comments.valine.path %>';
+      path = defaultPath || decodeURI(window.location.pathname);
+    }
 
     var valine = new Valine();
     valine.init({
       el: '#valine_container',
       meta: meta,
       placeholder: pagePlaceholder,
-      path: pageUrl,
+      path: path,
       appId: "<%= theme.comments.valine.appId %>",
       appKey: "<%= theme.comments.valine.appKey %>",
       pageSize: '<%= theme.comments.valine.pageSize %>',
@@ -58,6 +60,7 @@
       highlight: '<%= theme.comments.valine.highlight %>',
       mathJax: '<%= theme.comments.valine.mathJax %>',
       enableQQ: '<%= theme.comments.valine.enableQQ %>',
+      recordIP: '<%= theme.comments.valine.recordIP %>',
       requiredFields: requiredFields,
       emojiCDN: 'https://cdn.jsdelivr.net/gh/volantis-x/cdn-emoji/valine/',
       emojiMaps: emojiMaps

@@ -15,13 +15,11 @@
     max-height: "calc(100vh - %s)" % ($gap * 5 + $navbar-height)
     a
       border-left: $border-line solid transparent
-      &:hover
-        background: bgcolor($color-theme)
-        border-left: $border-line solid $color-theme
-      &:active
-        border-left: 2 * $border-line solid $color-theme
       &.active
-        color: $color-theme
+        list_active()
+        border-left: $border-line solid $color-theme
+      &:hover
+        list_hover()
         border-left: $border-line solid $color-theme
 
 
@@ -32,7 +30,7 @@
     max-height: 1000px
     width: auto
     max-width: "calc(100% - 2 * %s)" % $gap
-    top: $navbar-height - $gap * 2
+    top: $navbar-height - $gap
     right: $gap
     border-radius: $border-card * 0.5
     box-shadow: $boxshadow-float
@@ -43,12 +41,12 @@
     &.active
       visibility: visible
       transform: scale(1,1)
-  @media screen and (max-width: $device-mobile-l)
+  @media screen and (max-width: $device-mobile-m)
     right: 0
 
   a
     padding-left: 8px
-    color: $color-meta
+    color: var(--color-meta)
     font-size: $fontsize-meta
     display: inline-block
 
@@ -84,3 +82,16 @@
 
   &:empty
     display:none
+
+  .toc-child 
+    font-size: 1rem
+    overflow: hidden
+    transition: max-height 0.6s ease-in
+    max-height: 0
+  .toc-item
+    &.active
+      &>.toc-link
+        list_active()
+        border-left: $border-line solid $color-theme
+      &>.toc-child 
+        max-height: 1000px

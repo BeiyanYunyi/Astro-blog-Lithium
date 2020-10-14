@@ -1,34 +1,29 @@
-footer
+footer.footer
   position: relative
   padding: 40px 10px 120px 10px
   width: 100%
-  color: alpha($color-site-footer, .5)
+  color: var(--color-site-footer)
   margin: 0px auto
   &,p
     font-size: $fontsize-code
   overflow: hidden
   text-align: center
-
   .licenses
     color: fade(@color_text_main, 50%)
-    text-decoration: underline
-
-  .codename
-    text-decoration: underline
-
   .social-wrapper
     display: flex
     justify-content: center
     flex-wrap: wrap
     margin: 4px $gap * 0.5
-    font-size: $fontsize
 
   a
-    color: alpha($color-site-footer, .75)
+    color: var(--color-site-footer)
     padding: 0
     trans()
     &:hover
-      color: $color-site-footer
+      color: $color-hover
+    &:not(.social):hover
+      text-decoration: underline
     &.social
       position: relative
       display: inline-block
@@ -36,14 +31,18 @@ footer
       display: flex
       justify-content: center
       align-items: center
-      width: 36px
-      height: 36px
+      min-width: 36px
+      min-height: 36px
       margin: 4px
-      border-radius: 100px
-      color: alpha($color-site-footer, .75)
+      opacity: .75
+      border-radius: 4px
+      font-size: 1rem
+      img
+        margin: 8px
+        height: 24px
       &:hover
-        background: alpha($color-site-footer, .1)
-        color: $color-site-footer
+        color: $color-hover
+        background: alpha(@color, 0.1)
 
 
 

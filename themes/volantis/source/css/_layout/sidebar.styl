@@ -13,7 +13,7 @@
       top: $navbar-height + $gap
       z-index: 1
     >.content
-      max-height: "calc(100vh - %s)" % ($gap * 5 + $navbar-height)
+      max-height: 200vh
       @media screen and (max-width: $device-tablet)
         max-height: none
       overflow: auto
@@ -25,8 +25,8 @@
 
 .widget
   z-index: 0
-  background: $color-card
-  margin-top: $gap
+  background: var(--color-card)
+  margin-bottom: $gap
   border-radius: $border-card
   width: 100%
   display: none
@@ -41,22 +41,16 @@
     &.mobile
       display: block !important
 
-  @media screen and (max-width: $device-mobile-l)
-    width: "calc(100% - 2 * %s)" % $gap
-    margin: $gap $gap 0 $gap
-    display: none !important
-    &.mobile
-      display: block !important
-
 
   header
     border-top-left-radius: $border-card
     border-top-right-radius: $border-card
     padding: "calc(%s - 2px)" % $gap
     font-weight: bold
+    font-size: $fontsize-meta
     padding-bottom: 0
     &,a
-      color: $color-theme
+      color: var(--color-meta)
     >a:hover
       color: $color-hover
 
@@ -67,11 +61,13 @@
   >.content
     padding: $gap * 0.5 0
     p
-      margin-top: $gap-row
-      margin-bottom: $gap-row
+      margin-top: $gap-p
+      margin-bottom: $gap-p
+      &:first-child
+        margin-top: $gap-p * 0.5
     ul>li
       a
-        color: $color-meta
+        color: var(--color-meta)
         padding: 0 $gap
         padding-left: $gap * 0.5 + 4px
         line-height: 2
@@ -83,34 +79,25 @@
     ul.entry, ul.popular-posts
       list-style: none
       a
-        border-bottom: 1px solid transparent
+        color: var(--color-list)
         .name
           flex: auto
-          // txt-ellipsis()
-          color: alpha($color-text, .8)
         .badge
           flex:none
           font-weight: normal
           font-size: $fontsize-meta
           color: alpha($color-text, .7)
-
-        &:hover
-          border-left: $border-line solid $color-theme
-          background: bgcolor($color-theme)
-
         &.active
           border-left: $border-line solid $color-theme
-          .name
-            color: $color-theme
+          list_active()
           .badge
             color: alpha($color-theme, .9)
-
-
-        &:active
-          border-left: $border-line * 2 solid $color-theme
-
         &.child
           padding-left: $gap * 2
+        &:hover
+          border-left: $border-line solid $color-theme
+          list_hover()
+
 
 
   &.blogger
@@ -133,7 +120,7 @@
           width: 128px
           height: 128px
           margin-top: $gap * 2
-          margin-bottom: $gap-row
+          margin-bottom: $gap-p
           img
             display: block
             position: absolute
@@ -169,14 +156,12 @@
         flex-wrap: wrap
         margin: 4px $gap * 0.25
         a
-          color: $color-meta
+          color: var(--color-meta)
           padding: 0
           trans()
           &:hover
             color: $color-hover
-
           &.social
-            font-size: $fontsize-body
             display: flex
             justify-content: center
             align-items: center
@@ -197,7 +182,7 @@
       background: transparent !important
       margin-top: 2 * $gap
       backdrop-filter: none
-      color: $color-site-inner
+      color: var(--color-site-inner)
 
 
 
@@ -212,8 +197,6 @@
         trans()
         &:hover
           color: $color-hover
-          text-decoration: underline
-
         &:active
           color: darken($color-hover, 25%)
 
@@ -274,12 +257,10 @@
               border-radius: 100%
 
           &.active
-            color: $color-theme
-            background: bgcolor($color-theme)
+            list_hover()
           &:hover
-            color: $color-theme
+            list_hover()
             border-radius: $border-line
-            background: bgcolor($color-theme)
 
 
         &.fixed a
@@ -327,8 +308,6 @@
 
 
 
-
-
   &.qrcode
     .content
       display: flex
@@ -347,25 +326,6 @@
     padding-left: $gap - 4px
     padding-right: $gap - 4px
 
-
-
-.aplayer-container
-  display: flex
-  justify-content: center
-  min-height: 100px
-  meting-js
-    max-width: 100%
-
-
-.aplayer
-  max-width: 500px
-  border-radius: 4px
-  color: $color-text
-  font-family: $fontfamily
-  .aplayer-list
-    text-align: left
-  @media screen and (max-width: $device-mobile)
-    border-radius: $border-card
 
 .webinfo
   padding 0.2rem 1rem

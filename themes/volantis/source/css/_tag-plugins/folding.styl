@@ -1,12 +1,10 @@
 details
   display: block
   padding: $gap
-  margin: $gap-row 0
+  margin: $gap-p 0
   border-radius: $border-codeblock
-  background: $color-card
+  background: var(--color-card)
   font-size: $fontsize-list
-  p
-    font-size: $fontsize-body
   trans()
   summary
     cursor: pointer
@@ -23,7 +21,7 @@ details
         display: inline
         border-bottom: none !important
     &:hover
-      color: $color-p
+      color: var(--color-p)
       &:after
         position: absolute
         content: '+'
@@ -32,9 +30,9 @@ details
         transform: translateY(-50%)
         right: $gap
 
-  border: 1px solid $color-block
+  border: 1px solid var(--color-block)
   >summary
-    background: $color-block
+    background: var(--color-block)
   &[blue]
     border-color: bgcolor($color-md-blue)
     >summary
@@ -95,7 +93,7 @@ details[open]
     p>a:hover
       text-decoration: underline
     >
-      p,.tabs,ul,ol,.highlight,.note,.fancybox,details
+      p,.tabs,ul,ol,.highlight,.note,details
         &:first-child
           margin-top: 0
         &:last-child

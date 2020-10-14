@@ -1,3 +1,23 @@
+:root
+  --color-site-bg: $color-site-bg
+  --color-site-inner: $color-site-inner
+  --color-site-footer: $color-site-footer
+  --color-card: $color-card
+  --color-text: $color-text
+  --color-block: $color-block
+  --color-inlinecode: $color-inlinecode
+  --color-codeblock: $color-codeblock
+  --color-h1: $color-h1
+  --color-h2: $color-h2
+  --color-h3: $color-h3
+  --color-h4: $color-h4
+  --color-h5: $color-h5
+  --color-h6: $color-h6
+  --color-p: $color-p
+  --color-list: $color-list
+  --color-list-hl: $color-list-hl
+  --color-meta: $color-meta
+
 *
   box-sizing: border-box
   outline: none
@@ -5,23 +25,17 @@
   padding: 0
 
 html
-  color: $color-text
+  color: var(--color-text)
   width: 100%
   height: 100%
   font-family: $fontfamily
-  font-size: $fontsize-body
+  font-size: $fontsize-root
   >
-    if hexo-config('style.scrollbar.size')
-      if hexo-config('style.scrollbar.color')
-        if hexo-config('style.scrollbar.hover')
-          scrollbar(convert(hexo-config('style.scrollbar.size')), convert(hexo-config('style.scrollbar.border')) || 0px, convert(hexo-config('style.scrollbar.color')), convert(hexo-config('style.scrollbar.hover')))
-        else
-          scrollbar(convert(hexo-config('style.scrollbar.size')), convert(hexo-config('style.scrollbar.border')) || 0px, convert(hexo-config('style.scrollbar.color')))
-      else
-        scrollbar(convert(hexo-config('style.scrollbar.size')), convert(hexo-config('style.scrollbar.border')) || 0px)
+    if hexo-config('custom_css.scrollbar.size')
+      scrollbar(convert(hexo-config('custom_css.scrollbar.size')), convert(hexo-config('custom_css.scrollbar.border')) || 0px)
 
 body
-  background-color: $color-site
+  background-color: var(--color-site-bg)
   text-rendering: optimizelegibility
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0)
   line-height: $lineheight
@@ -82,10 +96,6 @@ pre
   -o-tab-size: 4
   -webkit-tab-size: 4
 
-
-img
-  max-width: 100%
-
 .clearfix
   zoom: 1
   &:before,&:after
@@ -117,6 +127,8 @@ ul,ol
 article,aside,details,figcaption,figure,footer,header,hgroup,main,menu,nav,section,summary
   display: block
 
+article
+  overflow: hidden
 
 abbr[title]
   border-bottom: 1px dotted
@@ -162,6 +174,13 @@ hr
 pre
   overflow: auto
 
+span.dot,span.sep
+  font-size: 0.9em
+  margin: 0 .2rem
+span.dot:before
+  content: '·'
+span.sep:before
+  content: '/'
 
 code,kbd,pre,samp
   font-family: monospace, monospace
@@ -235,13 +254,11 @@ optgroup
   font-weight: bold
 
 
-table
+table:not([class])
   border-collapse: collapse
   overflow: auto
   display: inline-block
   max-width: 100%
-  scrollbar-codeblock()
-  margin-right: $gap-row
   vertical-align: text-top
   th
     background-color: darken($color-block, 2)
@@ -253,11 +270,10 @@ table
   tr
     word-break: keep-all
     background-color: lighten($color-block, 3)
-  tbody
-    >tr
-      trans()
-      &:hover
-        background-color: darken($color-block, 2)
+    trans()
+    &:hover
+      background-color: darken($color-block, 2)
+
 
 td,th
   padding: 0

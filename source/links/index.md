@@ -1,5 +1,5 @@
 ---
-layout: links
+layout: friends
 title: 友链及他人文章收藏
 date: 2020-03-02 21:40:06
 keywords: 收藏

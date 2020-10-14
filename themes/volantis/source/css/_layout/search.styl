@@ -18,7 +18,7 @@
     left: 50%
     top: 0
     margin: 64px 0px 0px -320px
-    background: $color-card
+    background: var(--color-card)
     z-index: 3
     border-radius: $border-card
     overflow: hidden
@@ -97,7 +97,8 @@
         width: 100%
         height: 100%
         z-index: 2
-
+        input
+          color: var(--color-text)
         #u-search-modal-input
           margin: $gap 50px
           padding: 0 $gap * 0.5
@@ -139,7 +140,7 @@
       width: 100%
       height: 50px
       padding: 0px 15px
-      background: $color-card
+      background: var(--color-card)
       .logo
         position: absolute
         top: 0
@@ -187,7 +188,7 @@
         font-size: $fontsize-meta
         font-weight: bold
         line-height: 50px
-        color: $color-meta
+        color: var(--color-meta)
         cursor: pointer
         z-index: 1
         &:hover
@@ -206,7 +207,7 @@
       left: 0
       overflow-y: scroll
       -webkit-overflow-scrolling: touch
-      background: $color-card
+      background: var(--color-card)
       border-radius: $border-card
       scrollbar()
       .modal-results
@@ -220,14 +221,15 @@
             color: darken($color-theme, 10)
             text-decoration: underline
           &:hover
-            background: bgcolor($color-theme)
-
+            background: var(--color-site-bg)
+            .title
+              color: var(--color-list-hl)
 
 
           .title
             display: inline-block
             max-width: 100%
-            color: lighten($color-text, 10)
+            color: var(--color-list)
             font-weight: bold
             padding: 1px
             margin-bottom: 2px
@@ -242,14 +244,14 @@
             word-break: break-all
             text-overflow: ellipsis
             font-size: $fontsize-code
-            color: $color-meta
+            color: var(--color-meta)
           .icon
             position: absolute
             top: 50%
             right: 0
             margin-top: -4px
             font-size: 11px
-            color: gray
+            color: var(--color-meta)
 
 
   .modal-overlay

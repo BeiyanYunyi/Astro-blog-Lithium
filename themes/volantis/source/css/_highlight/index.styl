@@ -6,13 +6,13 @@ pre
   -webkit-font-smoothing: auto
   -moz-osx-font-smoothing: auto
   scrollbar()
-  if hexo-config('style.body.highlight.language') == true
+  if hexo-config('custom_css.body.highlight.language') == true
     &:before
       position: absolute
       top: 0
       right: 0
-      color: $color-meta
-      font-size: 12px
+      color: var(--color-meta)
+      font-size: 13px
       padding: 4px 8px
     &.md:before,&.markdown:before
       content: "md"
@@ -72,9 +72,9 @@ pre
 .highlight
   position: relative
   width: 100%
-  margin: $gap-row 0
+  margin: $gap-p 0
   display: block
-  background: $color-block
+  background: var(--color-block)
   font-size: $fontsize-code
   font-family: $fontfamily-code
   border-radius: $border-codeblock
@@ -84,11 +84,11 @@ pre
   -moz-osx-font-smoothing: auto
   overflow: hidden
   trans()
-  if hexo-config('style.body.highlight.grayscale') == true
+  if hexo-config('custom_css.body.highlight.grayscale') == true
     filter: grayscale(100%)
   &:hover
-    background: $color-codeblock
-    if hexo-config('style.body.highlight.grayscale') == true
+    background: var(--color-codeblock)
+    if hexo-config('custom_css.body.highlight.grayscale') == true
       filter: grayscale(0%)
     figcaption
       trans()
@@ -96,7 +96,7 @@ pre
     .gutter
       background: darken($color-codeblock, 5)
   figcaption
-    font-size: 12px
+    font-size: 13px
     position: sticky
     left: 0
     padding: $gap * 0.25 $gap * 0.5 $gap * 0.25 $gap * 0.5
@@ -107,6 +107,7 @@ pre
   >table
     overflow: auto
     display: block
+    scrollbar-codeblock()
     td,th
       padding: 0
       border: none
@@ -131,7 +132,7 @@ pre
       z-index: 1
       background: darken($color-block, 5)
       pre
-        color: $color-meta
+        color: var(--color-meta)
 
 
     pre
@@ -139,9 +140,11 @@ pre
       margin: 0
       padding: 0
       border: none
+      .code:before
+        display: none
 
     .code
-      padding: $gap
+      padding: $gap * 1.25 $gap
       vertical-align: top
       background-color: transparent
       &:before
@@ -149,11 +152,11 @@ pre
         position: absolute
         top: 0
         right: 0
-        color: $color-meta
-        font-size: 12px
+        color: var(--color-meta)
+        font-size: 13px
         padding: 4px 8px
 
-  if hexo-config('style.body.highlight.language') == true
+  if hexo-config('custom_css.body.highlight.language') == true
     &.md .code:before,&.markdown .code:before
       content: "md"
     &.yaml .code:before

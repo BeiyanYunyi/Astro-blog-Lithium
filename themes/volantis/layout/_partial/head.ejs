@@ -1,4 +1,4 @@
-<head hexo-theme='https://github.com/volantis-x/hexo-theme-volantis/releases/tag/<%- theme.info.version %>'>
+<head hexo-theme='https://github.com/volantis-x/hexo-theme-volantis/tree/<%- theme.info.theme_version %>'>
   <meta charset="utf-8">
   <!-- SEO相关 -->
   <% if (page.robots) { %>
@@ -19,6 +19,9 @@
     <% } %>
   <% } %>
   <!-- 渲染优化 -->
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  <link rel='dns-prefetch' href='https://cdn.jsdelivr.net'>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <meta name="renderer" content="webkit">
   <meta name="force-rendering" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
@@ -45,6 +48,13 @@
     } else if (is_home() && page.prev == 0) {
       keywords = config.keywords || '';
       description = config.description || '';
+    } else {
+      if ((page.layout == 'docs') && page.group && (page.group in theme.sidebar.widget_library)) {
+        let widget = theme.sidebar.widget_library[page.group];
+        if ((widget.class == 'group') && widget.seo_title) {
+          title = widget.seo_title + ": " + title;
+        }
+      }
     }
     if (theme.seo && theme.seo.use_tags_as_keywords) {
       if (!keywords && page.tags && page.tags.length > 0) {
@@ -87,14 +97,11 @@
   <% if (theme.plugins.fontawesome) { %>
     <%- css(theme.plugins.fontawesome) %>
   <% } %>
-  <% if (theme.plugins.fontawesome_animation) { %>
-    <%- css(theme.plugins.fontawesome_animation) %>
-  <% } %>
-  <% if (theme.plugins.fancybox) { %>
-    <%- css(theme.plugins.fancybox) %>
+  <% if (theme.plugins.fontawesome_animation.enable) { %>
+    <%- css(theme.plugins.fontawesome_animation.css) %>
   <% } %>
 
-  <% if (theme.plugins.nodewaves && theme.plugins.nodewaves.css) { %>
+  <% if (theme.plugins.nodewaves.enable) { %>
     <%- css(theme.plugins.nodewaves.css) %>
   <% } %>
 
@@ -116,8 +123,8 @@
   <%- item %><% }) %>
   <% } %>
 
-  <% if (config.highlight.enable != true) { %>
-    <% if (theme.plugins.highlightjs && theme.plugins.highlightjs.css) { %>
+  <% if (theme.plugins.highlightjs.enable == true) { %>
+    <% if (theme.plugins.highlightjs.css) { %>
       <%- css(theme.plugins.highlightjs.css) %>
     <% } %>
   <% } %>
@@ -127,34 +134,6 @@
     <%- css('css/style.css') %>
   <% } %>
 
-  <% if (config.google_analytics_key) { %>
-    <!-- Global site tag (gtag.js) - Google Analytics -->
-    <script>
-	setTimeout(function() {
-	  let script = document.createElement('script');
-	  script.src = "https://www.googletagmanager.com/gtag/js?id=<%- config.google_analytics_key %>";
-	  script.defer=true;
-	  document.body.appendChild(script);
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', '<%- config.google_analytics_key %>');
-	}, 5000);
-    </script>
-  <% } %>
-  <% if (config.baidu_analytics_key) { %>
-    <!-- ba -->
-    <script>
-    var _hmt = _hmt || [];
-    (function() {
-	  setTimeout(function() {
-        var hm = document.createElement("script");
-        hm.src = "https://hm.baidu.com/hm.js?<%= config.baidu_analytics_key %>";
-		hm.defer=true;
-        var s = document.getElementsByTagName("script")[0];
-        s.parentNode.insertBefore(hm, s);
-	  }, 5000);
-    })();
-    </script>
-  <% } %>
+  <script id="loadcss"></script>
+
 </head>

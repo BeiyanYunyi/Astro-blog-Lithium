@@ -1,83 +1,47 @@
 .article
-  underline()
-    text-decoration: underline
-    // border-bottom: 1px solid $color-link
-  a
-    &:not([class])
-      underline()
-      trans(0.1s)
-      // &:hover
-      //   border-bottom-color: $color-hover
-
-
-.article
-  color: $color-p
+  color: var(--color-p)
   // word-break: break-all
   word-wrap: break-word
-  img
-    &.inline
-      display: inline
-      vertical-align: middle
-      transform: translateY(-4px)
-    position: relative
-    trans()
-    @media screen and (max-width: $device-mobile)
-      box-shadow: none
-  div>img,p>img
-    display: block
-    margin: auto
-    border-radius: 4px
-    @media screen and (max-width: $device-mobile)
-      border-radius: 2px
-  span
-    img
-      display: inline
-      margin: auto
 
   a
     word-break: break-word
-  h1,h2,h3,h4,h5,h6
-    &:first-child
-      margin-top: $gap-row
-      padding-top: 0
-    &.title
-      left: 0
-      &:before
-        content: none
+  h1.title,h2.title
+    left: 0
+    &:before
+      content: none
   h1,h2
     padding-bottom: .2rem
     margin-bottom: 1rem
     border-bottom: 1px solid alpha($color-text, 10%)
   h1
     text-align: $textalign-h1
-    color: $color-h1
+    color: var(--color-h1)
     margin-top: $gap-h2
   h2
     text-align: $textalign-h2
-    color: $color-h2
+    color: var(--color-h2)
     margin-top: $gap-h2
   h3
     text-align: $textalign-h3
-    color: $color-h3
+    color: var(--color-h3)
     margin-top: $gap-h3
   h4
     text-align: $textalign-h4
-    color: $color-h4
+    color: var(--color-h4)
     margin-top: $gap-h4
   h5
     font-weight: bold
-    color: $color-h5
-    margin-top: $gap-paragraph
+    color: var(--color-h5)
+    margin-top: $gap-p
   h6
-    color: $color-h6
-    margin-top: $gap-paragraph
+    color: var(--color-h6)
+    margin-top: $gap-p
 
   center
     &,p
       text-align: center
-
   .aplayer
-    margin: $gap-row 0
+    margin: $gap-p 0
     display: inline-block
     width: 400px
     max-width: 100%
@@ -95,24 +59,24 @@
     color: mix($color-p, $color-card, 60)
     text-decoration-color: @color
   u
-    color: $color-text
+    color: var(--color-text)
     text-decoration: none
     border-bottom: 1px solid $color-mac-red
   emp
-    color: $color-text
+    color: var(--color-text)
     border-bottom: 4px dotted $color-mac-red
   wavy
-    color: $color-text
+    color: var(--color-text)
     text-decoration-style: wavy
     text-decoration-line: underline
     text-decoration-color: $color-mac-red
   psw
     color: transparent
-    background: mix($color-p, $color-card, 75)
+    background: mix($color-text, $color-card, 50)
     border-radius: 2px
     trans()
     &:hover
-      color: $color-p
+      color: var(--color-p)
       background: none
   kbd
     border-radius: 4px
@@ -122,44 +86,12 @@
     padding-left: 4px
     padding-right: 4px
   p
-    margin-top: $gap-paragraph
-    margin-bottom: $gap-paragraph
+    margin-top: 1rem
+    margin-bottom: 1rem
     text-align: $textalign-p
     max-width: 100%
     line-height: inherit
 
-  ul,ol
-    font-size: $fontsize-list
-    list-style: initial
-    padding-left: 8px
-    margin-left: $gap
-    margin-top: 2px
-    margin-bottom: 2px
-    ul,ol
-      margin-top: 0
-      margin-bottom: 0
-    li
-      margin-top: 0px
-      margin-bottom: 0px
-      li
-        margin-top: 0
-        margin-bottom: 0
-      p
-        margin-top: 4px
-        margin-bottom: 0
-    &.task-list
-      padding-left: 0
-      margin-left: 4px
-      li
-        list-style: none
-        input
-          margin-right: 4px
-
-
-  ul>li
-    list-style: initial
-  ol>li
-    list-style: decimal
 
   .subtitle
     h6
@@ -174,8 +106,8 @@
 
 
   blockquote
-    background: bgcolor($color-blockquote)
-    border-left: $border-codeblock solid $color-blockquote
+    background: var(--color-block)
+    border-left: $border-codeblock solid $color-theme
     border-radius: $border-codeblock
 
   blockquote
@@ -183,31 +115,31 @@
       text-align: left
       word-wrap: normal
       font-size: $fontsize-list
-      margin-top: $gap-row
-      margin-bottom: $gap-row
+      margin-top: .5em
+      margin-bottom: .5em
     position: relative
     width: 100%
-    padding: $gap + $fontoffset  $gap $gap $gap
+    padding: $gap
     trans()
     footer
       padding: 0
       text-align: justify
       color: inherit
       font-style: italic
-      margin: $gap-row 0
+      margin: $gap-p 0
       cite
         &::before
           content: '----'
           padding: 0 .3em
 
-        color: $color-meta
+        color: var(--color-meta)
         margin-left: 1em
 
 
     &.pullquote
       &.right
         border-left: none
-        border-right: $border-codeblock solid $color-blockquote
+        border-right: $border-codeblock solid $color-theme
         p
           text-align: right
 
@@ -215,10 +147,10 @@
     display: block
     -moz-box-sizing: border-box
     box-sizing: border-box
-    margin-top: $gap-row
-    margin-bottom: $gap-row
+    margin-top: $gap-p
+    margin-bottom: $gap-p
     overflow: auto
-    background: $color-codeblock
+    background: var(--color-codeblock)
     font-size: $fontsize-code
     font-family: $fontfamily-code
     border: 1px solid darken($color-codeblock, 6)
@@ -236,8 +168,8 @@
   code
     font-family: $fontfamily-code
     &:not([class])
-      font-size: $fontsize-code
-      color: $color-inlinecode
+      word-break: break-all
+      color: var(--color-inlinecode)
       border-radius: $border-codeblock * 0.5
 
 
@@ -251,11 +183,11 @@
 
   .widget
     background: transparent
-    margin: $gap-row 0
+    margin: $gap-p 0
     box-shadow: none
     border-radius: $border-codeblock
     cursor: auto
-    background: $color-block
+    background: var(--color-block)
     padding: $gap * 0.5 0
     trans()
     &:hover
@@ -281,11 +213,15 @@
     &.list, &.related_posts
       .content
         padding: 0 .6em !important
+        a
+          color: $color-link
+          &:hover
+            color: $color-hover
     .content
       padding: 0 .6em
       margin: 0
       ul
-        padding-left: 8px
+        padding-left: 4px
         margin-left: $gap
         a
           trans(0.1s)
@@ -296,12 +232,11 @@
           color: $color-link
           font-weight: normal
           text-decoration: none
-          &:hover
-            color: $color-hover
-            text-decoration: underline
           &:hover,&.active,&:active
             border-left: none !important
             background: none !important
+          &:hover
+            color: $color-hover
 
       .list
         a
@@ -310,7 +245,6 @@
             color: $color-link
           &:hover
             .name
-              text-decoration: underline
               color: $color-hover
 
 
@@ -335,40 +269,84 @@
   .widget-blur
     backdrop-filter: none
 
-// nav to title
-.article .article-entry>
-  h1,h2,h3,h4,h5,h6
-    position: relative
-    pointer-events: none
-    margin-top: 0
-    >a
-      color: inherit
-      pointer-events: auto
-      &:hover
-        color: $color-hover
-    &:before
-      content: ''
-      display: block
-      margin-top: 0 - $navbar-height -  $gap
-      height: $navbar-height + $gap
-      visibility: hidden
-      pointer-events: none
-  h1,h2
-    &:before
-      margin-top: $gap-h2 - $navbar-height - $gap
-  h3,h4,h5,h6
-    margin-bottom: $gap-paragraph
-  h3
-    &:before
-      margin-top: $gap-h3 - $navbar-height - $gap
-  h4
-    &:before
-      margin-top: $gap-h4 - $navbar-height - $gap
-  h5
-    font-weight: bold
+.md .footer
+  margin-top: $gap * 4
+  >div
+    margin-top: $gap-p
+    margin-bottom: $gap-p
+  .header
+    i
+      margin-right: 2px
+    line-height: 1.75
+    padding-bottom: $gap * 0.5
+    font-weight: 500
+    font-size: $fontsize-meta
+    color: var(--color-list)
+  .body
+    ul,ol
+      margin-top: 0
+      margin-bottom: 0
+  .references,.related_posts
+    background: var(--color-block)
+    border-radius: $border-codeblock
+    padding: $gap
+  .references .body a
+    font-size: $fontsize-list
+    font-weight: 500
+  .related_posts
+    .body
+      margin: 4px
+      overflow: hidden
+      border-radius: 2px
+    .body .vlts-rps
+      display: flex
+      overflow: scroll
+      .item
+        &+.item
+          margin-left: $gap
+        flex-shrink: 0
+        width: 240px
+        &:hover
+          img
+            filter: opacity(1)
+      img
+        border-radius: 2px
+        width: 100%
+        height: 120px
+        object-fit: cover
+        filter: opacity(0.75)
+      span
+        display: block
+        text-align: justify
+        display: -webkit-box
+        -webkit-box-orient: vertical
+        overflow: hidden
+      .title
+        font-weight: 600
+        -webkit-line-clamp: 1
+      .excerpt
+        font-size: $fontsize-meta
+        color: var(--color-meta)
+        -webkit-line-clamp: 3
+
+  .copyright blockquote p
+    font-size: $fontsize-meta
+    margin: .25em 0
+    a
+      font-weight: 500
+  .donate
+    display: flex
+    margin: 0 auto
+    .imgs
+      display: inline-flex
+      margin: 0 auto
+      .fancybox
+        margin: $gap * 0.5
+      img
+        width: 80px
 
 
 article .readmore
   display: block
-  margin-top: $gap-paragraph
+  margin-top: $gap * 1.5
   font-size: $fontsize-meta

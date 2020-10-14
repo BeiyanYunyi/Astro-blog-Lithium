@@ -4,15 +4,15 @@ $tbr = 4px
 div.tabs
   display: block
   position: relative
-  margin-top: $gap-row
-  margin-bottom: $gap-row
+  margin-top: $gap-p
+  margin-bottom: $gap-p
   border-radius: $tbr
-  background: $color-card
+  background: var(--color-card)
   border: 1px solid $border-color
   font-size: $fontsize-list
   .highlight,p,ul,ol,div.note,details
-    margin-top: $gap-row
-    margin-bottom: $gap-row
+    margin-top: $gap-p
+    margin-bottom: $gap-p
 
 div.tabs
   ul.nav-tabs
@@ -22,7 +22,7 @@ div.tabs
     justify-content: flex-start
     margin: 0 !important
     padding: 8px 8px 0 8px
-    background: $color-block
+    background: var(--color-block)
     border-radius: $tbr $tbr 0 0
     line-height: 1.5
     li.tab
@@ -40,18 +40,18 @@ div.tabs
         font-size: $fontsize-meta
         line-height: inherit
         font-weight: bold
-        color: $color-meta
+        color: var(--color-meta)
         border: 1px solid transparent
         &:hover
-          color: $color-p
+          color: var(--color-p)
         i
           pointer-events: none
       &.active a
         cursor: default
-        color: $color-p
+        color: var(--color-p)
         background: $color-card
         border: 1px solid $border-color
-        border-bottom: 1px solid $color-card
+        border-bottom: 1px solid var(--color-card)
 
   .tab-content
     border-top: 1px solid $border-color
@@ -63,7 +63,7 @@ div.tabs
       &.active
         display: block
       >
-        p,.tabs,ul,ol,.highlight,.note,.fancybox
+        p,.tabs,ul,ol,.highlight,.note
           &:first-child
             margin-top: 0
           &:last-child

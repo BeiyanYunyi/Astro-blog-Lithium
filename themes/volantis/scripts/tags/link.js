@@ -7,16 +7,26 @@ hexo.extend.tag.register('link', function(args) {
   let text = ''
   let url = ''
   let img = ''
-  if (args.length > 1) {
+  if (args.length < 2) {
+    return
+  } else if (args.length == 2) {
     text = args[0].trim()
     url = args[1].trim()
-  } else {
-    return
-  }
-  if (args.length > 2) {
+  } else if (args.length == 3) {
+    text = args[0].trim()
+    url = args[1].trim()
     img = args[2].trim()
-    return `<div><a class='link-card' title='${url}' href='${url}'><div class='left'><img src=${img}></div><div class='right'><p class='text'>${text}</p><p class='url'>${url}</p></div></a></div>`;
-  } else {
-    return `<div><a class='link-card' title='${url}' href='${url}'><div class='left'><i class='fas fa-link'></i></div><div class='right'><p class='text'>${text}</p><p class='url'>${url}</p></div></a></div>`;
   }
+  let result = '';
+  // 发现如果不套一层 div 在其它可渲染 md 的容器中容易被分解
+  result += '<div class="tag link"><a class="link-card" title="' + text + '" href="' + url + '">';
+  // left
+  result += '<div class="left">';
+  result += '<img src="' + (img || hexo.theme.config.tag_plugins.link.placeholder) + '"/>';
+  result += '</div>';
+  // right
+  result += '<div class="right"><p class="text">' + text + '</p><p class="url">' + url + '</p></div>';
+  result += '</a></div>';
+
+  return result;
 });
