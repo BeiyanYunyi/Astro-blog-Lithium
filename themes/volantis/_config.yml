@@ -17,7 +17,7 @@ navbar:
     icon:
     title: 黎想的博客
   menu:
-    - name: 暗黑模式 # 可自定义
+    - name: 暗黑模式（未完成） # 可自定义
       icon: fas fa-moon # 可自定义
       toggle: darkmode
     - name: 博客
@@ -495,7 +495,7 @@ plugins:
   ######## Plugins for ...
   # Button Ripple Effect
   nodewaves:
-    enable: #true
+    enable: true
     css: https://cdn.jsdelivr.net/npm/node-waves@0.7.6/dist/waves.min.css
     js: https://cdn.jsdelivr.net/npm/node-waves@0.7.6/dist/waves.min.js
 
@@ -511,7 +511,7 @@ plugins:
 
   # Slide Background
   backstretch:
-    enable: #true
+    enable: true
     js: https://cdn.jsdelivr.net/npm/jquery-backstretch@2.1.18/jquery.backstretch.min.js
     position: cover       # cover: sticky on the cover.   fixed: Fixed as background for the site.
     shuffle: true         # shuffle playlist
