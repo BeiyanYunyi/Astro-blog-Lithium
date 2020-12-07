@@ -1,9 +1,9 @@
 /* eslint-disable */
 var customSearch;
 
-// 函数防抖 (只执行最后一次点击) 
+// 函数防抖 (只执行最后一次点击)
 var Debounce = (fn, t) =>{
-	let delay = t || 200;
+	let delay = t || 25;
 	let timer;
 	return function() {
 		let args = arguments;
@@ -33,8 +33,7 @@ var Debounce = (fn, t) =>{
 	volantis.$coverAnchor = $('#l_cover .cover-wrapper');
 	volantis.$switcher = $('#l_header .switcher .s-search'); // 搜索按钮   移动端
 	volantis.$header = $('#l_header'); // 移动端导航栏
-	volantis.$tabs = $('.tabs');
-	volantis.$headerMenu = $('body .navigation');
+	volantis.$headerMenu = $('body .navigation'); // 导航列表
 	volantis.$search = $('#l_header .m_search'); // 搜索框 桌面端
 	volantis.$mPhoneList = $('#l_header .m-phone .list-v'); //  手机端 子菜单
 	const isMobile = /mobile/i.test(window.navigator.userAgent);
@@ -51,6 +50,7 @@ var Debounce = (fn, t) =>{
 		if (volantis.$header[0]) {
 			scrollCorrection = volantis.$header[0].clientHeight + 16;
 		}
+		volantis.$headerMenu = $('body .navigation');
 	}
 
 	// 校正页面定位（被导航栏挡住的区域）
@@ -109,7 +109,6 @@ var Debounce = (fn, t) =>{
 			} else {
 				volantis.$topBtn.removeClass('show').removeClass('hl');
 			}
-			console.log(scrollTop - showHeaderPoint)
 			if (scrollTop - showHeaderPoint  > -1) {
 				volantis.$header.addClass('show');
 			} else {
@@ -288,13 +287,6 @@ var Debounce = (fn, t) =>{
 
 	// 设置 tabs 标签
 	function setTabs() {
-		if (volantis.$tabs.length === 0) return;
-		let $navs = volantis.$tabs.find('.nav-tabs .tab');
-		for (var i = 0; i < $navs.length; i++) {
-			let $a = volantis.$tabs.find($navs[i].children[0]);
-			$a.addClass($a.attr("href"));
-			$a.removeAttr('href');
-		}
 		$('.tabs .nav-tabs').on('click', 'a', (e) =>{
 			e.preventDefault();
 			e.stopPropagation();
@@ -331,7 +323,10 @@ var Debounce = (fn, t) =>{
 					setPageHeaderMenuEvent();
 					setScrollAnchor();
 					setTabs();
-
+					// 全屏封面底部箭头
+					$('#scroll-down').on('click',function() {
+						scrolltoElement(volantis.$bodyAnchor);
+					});
 					// 处理点击事件 setHeaderSearch 没有重载，需要重新绑定单个事件
 					if (volantis.$switcher.length !== 0) {
 						$(document).click(function(e) {
@@ -345,7 +340,7 @@ var Debounce = (fn, t) =>{
 		} catch (error) {
 			// console.log(error);
 		}
-		
+
 	});
 
 	/*锚点定位*/

@@ -1,14 +1,14 @@
 ############################### Volantis ###############################
 info:
   theme_name: Volantis # This is theme's name.
-  theme_version: '4.1.0' # This is theme's version.
+  theme_version: '4.1.2' # This is theme's version.
   theme_docs: https://volantis.js.org/ # This is theme's URL.
   theme_repo: https://github.com/volantis-x/hexo-theme-volantis
   cdn:
     js:
     css:
 ########################################################################
-favicon: https://stblog.penclub.club/pdfv/favicon.ico
+
 ############################### Navigation Bar ############################### > start
 navbar:
   visiable: always # always, auto
@@ -17,24 +17,18 @@ navbar:
     icon:
     title: 黎想的博客
   menu:
+    - name: 暗黑模式 # 可自定义
+      icon: fas fa-moon # 可自定义
+      toggle: darkmode
     - name: 博客
       icon: fas fa-rss
       url: /
-    - name: 分类
-      icon: fas fa-folder-open
-      url: categories/
     - name: 标签
       icon: fas fa-tags
       url: tags/
-    - name: 归档
-      icon: fas fa-archive
-      url: archives/
     - name: 友链
       icon: fas fa-link
       url: links/
-    - name: 关于
-      icon: fas fa-info-circle
-      url: about/
   search: Search...   # Search bar placeholder
 ############################### Navigation Bar ############################### > end
 
@@ -56,7 +50,7 @@ cover:
     - name: 友链
       icon: #
       img: https://cdn.jsdelivr.net/gh/twitter/twemoji@13.0/assets/svg/1f46c.svg
-      url: /v4/getting-started/
+      url: /links/
 ############################### Cover ############################### > end
 
 pages:
@@ -171,10 +165,10 @@ article:
           img: https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/logo/128/qzone.png
         - id: weibo
           img: https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/logo/128/weibo.png
-        - id: # qrcode # 当id为qrcode时需要安装插件  npm i hexo-helper-qrcode
-          img: # https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/logo/128/wechat.png
-        - id: # telegram
-          img: # https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/logo/128/telegram.png
+        - id: qrcode # 当id为qrcode时需要安装插件  npm i hexo-helper-qrcode
+          img: https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/logo/128/wechat.png
+        - id: telegram
+          img: https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/logo/128/telegram.png
 ############################### Article Layout ############################### > end
 
 
@@ -182,7 +176,7 @@ article:
 comments:
   title: <i class='fas fa-comments'></i> 评论
   subtitle:
-  service: hashover # valine, minivaline, disqus, gitalk, vssue, livere, isso, hashover
+  service: vssue # valine, minivaline, disqus, gitalk, vssue, livere, isso, hashover
   # Valine
   # https://valine.js.org/
   valine:
@@ -259,19 +253,19 @@ comments:
   # Gitalk
   # https://gitalk.github.io/
   gitalk:
-    clientID:
-    clientSecret:
-    repo:
-    owner:
-    admin: # []
+    clientID: 1d0b51e70c7d97fbc341
+    clientSecret: 9b65ed10476f51504a872307ff156c36123cecd0
+    repo: fk-gfw
+    owner: lixiang810
+    admin: lixiang810 # []
     path: # 全局评论地址
   # Vssue
   # https://vssue.js.org/zh/
   vssue:
-    owner:
-    repo:
-    clientId:
-    clientSecret:
+    owner: lixiang810
+    repo: fk-gfw
+    clientId: 1d0b51e70c7d97fbc341
+    clientSecret: 9b65ed10476f51504a872307ff156c36123cecd0
   # LiveRe
   # https://www.livere.com
   livere:
@@ -284,7 +278,7 @@ comments:
   # HashOver
   # https://www.barkdull.org/software/hashover
   hashover:
-    src: https://htgr.penclub.club/hashover-next/comments.php
+    src: https://example.com/(path/)comments.php
 ############################### Comments ############################### > end
 
 ############################### Sidebar ############################### > start
@@ -463,7 +457,7 @@ plugins:
   # 图片懒加载
   # https://www.npmjs.com/package/vanilla-lazyload
   lazyload:
-    enable: false
+    enable: true
     js: https://cdn.jsdelivr.net/npm/vanilla-lazyload@17.1.0/dist/lazyload.min.js
     onlypost: false
     loadingImg: # https://cdn.jsdelivr.net/gh/volantis-x/cdn-volantis@3/img/placeholder/c617bfd2497fcea598e621413e315c368f8d8e.svg
@@ -473,7 +467,7 @@ plugins:
 
   # highlight.js
   highlightjs:
-    enable: #true # Please set hexo.config.highlight.enable = false !!!
+    enable: true # Please set hexo.config.highlight.enable = false !!!
     js: https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.1/build/highlight.min.js
     css: https://cdn.jsdelivr.net/npm/highlight.js@9.18.1/styles/solarized-light.css
     # more: https://www.jsdelivr.com/package/npm/highlight.js?path=styles
@@ -604,17 +598,20 @@ plugins:
     js:
 
   # 暗黑模式 darkmode
-  # 暗黑模式样式：source/css/_plugins/dark.styl
-  # 暗黑模式按钮：在navbar menu中添加class为 `.darkbtn` 的menu 或者 自行开发
+  # 样式：source/css/_plugins/dark.styl
+  # 开关按钮：在 navbar.menu 中添加：
+  # - name: 暗黑模式 # 可自定义
+  #   icon: fas fa-moon # 可自定义
+  #   toggle: darkmode
   darkmodejs:
-    enable: #true
+    enable: true
 
 ############################### Plugins ############################### > end
 
 ############################### Rightmenu ############################### > start
 # 自定义右键菜单
 rightmenu:
-  enable: \true
+  enable: true
   # hr: 分割线, music: 音乐控制器
   layout: [home, help, examples, contributors, hr, source_docs, source_theme, hr, print, hr, music]
   # 可选功能项
@@ -623,22 +620,6 @@ rightmenu:
     icon: fa fa-print
     onclick: document.execCommand('print')
   # 自定义菜单的格式如下
-  help:
-    name: 常见问题
-    icon: fa fa-question
-    url: https://volantis.js.org/faqs/
-  examples:
-    name: 示例博客
-    icon: fa fa-rss
-    url: https://volantis.js.org/examples/
-  contributors:
-    name: 加入社区
-    icon: fa fa-fan fa-spin
-    url: https://volantis.js.org/contributors/
-  source_theme:
-    name: 主题源码
-    icon: fa fa-code-branch
-    url: https://github.com/volantis-x/hexo-theme-volantis/
 ############################### Rightmenu ############################### > end
 
 
@@ -841,10 +822,10 @@ custom_css:
 ############################### Analytics ############################### > start
 analytics:
   busuanzi: https://cdn.jsdelivr.net/gh/volantis-x/cdn-busuanzi@2.3/js/busuanzi.pure.mini.js
-  leancloud: # 请使用自己的 id & key 以防止数据丢失
-    #app_id: u9j57bwJod4EDmXWdxrwuqQT-MdYXbMMI
-    #app_key: jfHtEKVE24j0IVCGHbvuFClp
-    #custom_api_server: # 国际版一般不需要写，除非自定义了 API Server
+#  leancloud: # 请使用自己的 id & key 以防止数据丢失
+#    app_id: u9j57bwJod4EDmXWdxrwuqQT-MdYXbMMI
+#    app_key: jfHtEKVE24j0IVCGHbvuFClp
+#    custom_api_server: # 国际版一般不需要写，除非自定义了 API Server
 ############################### Analytics ############################### > end
 
 ############################### SEO ############################### > start
