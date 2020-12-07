@@ -8,7 +8,7 @@ info:
     js:
     css:
 ########################################################################
-
+favicon: https://stblog.penclub.club/pdfv/favicon.ico
 ############################### Navigation Bar ############################### > start
 navbar:
   visiable: always # always, auto
