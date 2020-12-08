@@ -17,7 +17,7 @@ navbar:
     icon:
     title: 黎想的博客
   menu:
-    - name: 暗黑模式（未完成） # 可自定义
+    - name: 切换暗黑模式 # 可自定义
       icon: fas fa-moon # 可自定义
       toggle: darkmode
     - name: 博客
@@ -376,7 +376,7 @@ sidebar:
           text: '本站总字数：'   # 需要启用 wordcount
           unit: '字'
         visitcounter:
-          service: leancloud  # busuanzi, leancloud
+          service: busuanzi  # busuanzi, leancloud
           siteuv:
             enable: true
             text: '本站访客数：'
@@ -414,7 +414,7 @@ tag_plugins:
 ############################### Site Footer ############################### > start
 site_footer:
   # layout of footer: [aplayer, social, license, info, copyright]
-  layout: [aplayer, social, license, analytics, info, copyright]
+  layout: [aplayer, license, analytics, copyright]
   social:
     - icon: #fas fa-rss
       url:
@@ -428,12 +428,12 @@ site_footer:
   source: https://github.com/volantis-x/volantis-docs/
   # analytics using leancloud
   analytics: >
-    <span id="lc-sv">本站总访问量为 <span id='number'><i class="fas fa-circle-notch fa-spin fa-fw" aria-hidden="true"></i></span> 次</span>
-    <span id="lc-uv">访客数为 <span id='number'><i class="fas fa-circle-notch fa-spin fa-fw" aria-hidden="true"></i></span> 人</span>
+    <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
   # site copyright
-  copyright: '[Copyright © 2017-2020 XXX](/)'
+  copyright: '[Copyleft © 2018-2020 黎想](/)'
   # You can add your own property here. (Support markdown, for example: br: '<br>')
   br: '<br>'
+
 ############################### Site Footer ############################### > end
 
 ############################### Plugins ############################### > start
