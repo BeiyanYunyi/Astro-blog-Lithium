@@ -1,12 +1,18 @@
 ############################### Volantis ###############################
+# 仅限/source/js/中的JS文件
+# 默认使用 https://cdn.jsdelivr.net/npm/hexo-theme-volantis/source/js/ 的CDN压缩版本，注意版本号对应关系！！可以通过修改以下配置项覆盖
+# 开发者注意 use_cdn 设置为 false
+use_cdn: true
 info:
   theme_name: Volantis # This is theme's name.
-  theme_version: '4.1.2' # This is theme's version.
-  theme_docs: https://volantis.js.org/ # This is theme's URL.
+  theme_version: '4.2.0' # This is theme's version.
+  theme_docs: https://volantis-x.github.io/ # This is theme's URL.
   theme_repo: https://github.com/volantis-x/hexo-theme-volantis
   cdn:
     js:
     css:
+      first:
+      style:
 ########################################################################
 
 ############################### Navigation Bar ############################### > start
@@ -29,7 +35,7 @@ navbar:
     - name: 友链
       icon: fas fa-link
       url: links/
-  search: Search...   # Search bar placeholder
+  search: 搜索...   # Search bar placeholder
 ############################### Navigation Bar ############################### > end
 
 
@@ -176,7 +182,7 @@ article:
 comments:
   title: <i class='fas fa-comments'></i> 评论
   subtitle:
-  service: vssue # valine, minivaline, disqus, gitalk, vssue, livere, isso, hashover
+  service: vssue # valine, minivaline, disqus, gitalk, vssue, livere, isso, hashover, twikoo
   # Valine
   # https://valine.js.org/
   valine:
@@ -198,51 +204,13 @@ comments:
   # MiniValine
   # https://github.com/MiniValine/MiniValine
   minivaline:
-    appId: # your appId
-    appKey: # your appKey
-    js: https://cdn.jsdelivr.net/npm/minivaline@4/dist/MiniValine.min.js
+    js: https://cdn.jsdelivr.net/npm/minivaline@latest
     path: # 全局评论地址
-    placeholder: 快来评论吧~  # 评论占位提示
-    mode: xCss # DesertsP or xCss
-    math: false # Support MathJax.
-    md: true # Support Markdown.
-    enableQQ: false # Enable QQ avatar API.
-    NoRecordIP: true # Do not record commenter IP.
-    closeFlag: false
-    closeUA: false
-    region: false
-    visitor: false # Article reading statistics.
-    maxNest: 6 # Sub-comment maximum nesting depth.
-    pageSize: 6 # Pagination size.
-    barrager: 0
-    role: admin
-    cloudflag: false
-    adminEmailMd5: de8a7aa53d07e6b6bceb45c64027763d # The MD5 of Admin Email to show Admin Flag.[ Just Only DesertsP Style mode]
-    tagMeta: # The String Array of Words to show Flag.[ Just Only xCss Style mode]
-      - 管理员
-      - 小伙伴
-      - 访客
-    master: # The MD5 String Array of master Email to show master Flag.[ Just Only xCss Style mode]
-      - de8a7aa53d07e6b6bceb45c64027763d
-    friends: # The MD5 String Array of friends Email to show friends Flag. [ Just Only xCss Style mode]
-      - b5bd5d836c7a0091aa8473e79ed4c25e
-      - adb7d1cd192658a55c0ad22a3309cecf
-      - 3ce1e6c77b4910f1871106cb30dc62b0
-      - cfce8dc43725cc14ffcd9fb4892d5bfc
-    # MiniValine's display language depends on user's browser or system environment
-    # If you want everyone visiting your site to see a uniform language, you can set a force language value
-    # Available values: en  | zh-CN | (and many more)
-    # More i18n info: https://github.com/MiniValine/minivaline-i18n
-    lang:
-    # Expression Url.
-    # https://github.com/MiniValine/MiniValine/blob/master/.github/FAQ.md#how-to-customize-emoticons
-    emoticonUrl:
-      - https://cdn.jsdelivr.net/npm/alus@latest
-      - https://cdn.jsdelivr.net/gh/MiniValine/qq@latest
-      - https://cdn.jsdelivr.net/gh/MiniValine/Bilibilis@latest
-      - https://cdn.jsdelivr.net/gh/MiniValine/tieba@latest
-      - https://cdn.jsdelivr.net/gh/MiniValine/twemoji@latest
-      - https://cdn.jsdelivr.net/gh/MiniValine/weibo@latest
+    placeholder: 快来评论吧~  # 全局评论占位提示
+    # 更多选项 https://minivaline.js.org/docs/cn/#/Options 按照yml格式继续填写即可 （除了 [el] [pathname] [placeholder] 选项）  emoticonUrl可参考 https://github.com/MiniValine/hexo-next-minivaline
+    # mode: xCss # DesertsP or xCss
+
+
   # Disqus
   # https://disqus.com
   disqus:
@@ -279,6 +247,11 @@ comments:
   # https://www.barkdull.org/software/hashover
   hashover:
     src: https://example.com/(path/)comments.php
+  # Twikoo
+  # https://twikoo.js.org/
+  twikoo:
+    js: #https://cdn.jsdelivr.net/npm/twikoo@0.3.0/dist/twikoo.all.min.js   (本地为twikoo v0.3.0版本)
+    envId: xxxxxxxxxxxxxxx # 腾讯云环境id
 ############################### Comments ############################### > end
 
 ############################### Sidebar ############################### > start
@@ -295,7 +268,7 @@ sidebar:
       class: blogger
       display: [desktop, mobile] # [desktop, mobile]
       avatar: https://cdn.jsdelivr.net/gh/lixiang810/fk-gfw/1.jpg
-      shape: rectangle # circle, rectangle
+      shape: circle # circle, rectangle
       url: /about/
       title:
       subtitle:
@@ -428,7 +401,7 @@ site_footer:
   source: https://github.com/volantis-x/volantis-docs/
   # analytics using leancloud
   analytics: >
-    <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+    <span id="busuanzi_container_site_pv">本站总访问量：<span id="busuanzi_value_site_pv"></span>次</span>
   # site copyright
   copyright: '[Copyleft © 2018-2020 黎想](/)'
   # You can add your own property here. (Support markdown, for example: br: '<br>')
@@ -468,8 +441,8 @@ plugins:
   # highlight.js
   highlightjs:
     enable: true # Please set hexo.config.highlight.enable = false !!!
-    js: https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.1/build/highlight.min.js
-    css: https://cdn.jsdelivr.net/npm/highlight.js@9.18.1/styles/solarized-light.css
+    js: https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10/build/highlight.min.js
+    css: https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10/build/styles/solarized-light.min.css
     # more: https://www.jsdelivr.com/package/npm/highlight.js?path=styles
 
   # https://scrollrevealjs.org/api/reveal.html
@@ -545,8 +518,8 @@ plugins:
   aplayer:
     enable: true
     js:
-      - https://cdn.jsdelivr.net/npm/aplayer@1.10/dist/APlayer.min.js
-      - https://cdn.jsdelivr.net/npm/meting@2.0/dist/Meting.min.js
+      aplayer: https://cdn.jsdelivr.net/npm/aplayer@1.10/dist/APlayer.min.js
+      meting: https://cdn.jsdelivr.net/npm/meting@2.0/dist/Meting.min.js
     # Required
     server: netease   # netease, tencent, kugou, xiami, baidu
     type: playlist    # song, playlist, album, search, artist
@@ -564,7 +537,7 @@ plugins:
     enable: false
     timeout: 5000        # The timeout in milliseconds for the XHR requests. Set to 0 to disable the timeout.
     cacheBust: false     # When set to true, Pjax appends a timestamp  to skip the browser cache.
-    animation: nprogress # nprogress, circle
+    animation: false # false, nprogress, circle
     banUrl:              # 被屏蔽的 url 地址将不启用 pjax 跳转，可以在控制台下使用 window.location.pathname 获取
       # - /artitalk/     # artitalk 不支持 pjax
 
@@ -611,7 +584,7 @@ plugins:
 ############################### Rightmenu ############################### > start
 # 自定义右键菜单
 rightmenu:
-  enable: true
+  enable: false
   # hr: 分割线, music: 音乐控制器
   layout: [home, help, examples, contributors, hr, source_docs, source_theme, hr, print, hr, music]
   # 可选功能项

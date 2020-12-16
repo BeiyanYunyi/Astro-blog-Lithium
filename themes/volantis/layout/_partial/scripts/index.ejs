@@ -1,4 +1,18 @@
 <%- partial('loadfunction') %>
+<script>
+  <% if (theme.plugins.fontawesome) { %>
+  loadCSS("<%- theme.plugins.fontawesome %>", window.volantis.loadcss);
+  <% } %>
+  <% if (theme.plugins.fontawesome_animation.enable) { %>
+  loadCSS("<%- theme.plugins.fontawesome_animation.css %>", window.volantis.loadcss);
+  <% } %>
+  <% if (theme.plugins.nodewaves.enable) { %>
+  loadCSS("<%- theme.plugins.nodewaves.css %>", window.volantis.loadcss);
+  <% } %>
+  <% if ((theme.plugins.highlightjs.enable == true)&&(theme.plugins.highlightjs.css)) { %>
+  loadCSS("<%- theme.plugins.highlightjs.css %>", window.volantis.loadcss);
+  <% } %>
+</script>
 <!-- required -->
 <%- js(theme.plugins.jquery) %>
 <%- partial('../../_third-party/fancybox/script') %>
@@ -54,18 +68,12 @@
 <% if (theme.analytics.busuanzi) { %>
   <script defer src="<%- theme.analytics.busuanzi %>" data-pjax></script>
 <% } %>
-<% if (config.use_cdn && theme.info.cdn && theme.info.cdn.js) { %>
+<% if (theme.use_cdn && theme.info.cdn && theme.info.cdn.js) { %>
   <%- js(theme.info.cdn.js) %>
+<% } else if(theme.use_cdn) { %>
+  <%- js(['https://cdn.jsdelivr.net/npm/hexo-theme-volantis@'+theme.info.theme_version+'/source/js/app.min.js']) %>
 <% } else { %>
   <%- js(['js/app.js']) %>
-<% } %>
-
-<% if (theme.search.enable) { %>
-  <% if (theme.search.js) { %>
-    <%- js(theme.search.js) %>
-  <% } else { %>
-    <%- js(['js/search.js']) %>
-  <% } %>
 <% } %>
 
 <!-- optional -->
