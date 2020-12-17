@@ -456,7 +456,7 @@ plugins:
 
   # Codeblock Copy Button
   clipboard:
-    enable: #true
+    enable: true
     js: https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js
 
   ######## Plugins for SEO:
@@ -474,17 +474,17 @@ plugins:
 
   # fontawesome animation
   fontawesome_animation:
-    enable: #true
+    enable: true
     css: https://cdn.jsdelivr.net/gh/l-lin/font-awesome-animation/dist/font-awesome-animation.min.css
 
   # Typing Effects
   comment_typing:
-    enable: #true
+    enable: true
     js: https://cdn.jsdelivr.net/gh/volantis-x/cdn-volantis@2/js/comment_typing.js
 
   # Slide Background
   backstretch:
-    enable: true
+    enable: #true
     js: https://cdn.jsdelivr.net/npm/jquery-backstretch@2.1.18/jquery.backstretch.min.js
     position: cover       # cover: sticky on the cover.   fixed: Fixed as background for the site.
     shuffle: true         # shuffle playlist
