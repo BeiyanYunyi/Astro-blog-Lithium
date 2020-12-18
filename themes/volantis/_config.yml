@@ -422,7 +422,7 @@ plugins:
 
   # 预加载
   preload:
-    enable: true
+    enable: #true
     service: flying_pages # instant_page, flying_pages
     instant_page: https://cdn.jsdelivr.net/gh/volantis-x/cdn-volantis@2/js/instant_page.js
     flying_pages: https://cdn.jsdelivr.net/gh/gijo-varghese/flying-pages@2.1.2/flying-pages.min.js
@@ -447,7 +447,7 @@ plugins:
 
   # https://scrollrevealjs.org/api/reveal.html
   scrollreveal:
-    enable: #true
+    enable: true
     js: https://cdn.jsdelivr.net/npm/scrollreveal@4.0.6/dist/scrollreveal.min.js
     distance: 32px
     duration: 800 # ms
@@ -463,7 +463,7 @@ plugins:
 
   # npm i hexo-wordcount
   wordcount:
-    enable: #true
+    enable: true
 
   ######## Plugins for ...
   # Button Ripple Effect
@@ -474,12 +474,12 @@ plugins:
 
   # fontawesome animation
   fontawesome_animation:
-    enable: true
+    enable: false
     css: https://cdn.jsdelivr.net/gh/l-lin/font-awesome-animation/dist/font-awesome-animation.min.css
 
   # Typing Effects
   comment_typing:
-    enable: true
+    enable: false
     js: https://cdn.jsdelivr.net/gh/volantis-x/cdn-volantis@2/js/comment_typing.js
 
   # Slide Background
