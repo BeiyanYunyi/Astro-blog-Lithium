@@ -47,11 +47,11 @@ cover:
     home: true
     archive: true
     others: false # can be written in front-matter 'cover: true'
-  background: https://cdn.jsdelivr.net/gh/volantis-x/cdn-wallpaper-minimalist/2020/033.jpg
+  background: https://cdn.jsdelivr.net/gh/lixiang810/fk-gfw/banner.jpg
   logo: # https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/Logo-Cover@3x.png
   title: '黎想的博客'
   subtitle: ''
-  search: A Wonderful Theme for Hexo # search bar placeholder
+  search: 搜索 # search bar placeholder
   features:
     - name: 友链
       icon: #
