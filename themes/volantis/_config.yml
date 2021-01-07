@@ -182,7 +182,7 @@ article:
 comments:
   title: <i class='fas fa-comments'></i> 评论
   subtitle:
-  service: vssue # valine, minivaline, disqus, gitalk, vssue, livere, isso, hashover, twikoo
+  service: hashover # valine, minivaline, disqus, gitalk, vssue, livere, isso, hashover, twikoo
   # Valine
   # https://valine.js.org/
   valine:
@@ -246,7 +246,7 @@ comments:
   # HashOver
   # https://www.barkdull.org/software/hashover
   hashover:
-    src: https://example.com/(path/)comments.php
+    src: https://htgr.penclub.club/hashover-next/comments.php
   # Twikoo
   # https://twikoo.js.org/
   twikoo:
