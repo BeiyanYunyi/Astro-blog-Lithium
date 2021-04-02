@@ -39,7 +39,7 @@ GRUB_CMDLINE_LINUX_DEFAULT="quiet splash ……"
 
 * 禁用C6状态  
 
-```
+```bash
 $ yay zenstates-git
 # vim /etc/modules-load.d/modules.conf（可能是新文件）加入如下单词：“msr”。
 # vim /etc/systemd/system/disable_c6.service （新文件）
