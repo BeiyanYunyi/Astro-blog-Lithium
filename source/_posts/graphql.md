@@ -5,7 +5,6 @@ tags: [教程]
 description: >
   随着 GraphQL 应用程序从演示、概念验证到生产的发展，Schema 和 resolver 的复杂性也会随之增长。为了组织代码，我们可能需要将 schema type 和相关的 resolver 分割成多个文件。
 ---
-# 模块化你的GraphQL Schema代码
 
 随着 GraphQL 应用程序从演示、概念验证到生产的发展，Schema 和 resolver 的复杂性也会随之增长。为了组织代码，我们可能需要将 schema type 和相关的 resolver 分割成多个文件。<!--more-->
 
