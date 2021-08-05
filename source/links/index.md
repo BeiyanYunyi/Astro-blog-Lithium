@@ -34,6 +34,10 @@ links:
       avatar: https://lh3.googleusercontent.com/a-/AOh14GjDsjKnRFOKcLKEI2zllURuvlIV_3oEvAWhiZpw%3Ds96-c
       name: Lekvwa
       desc: I might finish 3 of my own novels before 2025.
+    - url: https://clansty.com
+      avatar: https://cdn.lwqwq.com/pic/avatar
+      name: 凌莞
+      desc: 114，514，1919810
 ---
 
 # 他人文章收藏
