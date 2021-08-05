@@ -10,10 +10,10 @@ links:
   - group: 友链
     desc: 欢迎交换友链 ꉂ(ˊᗜˋ)评论里面打出来就好啦，需包含标题、简介、头像地址和博客地址
     items:
-    - url: https://麻衣.com
-      avatar: https://pics.xn--6n2ao17b.com/images/2020/02/27/ed9fb11994a5937a3c24e1d7584f68e9.png
-      name: Aiden's World
-      desc: 黄冈最速传说
+    - url: https://clansty.com
+      avatar: https://cdn.lwqwq.com/pic/avatar
+      name: 凌莞
+      desc: 114，514，1919810
     - url: https://sukunahust.com
       avatar: https://cdn.jsdelivr.net/gh/lixiang810/fk-gfw/cropped-697301d8a960cba8.jpg
       name: Sukuna's Blog
@@ -34,10 +34,6 @@ links:
       avatar: https://lh3.googleusercontent.com/a-/AOh14GjDsjKnRFOKcLKEI2zllURuvlIV_3oEvAWhiZpw%3Ds96-c
       name: Lekvwa
       desc: I might finish 3 of my own novels before 2025.
-    - url: https://clansty.com
-      avatar: https://cdn.lwqwq.com/pic/avatar
-      name: 凌莞
-      desc: 114，514，1919810
 ---
 
 # 他人文章收藏
