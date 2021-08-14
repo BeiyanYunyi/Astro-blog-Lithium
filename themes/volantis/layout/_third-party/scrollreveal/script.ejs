@@ -1,5 +1,5 @@
-<script src="<%- theme.plugins.scrollreveal.js %>"></script>
 <script type="text/javascript">
+  loadScript("<%- theme.plugins.scrollreveal.js %>")
   function pjax_scrollrebeal() {
     ScrollReveal().reveal('.l_main .reveal', {
       distance: '<%- theme.plugins.scrollreveal.distance %>',
@@ -10,6 +10,12 @@
     });
   }
   $(function () {
-    pjax_scrollrebeal();
+  var checkScrollReveal = setInterval(function () {
+    if ($("#safearea").css("display")!="block") return
+    if (typeof ScrollReveal=="undefined") return
+    clearInterval(checkScrollReveal)
+	pjax_scrollrebeal();
+  }, 100)
   });
+  volantis.pjax.push(pjax_scrollrebeal)
 </script>

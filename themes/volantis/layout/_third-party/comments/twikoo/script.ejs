@@ -1,17 +1,32 @@
-<% if (theme.comments.twikoo.js) { %>
-<%- js(theme.comments.twikoo.js) %>
-<% } else { %>
-<%- js(['js/twikoo.js']) %>
-<% } %>
 <script>
-  function pjax_twikoo() {
-    twikoo.init({ envId: '<%= theme.comments.twikoo.envId %>', el: '#twikoo_container' })
+  function load_twikoo() {
+	<% if (theme.comments.twikoo.js) { %>
+	  loadScript('<%- theme.comments.twikoo.js %>', pjax_twikoo)
+	<% } else { %>
+	  loadScript('https://cdn.jsdelivr.net/npm/twikoo@latest', pjax_twikoo)
+	<% } %>
   }
-
+  function pjax_twikoo() {
+    if(!document.querySelectorAll("#twikoo_container")[0])return;
+    let path = pdata.commentPath;
+    if (path.length == 0) {
+      let defaultPath = '<%= theme.comments.twikoo.path %>';
+      path = defaultPath || "decodeURI(window.location.pathname)"; //神奇的pathname
+    }
+    twikoo.init(Object.assign(<%- JSON.stringify(theme.comments.twikoo) %>, {
+	  el: '#twikoo_container',
+	  path: path,
+    }))
+  }
   $(function () {
-    pjax_twikoo();
+    if(!document.querySelectorAll("#twikoo_container")[0])return;
+    load_twikoo();
   });
-
-
-
+   volantis.pjax.push(()=>{
+	  if (typeof twikoo == "undefined") {
+		load_twikoo();
+	  } else {
+		pjax_twikoo();
+	  }
+   },'twikoo');
 </script>
