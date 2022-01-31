@@ -23,7 +23,7 @@
     "hexo-helper-qrcode": "^1.0.2",
     "hexo-math": "^4.0.0",
     "hexo-renderer-ejs": "^2.0.0",
-    "hexo-renderer-marked": "^4.1.0",
+    "hexo-renderer-marked": "^5.0.0",
     "hexo-renderer-stylus": "^2.0.0",
     "hexo-server": "^3.0.0",
     "hexo-wordcount": "^6.0.1"
