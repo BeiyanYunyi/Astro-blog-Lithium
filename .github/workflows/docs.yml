@@ -42,6 +42,10 @@ jobs:
         if: steps.pnpm-cache.outputs.cache-hit != 'true'
         run: pnpm i --frozen-lockfile
 
+      - name: Try to magically fix the bug
+        run: |
+          sudo npm install -g vuepress-theme-hope@next
+
       # 运行构建脚本
       - name: Build VuePress site
         run: pnpm run build
@@ -58,3 +62,4 @@ jobs:
         env:
           # @see https://docs.github.com/cn/actions/reference/authentication-in-a-workflow#about-the-github_token-secret
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          fqdn: stblog.penclub.club
