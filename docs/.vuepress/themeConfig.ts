@@ -1,54 +1,54 @@
-import { defineThemeConfig } from "vuepress-theme-hope";
-import navbar from "./navbar";
-import sidebar from "./sidebar";
+import { defineThemeConfig } from 'vuepress-theme-hope';
+import navbar from './navbar';
+import sidebar from './sidebar';
 
 export default defineThemeConfig({
-  hostname: "https://stblog.penclub.club",
+  hostname: 'https://stblog.penclub.club',
 
   author: {
-    name: "黎想",
-    url: "https://stblog.penclub.club",
+    name: '黎想',
+    url: 'https://stblog.penclub.club',
   },
 
-  iconPrefix: "iconfont icon-",
+  iconPrefix: 'iconfont icon-',
 
-  logo: "/头像圆.png",
+  logo: '/头像圆.png',
 
-  repo: "https://github.com/lixiang810",
+  repo: 'https://github.com/lixiang810',
 
-  docsDir: "/",
+  docsDir: '/',
 
   // navbar
   navbar: navbar,
-  darkmode: "auto",
+  darkmode: 'auto',
   themeColor: false,
   fullScreen: false,
 
   // sidebar
   sidebar: false,
 
-  footer: "默认页脚",
+  footer: '默认页脚',
   displayFooter: false,
 
-  copyright: "Copyleft © 黎想",
+  copyright: 'Copyleft © 黎想',
 
   // page meta
   metaLocales: {
-    editLink: "在 GitHub 上编辑此页",
+    editLink: '在 GitHub 上编辑此页',
   },
 
   blog: {
-    description: "整活型人才",
-    intro: "/intro.html",
+    description: '整活型人才',
+    intro: '/intro.html',
     medias: {
-      GitHub: "https://github.com/lixiang810",
+      GitHub: 'https://github.com/lixiang810',
     },
     roundAvatar: true,
   },
 
   encrypt: {
     config: {
-      "/guide/encrypt.html": ["1234"],
+      '/guide/encrypt.html': ['1234'],
     },
   },
 
@@ -58,8 +58,8 @@ export default defineThemeConfig({
     },
 
     comment: {
-      type: "waline",
-      serverURL: "https://bmhgu5.deta.dev/",
+      type: 'waline',
+      serverURL: 'https://bmhgu5.deta.dev/',
     },
 
     mdEnhance: {
@@ -77,7 +77,9 @@ export default defineThemeConfig({
       tex: true,
     },
 
-    pwa: {
+    pwa: false,
+    /*
+    {
       favicon: "/favicon.ico",
       cachePic: true,
       apple: {
@@ -135,6 +137,6 @@ export default defineThemeConfig({
           },
         ],
       },
-    },
+    }, */
   },
 });
