@@ -1,29 +1,36 @@
-import { defineHopeConfig } from "vuepress-theme-hope";
-import themeConfig from "./themeConfig";
+import { defineHopeConfig } from 'vuepress-theme-hope';
+import mdPangu from 'markdown-it-pangu';
+import themeConfig from './themeConfig';
 
 export default defineHopeConfig({
-  base: "/",
-  source:"./source",
+  base: '/',
+  source: './source',
 
-  dest: "./dist",
+  dest: './dist',
 
   head: [
     [
-      "link",
+      'link',
       {
-        rel: "stylesheet",
-        href: "//at.alicdn.com/t/font_2410206_mfj6e1vbwo.css",
+        rel: 'stylesheet',
+        href: '//at.alicdn.com/t/font_2410206_mfj6e1vbwo.css',
       },
     ],
   ],
 
   locales: {
-    "/": {
-      lang: "zh-CN",
-      title: "黎想的博客",
-      description: "地上的人不应该进来",
+    '/': {
+      lang: 'zh-CN',
+      title: '黎想的博客',
+      description: '地上的人不应该进来',
     },
   },
 
   themeConfig,
+
+  markdown: { breaks: true },
+
+  extendsMarkdown: (mdit) => {
+    mdit.use(mdPangu);
+  },
 });
