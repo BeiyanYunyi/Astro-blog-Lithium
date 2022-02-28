@@ -21,7 +21,7 @@
   "dependencies": {
     "naive-ui": "^2.25.5",
     "vue": "^3.2.31",
-    "vuepress-theme-hope": "^2.0.0-alpha.36",
+    "vuepress-theme-hope": "^2.0.0-alpha.37",
     "vuepress-webpack": "^2.0.0-beta.35"
   },
   "packageManager": "pnpm@6.32.1"

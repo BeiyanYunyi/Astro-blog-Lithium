@@ -9,7 +9,7 @@ hero: true
 heroFullScreen: false
 tagline: 把信拿去吧，你可以假戏真做。
 projects:
-  - type: link
+  - icon: link
     name: 友链
     desc: 及他人文章收藏
     link: /links
