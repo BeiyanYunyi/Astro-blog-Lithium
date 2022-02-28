@@ -20,7 +20,7 @@ export default defineThemeConfig({
 
   // navbar
   navbar: navbar,
-  darkmode: 'auto',
+  darkmode: 'auto-switch',
   themeColor: false,
   fullScreen: false,
 
