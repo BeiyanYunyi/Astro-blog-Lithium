@@ -11,7 +11,7 @@ tagline: 把信拿去吧，你可以假戏真做。
 projects:
   - type: link
     name: 友链
-    desc: 朋友们
+    desc: 及他人文章收藏
     link: /links
 ---
 

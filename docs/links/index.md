@@ -1,12 +1,11 @@
 ---
 title: 友链及他人文章收藏
 date: 2020-03-02 21:40:06
-keywords: 收藏
-description: 
 article: false
-photos: https://cdn.jsdelivr.net/gh/honjun/cdn@1.4/img/banner/links.jpg
 ---
 ## 友链
+
+[规则与流程](/links/rules.html)
 
 <Friends />
 

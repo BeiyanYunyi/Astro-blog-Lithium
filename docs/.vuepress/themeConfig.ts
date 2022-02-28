@@ -14,9 +14,9 @@ export default defineThemeConfig({
 
   logo: '/头像圆.png',
 
-  repo: 'https://github.com/lixiang810',
+  repo: 'https://github.com/lixiang810/comb',
 
-  docsDir: '/',
+  docsDir: '/docs',
 
   // navbar
   navbar: navbar,
