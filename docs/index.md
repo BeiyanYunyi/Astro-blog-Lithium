@@ -3,7 +3,7 @@ home: true
 layout: Blog
 icon: home
 title: 博客主页
-heroImage: /头像圆.png
+heroImage: /头像圆.webp
 heroText: 黎想的博客
 hero: true
 heroFullScreen: false

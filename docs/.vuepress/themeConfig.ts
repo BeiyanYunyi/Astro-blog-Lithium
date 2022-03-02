@@ -12,7 +12,7 @@ export default defineThemeConfig({
 
   iconPrefix: 'iconfont icon-',
 
-  logo: '/头像圆.png',
+  logo: '/头像圆.webp',
 
   repo: 'https://github.com/lixiang810/comb',
 
