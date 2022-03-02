@@ -16,6 +16,9 @@ export default defineThemeConfig({
 
   repo: 'https://github.com/lixiang810/comb',
 
+  repoDisplay: false,
+  editLink: false,
+
   docsDir: '/docs',
 
   // navbar
@@ -27,10 +30,11 @@ export default defineThemeConfig({
   // sidebar
   sidebar: false,
 
-  footer: '默认页脚',
-  displayFooter: false,
+  footer: '',
+  displayFooter: true,
+  contributors: false,
 
-  copyright: 'Copyleft © 黎想',
+  copyright: 'Copyleft © 黎想 Under CC BY-NC-ND 4.0',
 
   // page meta
   metaLocales: {
@@ -60,6 +64,7 @@ export default defineThemeConfig({
     comment: {
       type: 'waline',
       serverURL: 'https://bmhgu5.deta.dev/',
+      copyright: true,
     },
 
     mdEnhance: {
