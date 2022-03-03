@@ -37,6 +37,6 @@ import { NImage, NSpace, NThing, NA, NCard } from 'naive-ui';
   font-size: 16px;
   font-weight: var(--n-title-font-weight);
   transition: color 0.3s var(--n-bezier);
-  color: var(--text-color-bright);
+  color: var(--theme-color);
 }
 </style>
