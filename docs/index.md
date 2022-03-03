@@ -2,7 +2,7 @@
 home: true
 layout: Blog
 icon: home
-title: 博客主页
+title: 主页
 heroImage: /头像圆.webp
 heroText: 黎想的博客
 hero: true
@@ -13,6 +13,10 @@ projects:
     name: 友链
     desc: 及他人文章收藏
     link: /links
+  - icon: info
+    name: 关于
+    desc: 简单了解博主
+    link: /intro
 ---
 
 我们的情人不过是随便借个名字，用幻想吹出来的肥皂泡！……把信拿去吧，你可以假戏真做。  
