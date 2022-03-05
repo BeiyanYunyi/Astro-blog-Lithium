@@ -32,6 +32,7 @@ export default defineThemeConfig({
 
   footer: '',
   displayFooter: true,
+  lastUpdated: false,
   contributors: false,
 
   copyright: 'Copyleft © 黎想 Under CC BY-NC-ND 4.0',
