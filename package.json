@@ -19,10 +19,10 @@
     "webpack": "^5.70.0"
   },
   "dependencies": {
-    "naive-ui": "^2.26.1",
+    "naive-ui": "^2.26.3",
     "vue": "^3.2.31",
-    "vuepress-theme-hope": "^2.0.0-beta.3",
+    "vuepress-theme-hope": "^2.0.0-beta.7",
     "vuepress-webpack": "^2.0.0-beta.36"
   },
-  "packageManager": "pnpm@6.32.2"
+  "packageManager": "pnpm@6.32.3"
 }
