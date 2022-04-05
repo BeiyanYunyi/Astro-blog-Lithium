@@ -4,7 +4,6 @@ date: 2022-04-04 16:07:00
 tag: [教程, 翻译]
 description: 原文出自 https://github.com/miguelmota/golang-for-nodejs-developers
 ---
-
 > 译注：于 2022 年 4 月 4 日（即 404 节）开始翻译自[原文](https://github.com/miguelmota/golang-for-nodejs-developers)
 
 ![Header](https://user-images.githubusercontent.com/168240/114315374-8ff5b480-9ab3-11eb-8323-b83858e8e74f.png)
@@ -19,7 +18,7 @@ description: 原文出自 https://github.com/miguelmota/golang-for-nodejs-develo
 
 所有示例代码都可在 [examples/](https://github.com/miguelmota/golang-for-nodejs-developers/examples/) 查找
 
-### comments
+### 注释
 
 ---
 
@@ -47,7 +46,7 @@ func main() {
 }
 ```
 
-### printing
+### 输出
 
 ---
 
@@ -92,7 +91,7 @@ format example 1
 print to stderr
 ```
 
-### logging
+### 打印 log
 
 ---
 
@@ -128,7 +127,7 @@ Output
 
 _(Package `log` writes to standard error ánd prints the date and time of each logged message)_
 
-### variables
+### 声明变量
 
 ---
 
@@ -167,7 +166,7 @@ func main() {
 }
 ```
 
-### interpolation
+### 格式化字符串
 
 ---
 
