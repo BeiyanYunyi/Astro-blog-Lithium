@@ -1,7 +1,7 @@
 <template>
   <div :class="$style.stack">
     <a
-      v-for="(friend, index) in friends"
+      v-for="(friend, index) in shuffle(friends)"
       :class="{ [$style.firstElement]: index === 0 }"
       :key="index"
       :href="friend.url"
@@ -21,6 +21,19 @@
 
 <script lang="ts" setup>
 import friends from '../docs/_data/friends.json';
+
+const shuffle = (arr: Array<any>) => {
+  let l = arr.length;
+  const brr = arr;
+  while (l > 0) {
+    const index = Math.floor(Math.random() * l);
+    const temp = brr[l - 1];
+    brr[l - 1] = brr[index];
+    brr[index] = temp;
+    l -= 1;
+  }
+  return brr;
+};
 </script>
 
 <style module>

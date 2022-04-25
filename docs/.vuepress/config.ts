@@ -1,4 +1,5 @@
 import { defineHopeConfig } from 'vuepress-theme-hope';
+import { path } from '@vuepress/utils';
 import mdPangu from 'markdown-it-pangu';
 import themeConfig from './themeConfig';
 
@@ -33,4 +34,13 @@ export default defineHopeConfig({
   extendsMarkdown: (mdit) => {
     mdit.use(mdPangu);
   },
+
+  plugins: [
+    [
+      '@vuepress/register-components',
+      {
+        componentsDir: path.resolve(__dirname, '../../src'),
+      },
+    ],
+  ],
 });

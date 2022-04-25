@@ -1,3 +1,3 @@
-import { defineSidebarConfig } from "vuepress-theme-hope";
+import { defineSidebarConfig } from 'vuepress-theme-hope';
 
-export default defineSidebarConfig(["",'/links']);
+export default defineSidebarConfig(['', '/links']);
