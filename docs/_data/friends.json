@@ -46,5 +46,11 @@
     "avatar": "https://blog.bgme.me/favicon.jpg",
     "title": "影子屋",
     "description": "随手记一些小事。"
-  }
+  },
+  {
+    "url": "https://dustella.net",
+    "avatar": "https://img-cdn.dustella.net/avtr.jpg",
+    "title": "Dustella",
+    "description": "懒的要死的魔女"
+  },
 ]
