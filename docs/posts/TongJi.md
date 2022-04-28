@@ -28,7 +28,7 @@ tag: [备份]
 
 ## LOGO 分赛区作品
 
-![1651058082586-7.jpg](https://hsp.penclub.club/api/gh/https://raw.githubusercontent.com/lixiang810/fk-gfw/master/hsp/1651058082586-7.jpg)
+![1651058076004-6.jpg](https://hsp.penclub.club/api/gh/https://raw.githubusercontent.com/lixiang810/fk-gfw/master/hsp/1651058076004-6.jpg)
 
 ![1651058099289-7.jpg](https://hsp.penclub.club/api/gh/https://raw.githubusercontent.com/lixiang810/fk-gfw/master/hsp/1651058099289-7.jpg)
 
