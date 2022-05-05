@@ -1,21 +1,24 @@
 <template>
   <div :class="$style.stack">
-    <a
-      v-for="(friend, index) in friendsList"
-      :class="{ [$style.firstElement]: index === 0 }"
-      :key="friend.url"
-      :href="friend.url"
-    >
-      <div :class="$style.card">
-        <div :class="$style.cardLayer1">
-          <img height="75" width="75" :src="friend.avatar" :class="$style.avatar" />
-          <div :class="$style.cardLayer2">
-            <div :class="$style.title">{{ friend.title }}</div>
-            <div :class="$style.content">{{ friend.description }}</div>
+    <ClientOnly>
+      <a
+        v-for="(friend, index) in shuffle(friends)"
+        :class="{ [$style.firstElement]: index === 0 }"
+        :key="friend.url"
+        :href="friend.url"
+      >
+        <div :class="$style.card">
+          <div :class="$style.cardLayer1">
+            <img height="75" width="75" :src="friend.avatar" :class="$style.avatar" />
+
+            <div :class="$style.cardLayer2">
+              <div :class="$style.title">{{ friend.title }}</div>
+              <div :class="$style.content">{{ friend.description }}</div>
+            </div>
           </div>
         </div>
-      </div>
-    </a>
+      </a>
+    </ClientOnly>
   </div>
 </template>
 
@@ -34,7 +37,6 @@ const shuffle = (arr: Array<any>) => {
   }
   return brr;
 };
-const friendsList = shuffle(friends);
 </script>
 
 <style module>
@@ -45,17 +47,20 @@ const friendsList = shuffle(friends);
   outline: 1px solid var(--border-color);
   overflow-wrap: break-word;
 }
+
 .card:hover {
   box-shadow: 0 1px 3px 1px var(--card-shadow);
   text-decoration: underline;
 }
 
-.card:hover .title{
+.card:hover .title {
   text-decoration: underline;
 }
-.card:hover .content{
+
+.card:hover .content {
   text-decoration: underline;
 }
+
 .content {
   color: var(--text-color);
   margin-top: 0.25rem;
@@ -73,6 +78,7 @@ const friendsList = shuffle(friends);
   display: flex;
   flex-direction: column;
 }
+
 .stack a {
   margin-top: 0.5rem;
 }
