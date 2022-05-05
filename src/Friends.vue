@@ -3,7 +3,7 @@
     <a
       v-for="(friend, index) in shuffle(friends)"
       :class="{ [$style.firstElement]: index === 0 }"
-      :key="index"
+      :key="friend.url"
       :href="friend.url"
     >
       <div :class="$style.card">
