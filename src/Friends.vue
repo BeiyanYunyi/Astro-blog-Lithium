@@ -1,7 +1,7 @@
 <template>
   <div :class="$style.stack">
     <a
-      v-for="(friend, index) in shuffle(friends)"
+      v-for="(friend, index) in friendsList"
       :class="{ [$style.firstElement]: index === 0 }"
       :key="friend.url"
       :href="friend.url"
@@ -34,6 +34,7 @@ const shuffle = (arr: Array<any>) => {
   }
   return brr;
 };
+const friendsList = shuffle(friends);
 </script>
 
 <style module>
