@@ -25,7 +25,7 @@
 <script lang="ts" setup>
 import friends from '../docs/_data/friends.json';
 
-const shuffle = (arr: Array<any>) => {
+const shuffle = <T>(arr: T[]) => {
   let l = arr.length;
   const brr = arr;
   while (l > 0) {
