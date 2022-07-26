@@ -2,7 +2,7 @@
   <div :class="$style.stack">
     <ClientOnly>
       <a
-        v-for="(friend, index) in shuffle(friends)"
+        v-for="(friend, index) in friendRenderList"
         :class="{ [$style.firstElement]: index === 0 }"
         :key="friend.url"
         :href="friend.url"
@@ -25,6 +25,7 @@
 <script lang="ts" setup>
 import friends from '../docs/_data/friends.json';
 
+
 const shuffle = <T>(arr: T[]) => {
   let l = arr.length;
   const brr = arr;
@@ -37,6 +38,9 @@ const shuffle = <T>(arr: T[]) => {
   }
   return brr;
 };
+
+const [dustella, ...toshuffle] = friends;
+const friendRenderList = [dustella, ...shuffle(toshuffle)];
 </script>
 
 <style module>
