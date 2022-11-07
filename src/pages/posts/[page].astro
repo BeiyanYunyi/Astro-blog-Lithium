@@ -1,0 +1,63 @@
+---
+import BaseHead from '../../components/BaseHead.astro';
+import Footer from '../../components/Footer.astro';
+import GlobalContainer from '../../components/GlobalContainer.astro';
+import Header from '../../components/Header.astro';
+import PostList from '../../components/PostList.astro';
+import SideBarLeft from '../../components/SideBarLeft.astro';
+import { SITE_DESCRIPTION, SITE_TITLE } from '../../config';
+import type MDInstance from '../../types/MDInstance';
+
+export async function getStaticPaths({ paginate }: { paginate: any }) {
+  const allPosts = await Astro.glob('./*.{md,mdx}');
+  const sortedPosts = allPosts.sort(
+    (a, b) => Number(new Date(b.frontmatter.date)) - Number(new Date(a.frontmatter.date)),
+  );
+  return paginate(sortedPosts, {
+    pageSize: 10,
+  });
+}
+
+export interface Props {
+  page: {
+    data: MDInstance[];
+    start: number;
+    end: number;
+    size: number;
+    total: number;
+    currentPage: number;
+    lastPage: number;
+    url: { current: string; next?: string; prev?: string };
+  };
+}
+const { page } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+  </head>
+  <GlobalContainer>
+    {page.data.map((post) => <link rel="prefetch" href={post.url} />)}
+    <Header />
+    <main class="flex flex-col-reverse lg:flex-row gap-4">
+      <SideBarLeft />
+      <div class="flex-grow">
+        <PostList posts={page.data} />
+        <div class="flex gap-2">
+          {page.url.prev && <a href={page.url.prev}>上一页</a>}
+          {
+            page.total > 1 && (
+              <span>
+                {page.currentPage} / {page.lastPage}
+              </span>
+            )
+          }
+          {page.url.next && <a href={page.url.next}>下一页</a>}
+        </div>
+      </div>
+    </main>
+    <Footer />
+  </GlobalContainer>
+</html>

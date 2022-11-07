@@ -1,27 +1,35 @@
 {
   "name": "backend-of-my-website",
+  "type": "module",
   "version": "2.0.0",
   "description": "拿去吧！",
   "license": "AGPL-3.0-or-later",
   "scripts": {
-    "build": "vuepress build docs",
-    "clean-dev": "vuepress dev docs --clean-cache",
-    "dev": "vuepress dev docs"
-  },
-  "devDependencies": {
-    "@types/node": "^17.0.31",
-    "@vuepress/plugin-register-components": "^2.0.0-beta.38",
-    "eslint": "^8.14.0",
-    "markdown-it-pangu": "^1.0.2",
-    "prettier": "^2.6.2",
-    "typescript": "^4.6.4",
-    "typescript-vue-plugin": "^0.34.11",
-    "vue-tsc": "^0.34.11"
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
   },
   "dependencies": {
-    "vue": "^3.2.33",
-    "vuepress": "^2.0.0-beta.36",
-    "vuepress-theme-hope": "2.0.0-beta.47"
+    "@astrojs/mdx": "^0.11.5",
+    "@astrojs/rss": "^1.0.3",
+    "@astrojs/sitemap": "^1.0.0",
+    "@astrojs/solid-js": "^1.2.2",
+    "@astrojs/tailwind": "^2.1.2",
+    "@tailwindcss/typography": "^0.5.7",
+    "astro": "^1.6.0",
+    "astro-icon": "^0.8.0",
+    "dayjs": "^1.11.6",
+    "rehype-katex": "^6.0.2",
+    "remark-math": "^5.1.1",
+    "solid-js": "^1.6.1",
+    "tailwindcss": "^3.2.2"
   },
-  "packageManager": "pnpm@7.0.0"
+  "devDependencies": {
+    "@babel/core": "^7.20.2",
+    "prettier": "^2.7.1",
+    "rollup": "^3.2.5",
+    "typescript": "^4.8.4"
+  }
 }

@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+a {
+  @apply text-neutral-600 dark:text-neutral-200 hover:text-blue-500 dark:hover:text-blue-400;
+}
+body {
+  @apply m-auto max-w-7xl font-sans dark:bg-stone-900 dark:text-neutral-200 text-neutral-800;
+  @apply bg-[#f7f7f7];
+  line-height: 1.5;
+}
+.prose p {
+  white-space: pre-line;
+}
+
+@layer components {
+  .card {
+    @apply bg-white dark:bg-stone-800 shadow-app dark:shadow-appDark rounded-md;
+  }
+}

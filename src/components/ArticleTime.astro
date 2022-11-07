@@ -1,0 +1,28 @@
+---
+import type MDInstance from '../types/MDInstance';
+import getWordCount from '../utils/getWordCount';
+export interface Props extends astroHTML.JSX.BaseHTMLAttributes {
+  post: MDInstance;
+}
+const { post, class: className } = Astro.props;
+let { words, time } = { words: 0, time: '' };
+if (typeof post.rawContent === 'function') {
+  ({ words, time } = getWordCount(post.rawContent()));
+}
+---
+
+<div class:list={[className, 'text-xs', 'flex', 'gap-2', 'text-neutral-500']}>
+  <time>
+    {
+      new Date(post.frontmatter.date).toLocaleDateString('zh-cn', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      })
+    }
+  </time>
+  <span>·</span>
+  <span>{words} 字</span>
+  <span>·</span>
+  <span>{time}</span>
+</div>

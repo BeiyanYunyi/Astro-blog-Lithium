@@ -1,0 +1,46 @@
+---
+import type { MarkdownInstance } from 'astro';
+import ArticleTime from '../components/ArticleTime.astro';
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import GlobalContainer from '../components/GlobalContainer.astro';
+import Header from '../components/Header.astro';
+import type IFrontmatter from '../types/IFrontmatter';
+
+export type Props = MarkdownInstance<Record<string, any> & IFrontmatter>;
+
+const {
+  content: { title, description, heroImage },
+} = Astro.props;
+---
+
+<html lang="en">
+  <head>
+    <BaseHead title={title} description={description} />
+  </head>
+  <GlobalContainer>
+    <Header />
+    <main>
+      <article
+        class="prose prose-neutral dark:prose-invert max-w-none card p-6"
+      >
+        <slot name="before-article" />
+        {
+          heroImage && (
+            <img
+              width={720}
+              height={360}
+              class="max-h-[360px] object-contain"
+              src={heroImage}
+              alt=""
+            />
+          )
+        }
+        <ArticleTime post={Astro.props} class="mb-2" />
+        <h1 class="mb-6">{title}</h1>
+        <slot />
+      </article>
+    </main>
+    <Footer />
+  </GlobalContainer>
+</html>
