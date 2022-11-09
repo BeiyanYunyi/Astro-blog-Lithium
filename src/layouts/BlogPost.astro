@@ -17,7 +17,13 @@ const {
     <slot name="before-article" />
     {
       heroImage && (
-        <img width={720} height={360} class="max-h-[360px] object-contain" src={heroImage} alt="Hero image" />
+        <img
+          width={720}
+          height={360}
+          class="max-h-[360px] object-contain"
+          src={heroImage}
+          alt="Hero image"
+        />
       )
     }
     <ArticleTime post={Astro.props} class="mb-2" />
