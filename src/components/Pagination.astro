@@ -1,0 +1,74 @@
+---
+import PageLink from './PageLink.astro';
+
+export interface Props extends astroHTML.JSX.BaseHTMLAttributes {
+  totalCount: number;
+  previousUrl?: string | undefined;
+  nextUrl?: string | undefined;
+  currentUrl: string;
+  currentPage: number;
+}
+
+const {
+  class: className,
+  totalCount,
+  previousUrl,
+  currentPage,
+  currentUrl,
+  nextUrl,
+  ...rest
+} = Astro.props;
+const pageAry = Array.from({ length: totalCount }, (_, i) => i + 1).filter(
+  (item) => item > currentPage - 3 && item < currentPage + 4,
+);
+const numRegex = /\d+/;
+---
+
+<div class:list={[className, 'flex', 'flex-row', 'gap-2']} {...rest}>
+  {
+    (previousUrl || currentPage === 2) && (
+      <a
+        href={previousUrl || currentUrl.replace(numRegex, '')}
+        class="card flex px-2 min-w-[2.25rem] min-h-[2.25rem] items-center justify-center"
+      >
+        上一页
+      </a>
+    )
+  }
+  {
+    totalCount > 1 &&
+      pageAry.map((i) => {
+        let targetUrl = currentUrl;
+        if (numRegex.test(currentUrl)) {
+          if (i === 1) {
+            targetUrl = currentUrl.replace(numRegex, '');
+          } else {
+            targetUrl = currentUrl.replace(numRegex, i.toString());
+          }
+        } else {
+          targetUrl = `${currentUrl}/${i}`;
+        }
+        return (
+          <PageLink
+            active={i === currentPage}
+            target={targetUrl}
+            num={i}
+            class="card px-2 min-w-[2.25rem] min-h-[2.25rem] items-center justify-center hidden md:flex"
+          />
+        );
+      })
+  }
+  <span class="px-2 min-w-[2.25rem] min-h-[2.25rem] items-center justify-center flex md:hidden">
+    {currentPage} / {totalCount}
+  </span>
+  {
+    nextUrl && (
+      <a
+        href={nextUrl}
+        class="card flex px-2 min-w-[2.25rem] min-h-[2.25rem] items-center justify-center"
+      >
+        下一页
+      </a>
+    )
+  }
+</div>

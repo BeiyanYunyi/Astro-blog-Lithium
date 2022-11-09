@@ -1,0 +1,44 @@
+---
+import Pagination from '@components/Pagination.astro';
+import PostList from '@components/PostList.astro';
+import BaseLayout from '@layouts/BaseLayout.astro';
+import type MDInstance from '../types/MDInstance';
+
+export async function getStaticPaths({ paginate }: { paginate: any }) {
+  const allPosts = await Astro.glob('./posts/*.{md,mdx}');
+  const sortedPosts = allPosts.sort(
+    (a, b) => Number(new Date(b.frontmatter.date)) - Number(new Date(a.frontmatter.date)),
+  );
+  return paginate(sortedPosts, {
+    pageSize: 10,
+  });
+}
+
+export interface Props {
+  page: {
+    data: MDInstance[];
+    start: number;
+    end: number;
+    size: number;
+    total: number;
+    currentPage: number;
+    lastPage: number;
+    url: { current: string; next?: string; prev?: string };
+  };
+}
+const { page } = Astro.props;
+---
+
+<BaseLayout>
+  <div class="flex-grow">
+    <PostList posts={page.data} />
+    <Pagination
+      totalCount={page.lastPage}
+      currentPage={page.currentPage}
+      currentUrl={page.url.current}
+      previousUrl={page.url.prev}
+      nextUrl={page.url.next}
+      class="mt-4 justify-center items-center"
+    />
+  </div>
+</BaseLayout>

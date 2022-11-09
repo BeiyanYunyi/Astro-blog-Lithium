@@ -1,0 +1,36 @@
+---
+import shuffle from '@utils/shuffle';
+import friends from '@data/friends.json';
+const [dustella, ...toshuffle] = friends;
+const friendRenderList = [dustella!, ...shuffle(toshuffle)];
+---
+
+<script>
+  import shuffle from '@utils/shuffle';
+  const friendsDOM = Array.from(document.querySelectorAll('.friend'));
+  const [dustella, ...toshuffle] = friendsDOM;
+  const friendRenderList = [dustella!, ...shuffle(toshuffle)];
+  const list = document.querySelector('.friend-list')!;
+  list.innerHTML = '';
+  list.append(...friendRenderList);
+</script>
+<div class="flex flex-col gap-2 not-prose friend-list">
+  {
+    friendRenderList.map((friend) => (
+      <a
+        href={friend.url}
+        class="hover:underline transition-all no-underline hover:shadow-md outline-neutral-200 dark:outline-neutral-600 outline outline-1 friend"
+      >
+        <div class="p-2">
+          <div class="flex gap-2">
+            <img height="75" width="75" src={friend.avatar} alt={friend.title} />
+            <div>
+              <p>{friend.title}</p>
+              <p>{friend.description}</p>
+            </div>
+          </div>
+        </div>
+      </a>
+    ))
+  }
+</div>

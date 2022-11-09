@@ -1,0 +1,27 @@
+---
+import ArticleTime from '@components/ArticleTime.astro';
+import { SITE_DESCRIPTION, SITE_TITLE } from '@config';
+import type { MarkdownInstance } from 'astro';
+import type IFrontmatter from '../types/IFrontmatter';
+import BaseLayout from './BaseLayout.astro';
+
+export type Props = MarkdownInstance<Record<string, any> & IFrontmatter>;
+
+const {
+  content: { title = SITE_TITLE, description = SITE_DESCRIPTION, heroImage },
+} = Astro.props;
+---
+
+<BaseLayout title={title} description={description}>
+  <article class="prose prose-neutral dark:prose-invert max-w-none card p-6">
+    <slot name="before-article" />
+    {
+      heroImage && (
+        <img width={720} height={360} class="max-h-[360px] object-contain" src={heroImage} alt="Hero image" />
+      )
+    }
+    <ArticleTime post={Astro.props} class="mb-2" />
+    <h1 class="mb-6">{title}</h1>
+    <slot />
+  </article>
+</BaseLayout>

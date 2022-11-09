@@ -1,0 +1,16 @@
+---
+import type { MarkdownInstance } from 'astro';
+import type IFrontmatter from '../types/IFrontmatter';
+import PostCard from './PostCard.astro';
+
+export interface Props extends astroHTML.JSX.BaseHTMLAttributes {
+  posts: MarkdownInstance<Record<string, any> & IFrontmatter>[];
+}
+const { posts, class: className } = Astro.props;
+---
+
+<section class:list={[className]}>
+  <ul class="flex flex-col gap-2">
+    {posts.map((post) => <PostCard post={post} />)}
+  </ul>
+</section>

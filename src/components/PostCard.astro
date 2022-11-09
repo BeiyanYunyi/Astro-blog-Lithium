@@ -1,0 +1,18 @@
+---
+import type { MarkdownInstance } from 'astro';
+import type IFrontmatter from '../types/IFrontmatter';
+import ArticleTime from './ArticleTime.astro';
+
+export interface Props {
+  post: MarkdownInstance<Record<string, any> & IFrontmatter>;
+}
+const { post } = Astro.props;
+---
+
+<li class="flex flex-col items-start p-6 card">
+  <ArticleTime post={post} class="mb-1" />
+  <a href={`${post.url}/`} class="text-[2rem] mb-6">
+    {post.frontmatter.title}
+  </a>
+  <div class="text-neutral-500">{post.frontmatter.description}</div>
+</li>

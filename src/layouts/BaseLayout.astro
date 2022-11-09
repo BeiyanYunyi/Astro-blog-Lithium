@@ -1,0 +1,53 @@
+---
+import BaseHead from '@components/BaseHead.astro';
+import Footer from '@components/Footer.astro';
+import GlobalContainer from '@components/GlobalContainer.astro';
+import Header from '@components/Header.astro';
+import SideBarLeft from '@components/SideBarLeft.astro';
+import { SITE_DESCRIPTION, SITE_TITLE } from '@config';
+
+export type Props = { title?: string; description?: string };
+
+const { title = SITE_TITLE, description = SITE_DESCRIPTION } = Astro.props;
+---
+
+<html lang="en">
+  <head>
+    <BaseHead title={title} description={description} />
+  </head>
+  <GlobalContainer>
+    <Header />
+    <main class="flex flex-col-reverse lg:flex-row gap-4">
+      <SideBarLeft />
+      <div class="flex-auto min-w-0">
+        <slot />
+        <script
+          src="https://giscus.app/client.js"
+          data-repo="lixiang810/fk-gfw"
+          data-repo-id="MDEwOlJlcG9zaXRvcnk2NDM2OTAzMA=="
+          data-category="Announcements"
+          data-category-id="DIC_kwDOA9Yxhs4CSbbj"
+          data-mapping="pathname"
+          data-strict="0"
+          data-reactions-enabled="1"
+          data-emit-metadata="1"
+          data-input-position="top"
+          data-theme="preferred_color_scheme"
+          data-lang="zh-CN"
+          data-loading="lazy"
+          crossorigin="anonymous"
+          async
+        ></script>
+        <style is:global>
+          .giscus {
+            @apply mt-6;
+          }
+          .giscus-frame {
+            @apply outline-none;
+          }
+        </style>
+      </div>
+    </main>
+    <Footer />
+  </GlobalContainer>
+</html>

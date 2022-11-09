@@ -1,0 +1,31 @@
+---
+export interface Props extends astroHTML.JSX.BaseHTMLAttributes {
+  active?: boolean;
+  target: string;
+  num: number;
+}
+
+const { target, active, num, class: className, ...rest } = Astro.props;
+---
+
+{
+  active ? (
+    <span
+      class:list={[
+        className,
+        'bg-blue-600',
+        'dark:bg-blue-600',
+        'text-neutral-50',
+        'hover:text-neutral-50',
+        'dark:hover:text-neutral-50',
+      ]}
+      {...rest}
+    >
+      {num}
+    </span>
+  ) : (
+    <a href={target} class:list={[className]} {...rest}>
+      {num}
+    </a>
+  )
+}
