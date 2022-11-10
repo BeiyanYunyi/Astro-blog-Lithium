@@ -22,8 +22,8 @@ const friendRenderList = [dustella!, ...shuffle(toshuffle)];
         class="hover:underline transition-all no-underline hover:shadow-md outline-neutral-200 dark:outline-neutral-600 outline outline-1 friend"
       >
         <div class="p-2">
-          <div class="flex gap-2">
-            <img height="75" width="75" src={friend.avatar} alt={friend.title} />
+          <div class="flex gap-2 items-start">
+            <img height="75" width="75" src={friend.avatar} alt={friend.title} class="object-contain" />
             <div>
               <p>{friend.title}</p>
               <p>{friend.description}</p>
