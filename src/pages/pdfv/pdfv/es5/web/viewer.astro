@@ -1,0 +1,16 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+---
+
+<BaseLayout>
+  <article class="prose prose-neutral dark:prose-invert max-w-none card p-6">
+    <p>
+      这个页面是 PDF 阅读器，原本是用于加速打开的，现在因为我的博客也被墙而失去了意义，已经被移除。
+    </p>
+    <p>请使用<a id="navigation">等价替代方案</a>。</p>
+    <script type="text/javascript" is:inline>
+      const targetUrl = `https://mozilla.github.io/pdf.js/legacy/web/viewer.html${location.search}`;
+      document.querySelector('a#navigation').href = targetUrl;
+    </script>
+  </article>
+</BaseLayout>
