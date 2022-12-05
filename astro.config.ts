@@ -6,10 +6,22 @@ import { defineConfig } from 'astro/config';
 import rehypeKatex from 'rehype-katex';
 import remarkMath from 'remark-math';
 import injectDefaultLayout from './src/utils/injectDefaultLayouts';
+import compress from 'astro-compress';
 
+// https://astro.build/config
 export default defineConfig({
   site: 'https://stblog.penclub.club',
-  integrations: [mdx(), sitemap(), solidJs(), tailwind({ config: { applyBaseStyles: false } })],
+  integrations: [
+    mdx(),
+    sitemap(),
+    solidJs(),
+    tailwind({
+      config: {
+        applyBaseStyles: false,
+      },
+    }),
+    compress(),
+  ],
   markdown: {
     syntaxHighlight: 'prism',
     remarkPlugins: [injectDefaultLayout, remarkMath],
