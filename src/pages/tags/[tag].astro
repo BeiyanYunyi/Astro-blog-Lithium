@@ -1,0 +1,39 @@
+---
+import PostList from '@components/PostList.astro';
+import BaseLayout from '@layouts/BaseLayout.astro';
+import { Icon } from 'astro-icon';
+import type MDInstance from '../../types/MDInstance';
+
+export const getStaticPaths = async () => {
+  const allPosts = await Astro.glob<MDInstance>('../../pages/posts/*.{md,mdx}');
+  const tags = new Set<string>();
+  allPosts.forEach((post) => {
+    if (!post.frontmatter.tag) return;
+    post.frontmatter.tag.forEach((t) => tags.add(t));
+  });
+  const tagsAry = Array.from(tags);
+  return tagsAry.map((tag) => ({ params: { tag } }));
+};
+
+const allPosts = await Astro.glob<MDInstance>('../../pages/posts/*.{md,mdx}');
+const { tag } = Astro.params;
+const posts: MDInstance[] = [];
+allPosts.forEach((post) => {
+  if (!post.frontmatter.tag) return;
+  if (post.frontmatter.tag.includes(tag || '')) {
+    posts.push(post);
+  }
+});
+---
+
+<BaseLayout>
+  <div class="flex-grow">
+    <div class="flex items-center p-6 card mb-2">
+      <a class="mr-4" href="/tags">
+        <Icon name="mdi:arrow-left" size={24} />
+      </a>
+      <h1 class="text-3xl">{tag}</h1>
+    </div>
+    <PostList posts={posts} />
+  </div>
+</BaseLayout>

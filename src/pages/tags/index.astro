@@ -1,0 +1,34 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import type MDInstance from '../../types/MDInstance';
+
+const allPosts = await Astro.glob<MDInstance>('../../pages/posts/*.{md,mdx}');
+const tags = new Set<string>();
+allPosts.forEach((post) => {
+  if (!post.frontmatter.tag) return;
+  post.frontmatter.tag.forEach((t) => tags.add(t));
+});
+const tagsAry = Array.from(tags);
+---
+
+<BaseLayout>
+  <article class="card p-6">
+    <ul class="grid grid-flow-row-dense grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2 tags-list">
+      {
+        tagsAry.map((tag) => (
+          <li class="hover:underline rounded-md transition-all no-underline hover:shadow-md outline-neutral-200 dark:outline-neutral-600 outline outline-1 p-2 flex tags">
+            <a class="w-full" href={`/tags/${tag}`}>{tag}</a>
+          </li>
+        ))
+      }
+    </ul>
+    <script>
+      import shuffle from '@utils/shuffle';
+      const tagsDOM = Array.from(document.querySelectorAll('.tags'));
+      const tagsRenderList = shuffle(tagsDOM);
+      const list = document.querySelector('.tags-list')!;
+      list.innerHTML = '';
+      list.append(...tagsRenderList);
+    </script>
+  </article>
+</BaseLayout>
