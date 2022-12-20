@@ -4,6 +4,7 @@
   "version": "3.0.0",
   "description": "拿去吧！",
   "license": "AGPL-3.0-or-later",
+  "packageManager": "pnpm@7.18.2",
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
