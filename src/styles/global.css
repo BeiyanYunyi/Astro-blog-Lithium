@@ -32,6 +32,6 @@ body {
 }
 
 .prose :where(code):not(:where([class~='not-prose'] *)) {
-  @apply px-[0.4rem] py-[0.2rem] m-0 text-[85%] rounded-md bg-stone-200 dark:bg-stone-700 font-mono;
+  @apply px-[0.4rem] py-[0.2rem] m-0 text-[85%] rounded-md bg-stone-200 dark:bg-stone-700 font-mono font-normal;
   white-space: break-spaces;
 }
