@@ -28,6 +28,7 @@ body {
 
 .prose :where(blockquote):not(:where(.not-prose, .not-prose *)) {
   font-style: initial;
+  @apply text-sm bg-stone-100 py-2 dark:bg-stone-900;
 }
 
 .prose :where(code):not(:where([class~='not-prose'] *)) {
