@@ -35,7 +35,7 @@ import ShowCase from '@components/ShowCase.tsx';
 
 现在我们完全可以说，除了生态不如 Hexo，Astro 就是 Hexo 的完全上位替代——体积更小、功能更多、开发更便捷。但因为刚刚出现，Astro 的生态比 vuepress2 的还差，幸好该有的东西全都有，而且很大程度上它能复用已有的现代前端技术成果（比如 [tailwindcss](https://tailwindcss.com)）。于是我在上面从零开始写了一个自己的博客主题。我对自己的审美能力有些自知之明，因此我照抄了 `hexo-theme-icarus` 的页面布局。在总共约几个小时的 coding 以后，我实现了我想要的大部分功能（RSS、SEO、友链和评论系统），然后把自己的博客换成了它，从而实现了总共只有 35k 的首页加载体积。即使在博文页面（40k），加上 katex 的 23k（css），和 182k 的 waline 评论系统（css+js）后，体积也依然比 hexo-theme-volantis 更低。比较可惜的地方是，我发现老博客有些地方破坏了我的身份隔离，因此我重置了历史，并且 `push -f` 了一遍。否则的话，你们将可以从 commit history 里目睹我从 Hexo 换成 vuepress2 再换成 Astro 的过程。
 
-自 2013 年 Hexo 发布首个版本至今，已经过去了 9 年。尽管 Hexo 仍然是一个非常优秀的静态页面生成器，它的生态和社区都很完善，文档也很详细，但它已经失去了适应新时代的可能性。Hexo 作为旧时代的产物，已经和 jQuery 那样到了该被抛弃的时刻，而 vuepress、[Docusaurus](https://docusaurus.io/)（基本可以视作 React 生态里的 vuepress）和 Astro（三者取决于使用场景）将取而代之。曾经 Vue 的文档是用 Hexo 写的，后来换成了 vuepress，现在则是 [vitepress](https://vitepress.vuejs.org/)。前端更新换代极快，而时间不等人。如果说博客主暂时还只能在已有的生态里挑选，那么开发者则更应该立即停止为 Hexo 生态继续贡献代码，而是转向 Astro，这将是一场双赢——开发者不再需要头疼 Hexo 固有架构带来的问题，而 Astro 的生态将得以发展。
+自 2013 年 Hexo 发布首个版本至今，已经过去了 9 年。尽管 Hexo 仍然是一个非常优秀的静态页面生成器，它的生态和社区都很完善，文档也很详细，但它已经失去了适应新时代的可能性。Hexo 作为旧时代的产物，已经和 jQuery 那样到了该被抛弃的时刻，而 vuepress、[Docusaurus](https://docusaurus.io/)（基本可以视作 React 生态里的 vuepress）和 Astro（三者取决于使用场景）将取而代之。曾经 Vue 的文档是用 Hexo 写的，后来换成了 vuepress，现在则是 [vitepress](https://vitepress.vuejs.org/)。前端更新换代极快，而时间不等人。如果说博客主暂时还只能在已有的生态里挑选，那么开发者则更应该立即停止为 Hexo 生态继续贡献代码，而是转向 Astro，这将是一场双赢——开发者不再需要头疼 Hexo 固有架构带来的问题，而 Astro 的生态也能得以发展。
 
 > 如果觉得上文对体积的比较不够客观，可以进入下面几个参考页面，按 F12 抓包，排除掉我博客没有的功能（如看板娘）以后，看一下体积。
 >
