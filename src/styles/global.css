@@ -9,16 +9,6 @@ body {
   @apply bg-[#f7f7f7];
   line-height: 1.5;
 }
-.prose p {
-  white-space: pre-line;
-}
-
-.prose :where(blockquote p:first-of-type):not(:where([class~='not-prose'] *))::before,
-.prose :where(blockquote p:last-of-type):not(:where([class~='not-prose'] *))::after,
-.prose :where(code):not(:where([class~='not-prose'] *))::before,
-.prose :where(code):not(:where([class~='not-prose'] *))::after {
-  content: none;
-}
 
 .prose :where(blockquote):not(:where(.not-prose, pre *)) {
   font-style: initial;
