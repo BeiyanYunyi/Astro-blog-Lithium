@@ -22,7 +22,7 @@ const { title = SITE_TITLE, description = SITE_DESCRIPTION } = Astro.props;
       <SideBarLeft />
       <div class="flex-auto min-w-0">
         <slot />
-        <Comments />
+        {!process.env.DEV && <Comments />}
       </div>
     </main>
     <Footer />
