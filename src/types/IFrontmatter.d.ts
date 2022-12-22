@@ -3,4 +3,5 @@ export default interface IFrontmatter {
   date: string;
   description?: string;
   tag?: string[];
+  rawContent?: string;
 }
