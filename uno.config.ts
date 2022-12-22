@@ -1,8 +1,8 @@
 import transformerDirectives from '@unocss/transformer-directives';
-import { defineConfig, presetTypography, presetWind } from 'unocss';
+import { defineConfig, presetTypography, presetWind, presetAttributify } from 'unocss';
 
 export default defineConfig({
-  presets: [presetWind(), presetTypography()],
+  presets: [presetWind(), presetAttributify(), presetTypography()],
   transformers: [transformerDirectives()],
   rules: [
     ['shadow-app', { 'box-shadow': '0 4px 10px rgba(0, 0, 0, 0.05), 0 0 1px rgba(0, 0, 0, 0.1)' }],
@@ -13,4 +13,6 @@ export default defineConfig({
       },
     ],
   ],
+  shortcuts: { card: 'bg-white dark:bg-stone-800 rounded-md shadow-app dark:shadow-appDark' },
+  layers: { shortcuts: -1 },
 });
