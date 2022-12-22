@@ -1,16 +1,16 @@
 import type MDInstance from '@app-types/MDInstance';
-import type { Root, Content } from 'mdast';
+import type { Content, Root } from 'mdast';
 import type { Plugin } from 'unified';
 import { visit } from 'unist-util-visit';
 
 const getText: (node: Content) => string = (node) => {
-  if (node.type === 'text' || node.type === 'inlineCode') {
-    return node.value;
-  }
-  if ('children' in node) {
-    return node.children.map(getText).join('');
-  }
-  return '';
+  let value = '';
+  visit(node, (node1) => {
+    if (node1.type === 'text' || node1.type === 'inlineCode') {
+      value += node1.value;
+    }
+  });
+  return value;
 };
 
 const injectDefaultLayout: Plugin<[], Root> = () => (tree, file) => {
