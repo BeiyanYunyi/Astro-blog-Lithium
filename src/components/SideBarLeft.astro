@@ -1,5 +1,5 @@
 ---
-import type MDInstance from '../types/MDInstance';
+import type MDInstance from '@app-types/MDInstance';
 import { Icon } from 'astro-icon';
 
 const allPosts = await Astro.glob<MDInstance>('../pages/posts/*.{md,mdx}');

@@ -2,7 +2,7 @@
 import PostList from '@components/PostList.astro';
 import BaseLayout from '@layouts/BaseLayout.astro';
 import { Icon } from 'astro-icon';
-import type MDInstance from '../../types/MDInstance';
+import type MDInstance from '@app-types/MDInstance';
 
 export const getStaticPaths = async () => {
   const allPosts = await Astro.glob<MDInstance>('../../pages/posts/*.{md,mdx}');

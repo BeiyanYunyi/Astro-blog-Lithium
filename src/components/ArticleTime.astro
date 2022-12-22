@@ -1,6 +1,6 @@
 ---
 import getWordCount from '@utils/getWordCount';
-import type MDInstance from '../types/MDInstance';
+import type MDInstance from '@app-types/MDInstance';
 export interface Props extends astroHTML.JSX.BaseHTMLAttributes {
   post: MDInstance;
 }
@@ -8,6 +8,9 @@ const { post, class: className } = Astro.props;
 let { words, time } = { words: 0, time: '' };
 if (typeof post.rawContent === 'function') {
   ({ words, time } = getWordCount(post.rawContent()));
+}
+if (post.frontmatter.rawContent) {
+  ({ words, time } = getWordCount(post.frontmatter.rawContent));
 }
 ---
 

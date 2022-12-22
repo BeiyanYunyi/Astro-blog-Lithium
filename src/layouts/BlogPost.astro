@@ -2,7 +2,7 @@
 import ArticleTime from '@components/ArticleTime.astro';
 import { SITE_DESCRIPTION, SITE_TITLE } from '@config';
 import type { MarkdownInstance } from 'astro';
-import type IFrontmatter from '../types/IFrontmatter';
+import type IFrontmatter from '@app-types/IFrontmatter';
 import BaseLayout from './BaseLayout.astro';
 
 export type Props = MarkdownInstance<Record<string, any> & IFrontmatter>;

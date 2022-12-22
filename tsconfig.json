@@ -9,7 +9,7 @@
       "@components/*": ["src/components/*"],
       "@pages/*": ["src/pages/*"],
       "@utils/*": ["src/utils/*"],
-      "@types/*": ["src/types/*"],
+      "@app-types/*": ["src/types/*"],
       "@styles/*": ["src/styles/*"],
       "@data/*": ["src/data/*"],
       "@config": ["src/config.ts"]

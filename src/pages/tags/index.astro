@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '@layouts/BaseLayout.astro';
-import type MDInstance from '../../types/MDInstance';
+import type MDInstance from '@app-types/MDInstance';
 
 const allPosts = await Astro.glob<MDInstance>('../../pages/posts/*.{md,mdx}');
 const tags = new Set<string>();
