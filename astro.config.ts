@@ -1,12 +1,14 @@
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import solidJs from '@astrojs/solid-js';
-import tailwind from '@astrojs/tailwind';
+import transformerDirectives from '@unocss/transformer-directives';
+import compress from 'astro-compress';
 import { defineConfig } from 'astro/config';
 import rehypeKatex from 'rehype-katex';
 import remarkMath from 'remark-math';
+import { presetTypography, presetWind } from 'unocss';
+import UnoCSS from 'unocss/astro';
 import injectDefaultLayout from './src/utils/injectDefaultLayouts';
-import compress from 'astro-compress';
 
 // https://astro.build/config
 export default defineConfig({
@@ -15,10 +17,21 @@ export default defineConfig({
     mdx(),
     sitemap(),
     solidJs(),
-    tailwind({
-      config: {
-        applyBaseStyles: false,
-      },
+    UnoCSS({
+      presets: [presetWind(), presetTypography()],
+      transformers: [transformerDirectives()],
+      rules: [
+        [
+          'shadow-app',
+          { 'box-shadow': '0 4px 10px rgba(0, 0, 0, 0.05), 0 0 1px rgba(0, 0, 0, 0.1)' },
+        ],
+        [
+          'shadow-appDark',
+          {
+            'box-shadow': '0 4px 10px rgba(255, 255, 255, 0.05), 0 0 1px rgba(255, 255, 255, 0.1)',
+          },
+        ],
+      ],
     }),
     compress(),
   ],
