@@ -6,11 +6,12 @@ export interface Props extends astroHTML.JSX.BaseHTMLAttributes {
 }
 const { post, class: className } = Astro.props;
 let { words, time } = { words: 0, time: '' };
-if (typeof post.rawContent === 'function') {
-  ({ words, time } = getWordCount(post.rawContent()));
-}
 if (post.frontmatter.rawContent) {
   ({ words, time } = getWordCount(post.frontmatter.rawContent));
+} else {
+  if (!post.frontmatter.isMdx) {
+    ({ words, time } = getWordCount(post.rawContent()));
+  }
 }
 ---
 
@@ -28,6 +29,15 @@ if (post.frontmatter.rawContent) {
   <span>{words} 字</span>
   <span>·</span>
   <span>{time}</span>
-  <span>·</span>
-  <span><span class="waline-pageview-count" data-path={`${post.url}.html`}></span> 浏览</span>
+  {
+    // Disable pageview count in dev mode
+    !process.env.DEV && (
+      <>
+        <span>·</span>
+        <span>
+          <span class="waline-pageview-count" data-path={post.url} /> 浏览
+        </span>
+      </>
+    )
+  }
 </div>

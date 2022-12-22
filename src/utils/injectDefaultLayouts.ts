@@ -23,6 +23,9 @@ const injectDefaultLayout: Plugin<[], Root> = () => (tree, file) => {
       }
     });
     astro.frontmatter.rawContent = rawContent;
+    astro.frontmatter.isMdx = true;
+  } else {
+    astro.frontmatter.isMdx = false;
   }
   const moreLabel = tree.children.findIndex(
     (elem) => elem.type === 'html' && elem.value === '<!--more-->',

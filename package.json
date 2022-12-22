@@ -6,7 +6,7 @@
   "license": "AGPL-3.0-or-later",
   "packageManager": "pnpm@7.18.2",
   "scripts": {
-    "dev": "astro dev",
+    "dev": "cross-env DEV=true astro dev",
     "start": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
@@ -22,6 +22,7 @@
     "astro": "^1.7.1",
     "astro-compress": "^1.1.23",
     "astro-icon": "^0.8.0",
+    "cross-env": "^7.0.3",
     "dayjs": "^1.11.7",
     "rehype-katex": "^6.0.2",
     "remark-math": "^5.1.1",
