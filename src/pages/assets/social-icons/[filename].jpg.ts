@@ -78,7 +78,7 @@ export const get: APIRoute = ({ params, request }) => {
   roundRect({ ctx: context, x: 25, y: 25, width, height, radius: 15, fill: true, stroke: false });
 
   //set the copy style
-  context.font = 'bold 82pt SimSun';
+  context.font = 'bold 82pt Ubuntu';
   context.textAlign = 'left';
   context.textBaseline = 'top';
   context.fillStyle = '#fff';
@@ -105,12 +105,12 @@ export const get: APIRoute = ({ params, request }) => {
 
   //insert domain
   context.fillStyle = '#ccc';
-  context.font = 'bold 24pt SimSun';
+  context.font = 'bold 24pt Ubuntu';
   context.fillText('danspratling.dev', 60, 540);
 
   //insert handle
   context.fillStyle = '#ccc';
-  context.font = 'bold 24pt SimSun';
+  context.font = 'bold 24pt Ubuntu';
   context.textAlign = 'right';
   context.fillText('@dan_spratling', 1140, 540);
 
