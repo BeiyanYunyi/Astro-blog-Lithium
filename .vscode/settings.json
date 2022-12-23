@@ -1,5 +1,7 @@
 {
     "typescript.tsdk": "node_modules/typescript/lib",
     "editor.formatOnSave": false,
-    "css.lint.unknownAtRules": "ignore"
+    "css.customData": [
+        "./css-data.json"
+    ]
 }
