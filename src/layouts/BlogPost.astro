@@ -5,14 +5,14 @@ import type { MarkdownInstance } from 'astro';
 import type IFrontmatter from '@app-types/IFrontmatter';
 import BaseLayout from './BaseLayout.astro';
 
-export type Props = MarkdownInstance<Record<string, any> & IFrontmatter>;
+export type Props = MarkdownInstance<Record<string, any> & IFrontmatter> & { image?: string };
 
 const {
-  content: { title = SITE_TITLE, description = SITE_DESCRIPTION, heroImage },
+  content: { title = SITE_TITLE, description = SITE_DESCRIPTION, heroImage, image },
 } = Astro.props;
 ---
 
-<BaseLayout title={title} description={description}>
+<BaseLayout title={title} description={description} image={image || heroImage}>
   <article class="prose prose-neutral dark:prose-invert max-w-none card p-6">
     <slot name="before-article" />
     {
