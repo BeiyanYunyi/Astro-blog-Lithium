@@ -24,6 +24,7 @@
     "canvas": "^2.11.0",
     "cross-env": "^7.0.3",
     "dayjs": "^1.11.7",
+    "eslint-plugin-solid": "^0.9.1",
     "rehype-katex": "^6.0.2",
     "remark-math": "^5.1.1",
     "solid-js": "^1.6.6",

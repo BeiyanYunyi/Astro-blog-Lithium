@@ -1,14 +1,8 @@
 {
-  "extends": [
-    "eslint:recommended",
-    //"airbnb-typescript",
-    "prettier",
-    "plugin:astro/recommended"
-  ],
-  "plugins": ["@typescript-eslint", "prettier", "astro"],
+  "extends": ["eslint:recommended", "prettier", "plugin:astro/recommended"],
+  "plugins": ["astro", "@typescript-eslint", "prettier"],
   "rules": {
-    "prettier/prettier": "error",
-    "react/jsx-filename-extension": 0
+    "prettier/prettier": "error"
   },
   "overrides": [
     {
@@ -20,7 +14,31 @@
       }
     },
     {
+      // Define the configuration for `<script>` tag.
+      // Script in `<script>` is assigned a virtual file name with the `.js` extension.
+      "files": ["**/*.astro/*.js", "*.astro/*.js"],
+      "env": {
+        "browser": true,
+        "es2020": true
+      },
+      "parserOptions": {
+        "project": "./tsconfig.json",
+        "parser": "@typescript-eslint/parser"
+      },
+      "rules": {
+        "prettier/prettier": "off"
+      }
+    },
+    {
       "files": ["*.ts", "*.tsx"],
+      "extends": [
+        "airbnb-base",
+        "airbnb-typescript",
+        "prettier",
+        "plugin:solid/recommended",
+        "plugin:import/typescript"
+      ],
+      "rules": { "react/jsx-filename-extension": 0 },
       "parserOptions": {
         "project": "./tsconfig.json",
         "parser": "@typescript-eslint/parser"
