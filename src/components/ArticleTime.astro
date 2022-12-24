@@ -8,10 +8,8 @@ const { post, class: className } = Astro.props;
 let { words, time } = { words: 0, time: '' };
 if (post.frontmatter.rawContent) {
   ({ words, time } = getWordCount(post.frontmatter.rawContent));
-} else {
-  if (!post.frontmatter.isMdx) {
-    ({ words, time } = getWordCount(post.rawContent()));
-  }
+} else if (!post.frontmatter.isMdx) {
+  ({ words, time } = getWordCount(post.rawContent()));
 }
 ---
 

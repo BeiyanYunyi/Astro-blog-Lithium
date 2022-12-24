@@ -1,6 +1,7 @@
 {
   "extends": "astro/tsconfigs/strictest",
   "compilerOptions": {
+    "rootDir": ".",
     "jsx": "preserve",
     "jsxImportSource": "solid-js",
     "baseUrl": ".",
@@ -13,7 +14,8 @@
       "@styles/*": ["src/styles/*"],
       "@data/*": ["src/data/*"],
       "@config": ["src/config.ts"],
-      "@assets/*": ["src/assets/*"],
+      "@assets/*": ["src/assets/*"]
     }
-  }
+  },
+  "include": ["src/**/*.astro", "src/**/*.ts", "src/**/*.tsx", "uno.config.ts", "astro.config.ts"]
 }

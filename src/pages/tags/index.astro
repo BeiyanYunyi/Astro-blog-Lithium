@@ -17,7 +17,9 @@ const tagsAry = Array.from(tags);
       {
         tagsAry.map((tag) => (
           <li class="hover:underline rounded-md transition-all no-underline hover:shadow-md outline-neutral-200 dark:outline-neutral-600 outline outline-1 p-2 flex tags">
-            <a class="w-full" href={`/tags/${tag}`}>{tag}</a>
+            <a class="w-full" href={`/tags/${tag}`}>
+              {tag}
+            </a>
           </li>
         ))
       }

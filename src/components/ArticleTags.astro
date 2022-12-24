@@ -2,14 +2,14 @@
 import { Icon } from 'astro-icon';
 
 export type Props = { tag: string[] | undefined };
-const { tag } = Astro.props;
+const { tag: tags } = Astro.props;
 ---
 
 <>
   {
-    tag && (
+    tags && (
       <div class="flex gap-1 text-xs items-center">
-        {tag.map((tag) => (
+        {tags.map((tag) => (
           <a
             href={`/tags/${tag}`}
             class="rounded-md transition-all no-underline hover:shadow-md outline-neutral-200 dark:outline-neutral-600 outline outline-1 p-1 flex items-center"
