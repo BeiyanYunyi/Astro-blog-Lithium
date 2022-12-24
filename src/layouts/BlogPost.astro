@@ -1,14 +1,16 @@
 ---
+import type IFrontmatter from '@app-types/IFrontmatter';
+import ArticleTags from '@components/ArticleTags.astro';
 import ArticleTime from '@components/ArticleTime.astro';
 import { SITE_DESCRIPTION, SITE_TITLE } from '@config';
 import type { MarkdownInstance } from 'astro';
-import type IFrontmatter from '@app-types/IFrontmatter';
 import BaseLayout from './BaseLayout.astro';
 
 export type Props = MarkdownInstance<Record<string, any> & IFrontmatter> & { image?: string };
 
 const {
   content: { title = SITE_TITLE, description = SITE_DESCRIPTION, heroImage, image },
+  frontmatter,
 } = Astro.props;
 ---
 
@@ -29,5 +31,6 @@ const {
     <ArticleTime post={Astro.props} class="mb-2" />
     <h1 class="mb-6">{title}</h1>
     <slot />
+    <ArticleTags tag={frontmatter.tag} />
   </article>
 </BaseLayout>
