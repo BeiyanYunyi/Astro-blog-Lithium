@@ -16,20 +16,22 @@ const {
 
 <BaseLayout title={title} description={description} image={image || heroImage}>
   <article class="prose prose-neutral dark:prose-invert max-w-none card p-6">
-    <slot name="before-article" />
-    {
-      heroImage && (
-        <img
-          width={720}
-          height={360}
-          class="max-h-[360px] object-contain"
-          src={heroImage}
-          alt="Hero image"
-        />
-      )
-    }
-    <ArticleTime post={Astro.props} class="mb-2" />
-    <h1 class="mb-6">{title}</h1>
+    <header>
+      <slot name="before-article" />
+      {
+        heroImage && (
+          <img
+            width={720}
+            height={360}
+            class="max-h-[360px] object-contain"
+            src={heroImage}
+            alt="Hero image"
+          />
+        )
+      }
+      <ArticleTime post={Astro.props} class="mb-2" />
+      <h1 class="mb-6">{title}</h1>
+    </header>
     <slot />
     <ArticleTags tag={frontmatter.tag} />
   </article>

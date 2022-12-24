@@ -12,7 +12,8 @@
       "@app-types/*": ["src/types/*"],
       "@styles/*": ["src/styles/*"],
       "@data/*": ["src/data/*"],
-      "@config": ["src/config.ts"]
+      "@config": ["src/config.ts"],
+      "@assets/*": ["src/assets/*"],
     }
   }
 }
