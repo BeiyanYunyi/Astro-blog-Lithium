@@ -4,7 +4,7 @@ const PrefetchLink: ParentComponent<{ href: string }> = (prop) => {
   let content: string;
   const loadPage = async () => {
     if (content) return;
-    const href = prop.href;
+    const { href } = prop;
     content = await (await fetch(href)).text();
     // document.querySelector('html')!.outerHTML = content;
   };

@@ -1,5 +1,10 @@
 {
-  "extends": ["eslint:recommended", "prettier", "plugin:astro/recommended"],
+  "extends": [
+    "eslint:recommended",
+    "prettier",
+    "plugin:astro/recommended",
+    "plugin:astro/jsx-a11y-recommended"
+  ],
   "plugins": ["astro", "@typescript-eslint", "prettier"],
   "rules": {
     "prettier/prettier": "error"
