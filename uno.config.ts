@@ -4,6 +4,7 @@ import {
   presetWind,
   presetAttributify,
   transformerDirectives,
+  presetIcons,
 } from 'unocss';
 
 export default defineConfig({
@@ -16,6 +17,7 @@ export default defineConfig({
         p: { 'white-space': 'pre-line' },
       },
     }),
+    presetIcons(),
   ],
   transformers: [transformerDirectives()],
   rules: [

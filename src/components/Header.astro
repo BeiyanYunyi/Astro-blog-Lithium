@@ -1,6 +1,6 @@
 ---
 import { SITE_TITLE } from '@config';
-import { Icon } from 'astro-icon';
+import DarkSwitch from './DarkSwitch';
 import HeaderLink from './HeaderLink.astro';
 ---
 
@@ -18,20 +18,6 @@ import HeaderLink from './HeaderLink.astro';
     <HeaderLink href="/intro">关于我</HeaderLink>
     <HeaderLink href="/links">友链</HeaderLink>
     <div class="flex-grow hidden sm:block"></div>
-    <a href="https://github.com/lixiang810/comb" target="_blank">
-      <Icon name="fa:github" size={24} class="inline-block" />
-    </a>
+    <DarkSwitch client:only="solid-js" />
   </nav>
 </header>
-<script type="text/javascript">
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-    if (e.matches) {
-      window.document.documentElement.classList.add('dark');
-    } else {
-      window.document.documentElement.classList.remove('dark');
-    }
-  });
-  if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    window.document.documentElement.classList.add('dark');
-  }
-</script>

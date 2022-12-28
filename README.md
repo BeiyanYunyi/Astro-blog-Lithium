@@ -13,6 +13,5 @@ Currently, there're no i18n support, but since there's few text, you can easily 
 - UnoCSS
 - Tags
 - Default layout for Markdown and MDX -- no need to write layout froutmatter for each post.
-- Zero JavaScript in frontend (except for comment system)
 - Fast -- ~35kB for home page
 - Solid.js support, or you can replace it with React, Vue, Svelte, etc.

@@ -6,6 +6,7 @@ specifiers:
   '@astrojs/sitemap': ^1.0.0
   '@astrojs/solid-js': ^1.2.3
   '@babel/core': ^7.20.7
+  '@iconify-json/ion': ^1.1.4
   '@types/mdast': ^3.0.10
   '@typescript-eslint/eslint-plugin': ^5.47.0
   '@typescript-eslint/parser': ^5.47.0
@@ -42,6 +43,7 @@ dependencies:
   '@astrojs/rss': 1.2.1
   '@astrojs/sitemap': 1.0.0
   '@astrojs/solid-js': 1.2.3_tljsng7jtgtdn2jjyfs6s5papm
+  '@iconify-json/ion': 1.1.4
   '@unocss/reset': 0.48.0
   astro: 1.7.2
   astro-compress: 1.1.24
@@ -553,6 +555,12 @@ packages:
 
   /@humanwhocodes/object-schema/1.2.1:
     resolution: {integrity: sha512-ZnQMnLV4e7hDlUvw8H+U8ASL02SS2Gn6+9Ac3wGGLIe7+je2AeAOxPY+izIPJDfFDb7eDjev0Us8MO1iFRN8hA==}
+
+  /@iconify-json/ion/1.1.4:
+    resolution: {integrity: sha512-30sOiE7OIboJXCFqIUfyAcskE49pEUjPyQs2Pl35o4lBXKZ46Jy3RzD+atkWBVz6ftlvTk9jE/qFi2mZ+gk78g==}
+    dependencies:
+      '@iconify/types': 2.0.0
+    dev: false
 
   /@iconify/types/2.0.0:
     resolution: {integrity: sha512-+wluvCrRhXrhyOmRDJ3q8mux9JkKy5SJ/v8ol2tu4FVjyYvtEzkc/3pK15ET6RKg4b4w4BmTk1+gsCUhf21Ykg==}
