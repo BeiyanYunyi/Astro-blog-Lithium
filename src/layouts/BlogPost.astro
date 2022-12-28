@@ -12,19 +12,21 @@ const {
   content: { title = SITE_TITLE, description = SITE_DESCRIPTION, heroImage, image },
   frontmatter,
 } = Astro.props;
+
+const finalImage = image || heroImage;
 ---
 
-<BaseLayout title={title} description={description} image={image || heroImage}>
+<BaseLayout title={title} description={description} image={finalImage}>
   <article class="prose prose-neutral dark:prose-invert max-w-none card p-6">
     <header>
       <slot name="before-article" />
       {
-        heroImage && (
+        finalImage && (
           <img
             width={720}
             height={360}
             class="max-h-[360px] object-contain"
-            src={heroImage}
+            src={finalImage}
             alt="Article cover"
           />
         )
