@@ -14,7 +14,7 @@ const friendRenderList = [dustella!, ...shuffle(toshuffle)];
   list.innerHTML = '';
   list.append(...friendRenderList);
 </script>
-<div class="flex flex-col gap-2 not-prose friend-list">
+<div class="grid grid-cols-1 lg:grid-cols-2 grid-flow-row-dense gap-2 not-prose friend-list">
   {
     friendRenderList.map((friend) => (
       <a
@@ -22,7 +22,7 @@ const friendRenderList = [dustella!, ...shuffle(toshuffle)];
         class="hover:underline rounded-md transition-all no-underline hover:shadow-md outline-neutral-200 dark:outline-neutral-600 outline outline-1 friend"
       >
         <div class="p-2">
-          <div class="flex gap-2 items-start">
+          <div class="flex items-start">
             <img
               height="75"
               width="75"
@@ -30,7 +30,7 @@ const friendRenderList = [dustella!, ...shuffle(toshuffle)];
               alt={friend.title}
               class="object-contain"
             />
-            <div>
+            <div class="ml-2">
               <p>{friend.title}</p>
               <p>{friend.description}</p>
             </div>
