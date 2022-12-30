@@ -13,7 +13,7 @@ if (post.frontmatter.rawContent) {
 }
 ---
 
-<div class:list={[className, 'text-xs', 'flex', 'gap-2', 'text-neutral-500']}>
+<div class:list={[className, 'text-xs', 'flex', 'text-neutral-500']}>
   <time>
     {
       new Date(post.frontmatter.date).toLocaleDateString('zh-cn', {
@@ -23,16 +23,16 @@ if (post.frontmatter.rawContent) {
       })
     }
   </time>
-  <span>·</span>
-  <span>{words} 字</span>
-  <span>·</span>
-  <span>{time}</span>
+  <span class="ml-2">·</span>
+  <span class="ml-2">{words} 字</span>
+  <span class="ml-2">·</span>
+  <span class="ml-2">{time}</span>
   {
     // Disable pageview count in dev mode
     !process.env.DEV && (
       <>
-        <span>·</span>
-        <span>
+        <span class="ml-2">·</span>
+        <span class="ml-2">
           <span class="waline-pageview-count" data-path={`${post.url}.html`} /> 浏览
         </span>
       </>

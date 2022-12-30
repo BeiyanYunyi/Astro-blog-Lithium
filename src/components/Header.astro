@@ -5,18 +5,18 @@ import HeaderLink from './HeaderLink.astro';
 ---
 
 <header
-  class="static md:sticky top-0 mb-4 card flex gap-4 p-2 pl-4 z-20 flex-wrap justify-center sm:justify-start backdrop-filter backdrop-blur bg-opacity-70"
+  class="static md:sticky top-0 mb-4 card flex p-2 pl-4 z-20 flex-wrap justify-center sm:justify-start backdrop-filter backdrop-blur bg-opacity-70"
 >
-  <a href="/" class="flex gap-2 items-center">
+  <a href="/" class="flex items-center">
     <img src="/头像圆.webp" height="48" width="48" class="object-cover w-12" alt="My avatar" />
-    <h2 class="text-lg break-keep">
+    <h2 class="text-lg break-keep ml-2">
       {SITE_TITLE}
     </h2>
   </a>
-  <nav class="flex gap-2 flex-grow items-center justify-center">
+  <nav class="flex flex-grow items-center justify-center ml-4">
     <HeaderLink href="/">主页</HeaderLink>
-    <HeaderLink href="/intro">关于我</HeaderLink>
-    <HeaderLink href="/links">友链</HeaderLink>
+    <HeaderLink class="ml-2" href="/intro">关于我</HeaderLink>
+    <HeaderLink class="ml-2" href="/links">友链</HeaderLink>
     <div class="flex-grow hidden sm:block"></div>
     <DarkSwitch client:only="solid-js" />
   </nav>
