@@ -37,4 +37,14 @@ const finalImage = image || heroImage;
     <slot />
     <ArticleTags tag={frontmatter.tag} />
   </article>
+  {
+    frontmatter.toc && (
+      <div slot="sidebar-right" class="hidden lg:block mt-4 lg:(mt-0 ml-4) flex-shrink-0">
+        <div
+          class="prose prose-neutral dark:prose-invert sticky top-20 text-sm card px-4 w-[15vw] max-h-[calc(100vh-6rem)] overflow-y-auto"
+          set:html={frontmatter.toc}
+        />
+      </div>
+    )
+  }
 </BaseLayout>

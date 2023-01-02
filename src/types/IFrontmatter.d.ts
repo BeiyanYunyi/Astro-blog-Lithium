@@ -5,4 +5,5 @@ export default interface IFrontmatter {
   tag?: string[];
   rawContent?: string;
   isMdx: boolean;
+  toc?: string;
 }

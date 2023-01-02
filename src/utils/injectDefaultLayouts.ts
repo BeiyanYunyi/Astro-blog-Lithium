@@ -2,6 +2,9 @@ import type MDInstance from '@app-types/MDInstance';
 import type { Content, Root } from 'mdast';
 import type { Plugin } from 'unified';
 import { visit } from 'unist-util-visit';
+import { toc } from 'mdast-util-toc';
+import { toHast } from 'mdast-util-to-hast';
+import { toHtml } from 'hast-util-to-html';
 
 const getText: (node: Content) => string = (node) => {
   let value = '';
@@ -13,8 +16,23 @@ const getText: (node: Content) => string = (node) => {
   return value;
 };
 
+const getToc = (tree: Root) => {
+  // const astro = file.data.astro as MDInstance;
+  const result = toc(tree);
+  if (!result.map) {
+    return undefined;
+  }
+  const hast = toHast(result.map);
+  const html = toHtml(hast!);
+  return html;
+};
+
 const injectDefaultLayout: Plugin<[], Root> = () => (tree, file) => {
   const astro = file.data.astro as MDInstance;
+  const fileToc = getToc(tree);
+  if (!astro.frontmatter.toc && fileToc) {
+    astro.frontmatter.toc = fileToc;
+  }
   if (file.history[0]?.endsWith('.mdx') && !astro.frontmatter.rawContent) {
     let rawContent = '';
     visit(tree, (node) => {
