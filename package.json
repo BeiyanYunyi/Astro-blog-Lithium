@@ -31,7 +31,6 @@
     "mdast-util-toc": "^6.1.0",
     "rehype-katex": "^6.0.2",
     "remark-math": "^5.1.1",
-    "remark-toc": "^8.0.1",
     "solid-js": "^1.6.6",
     "unified": "^10.1.2",
     "unist-util-visit": "^4.1.1",
