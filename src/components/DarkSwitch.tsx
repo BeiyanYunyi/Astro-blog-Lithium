@@ -27,7 +27,7 @@ const DarkSwitch: Component = () => (
           darkMode.setDark(true);
         }}
         aria-label="Turn on dark mode"
-        class="i-ion:moon-outline text-2xl"
+        class="i-ion:moon-outline text-2xl ml-2"
       />
     }
   >
@@ -37,7 +37,7 @@ const DarkSwitch: Component = () => (
         darkMode.setDark(false);
       }}
       aria-label="Turn off dark mode"
-      class="i-ion:sunny-outline text-2xl"
+      class="i-ion:sunny-outline text-2xl ml-2"
     />
   </Show>
 );
