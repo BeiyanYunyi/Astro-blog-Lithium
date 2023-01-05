@@ -32,6 +32,7 @@ specifiers:
   prettier: ^2.8.1
   prettier-plugin-astro: ^0.7.0
   rehype-katex: ^6.0.2
+  remark-gfm: ^3.0.1
   remark-math: ^5.1.1
   rollup: ^3.8.1
   solid-js: ^1.6.6
@@ -59,6 +60,7 @@ dependencies:
   mdast-util-to-hast: 12.2.4
   mdast-util-toc: 6.1.0
   rehype-katex: 6.0.2
+  remark-gfm: 3.0.1
   remark-math: 5.1.1
   solid-js: 1.6.6
   unified: 10.1.2

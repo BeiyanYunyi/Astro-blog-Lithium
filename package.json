@@ -4,7 +4,7 @@
   "version": "3.0.0",
   "description": "拿去吧！",
   "license": "AGPL-3.0-or-later",
-  "packageManager": "pnpm@7.19.0",
+  "packageManager": "pnpm@7.22.0",
   "scripts": {
     "dev": "cross-env DEV=true astro dev",
     "start": "astro dev",
@@ -30,6 +30,7 @@
     "mdast-util-to-hast": "^12.2.4",
     "mdast-util-toc": "^6.1.0",
     "rehype-katex": "^6.0.2",
+    "remark-gfm": "^3.0.1",
     "remark-math": "^5.1.1",
     "solid-js": "^1.6.6",
     "unified": "^10.1.2",
