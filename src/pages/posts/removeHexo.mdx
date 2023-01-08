@@ -12,7 +12,7 @@ import { Icon } from 'astro-icon';
 
 我在 2019 年开始用 Hexo 写博客。在那之前我用的是 jekyll 和 WordPress。出于身份隔离的需要，我有好几个博客，这个博客的域名是 `stblog.penclub.club`，其中的 `st` 是 `static` 的意思，与 `dynamic` 相对应。那时我没有接触前端技术（事实上还不会编程），在我当时的概念里，网页分为动态网页和静态网页，动态网页需要一个能运行 PHP 之类东西的服务端，静态网页则只需要一个静态文件服务器。
 
-我印象里的 Hexo 是一个使用 ejs 模板生成静态页面的工具。虽然不会编程，但改代码我还是会一点的，于是我[修改了我博客的代码](/posts/Sakura/)。后来我看到了 [hexo-theme-icarus](https://github.com/ppoffice/hexo-theme-icarus)，它是我最喜欢的 hexo 主题。然而当我准备如法炮制，给它更换评论系统时，我却发现自己改不动它：它用的是一个被称为 jsx 的全新格式。后来我知道，Hexo 的 Renderer 层是分离的，可以用任何你想用的模板引擎。我转而使用 [hexo-theme-volantis](https://github.com/volantis-x/hexo-theme-volantis)，它用的是 ejs，不过它的功能够多，不需要我去魔改。
+我印象里的 Hexo 是一个使用 ejs 模板生成静态页面的工具。虽然不会编程，但改代码我还是会一点的，于是我[修改了我博客的代码](/posts/Sakura/)。后来我看到了 [hexo-theme-icarus](https://github.com/ppoffice/hexo-theme-icarus)，它是我最喜欢的 hexo 主题。然而当我准备如法炮制，给它更换评论系统时，我却发现自己改不动它：它用的是一个被称为 jsx 的全新格式。[^1]我转而使用 [hexo-theme-volantis](https://github.com/volantis-x/hexo-theme-volantis)，它用的是 ejs，不过它的功能够多，不需要我去魔改。
 
 2020 年底，我下定决心要学网页编程，并且我做到了。我用 1 个月时间从 [fullstackopen](https://fullstackopen.com/zh/) 学会了用 React 写单页应用（Single Page Applications，SPA，下文会用到这个缩写），之后又花一个学期，学会了 TypeScript 和后端开发。现在我知道，html 里可以没有任何网页上的内容，而只包含几行用于加载 js 的代码，内容则完全由 js 渲染上去。这时我回过头看之前的 `hexo-theme-icarus`，发现也不过如此：我用 React 是写函数式组件的，而它用的是类组件的老式写法。我只写过一两个 JavaScript 项目，之后用的都是 TypeScript，而 `hexo-theme-icarus` 用的仍然是 JavaScript（估计是 `hexo-renderer-inferno` 只支持 js）。其它用 ejs 作为模板引擎的 Hexo 主题则更加落后：论语法简洁度，论类型提示，ejs 都远远不如 jsx。
 
@@ -40,7 +40,7 @@ import { Icon } from 'astro-icon';
 
 现在我们可以说，除了生态不如 Hexo，Astro 就是 Hexo 的完全上位替代——体积更小、功能更多、开发更便捷。只是因为刚刚出现，Astro 的生态比 VuePress2 的还差。幸好该有的东西全都有，而且很大程度上它能复用已有的现代前端技术成果（比如 [tailwindcss](https://tailwindcss.com) 和我正在使用的 [UnoCSS](https://github.com/unocss/unocss)）。于是我在上面从零开始写了一个自己的博客主题。我对自己的审美能力有些自知之明，知道自己是开发者而非设计师，因此我照抄了 `hexo-theme-icarus` 的页面布局。在总共约几个小时的 coding 以后，我实现了我想要的大部分功能（RSS、SEO、友链和评论系统），然后把自己的博客换成了它，从而实现了总共只有 35k 的首页加载体积。即使在博文页面（40k），加上 katex 的 23k（css），和 182k 的 waline 评论系统（css+js）后，体积也依然比 hexo-theme-volantis 更低。比较可惜的地方是，在迁移过程中，我发现老博客有些地方破坏了我的身份隔离，因此我重置了历史记录，并且 `push -f` 了一遍。如果不是这样的话，我将能用 commit history 展示自己从 Hexo 换成 VuePress2 再换成 Astro 的全过程。
 
-自 2013 年 Hexo 发布首个版本至今，已经过去了 9 年。尽管 Hexo 仍然是一个非常优秀的静态页面生成器，它的生态和社区都很完善，文档也很详细，但它的维护和开发成本已经显著高于期望。Hexo 作为旧时代的产物，已经和 jQuery 那样到了该被抛弃的时刻，而 [VuePress](https://github.com/vuepress/vuepress-next)、[Docusaurus](https://docusaurus.io/)、[Next.js](https://nextjs.org/)、[Nuxt.js](https://nuxt.com/) 和 Astro（取决于使用场景）将取而代之。曾经 Vue 的文档是用 Hexo 写的，后来换成了 VuePress，现在则是 [vitepress](https://vitepress.vuejs.org/)。前端更新换代极快，而时间不等人。如果说博客主暂时还只能在已有的生态里挑选，那么开发者则更应该立即停止为 Hexo 生态继续贡献代码，而是转向 Astro，这将是一场双赢——开发者不再需要头疼 Hexo 固有架构带来的问题，而 Astro 的生态也能得以发展。
+自 2013 年 Hexo 发布首个版本至今，已经过去了 9 年。尽管 Hexo 仍然是一个非常优秀的静态页面生成器，它的生态和社区都很完善，文档也很详细，但它的维护和开发成本已经显著高于期望。Hexo 作为旧时代的产物，已经和 jQuery 那样到了该被抛弃的时刻，而 [VuePress](https://github.com/vuepress/vuepress-next)、[Docusaurus](https://docusaurus.io/)、[Next.js](https://nextjs.org/)、[Nuxt.js](https://nuxt.com/) 和 Astro（取决于使用场景）将取而代之。曾经 Vue 的文档是用 Hexo 写的，后来换成了 VuePress，现在则是 [vitepress](https://vitepress.vuejs.org/)。前端更新换代极快，而时间不等人。如果说博客主暂时还只能在已有的生态里挑选，那么开发者则更应该立即停止为 Hexo 生态继续贡献代码[^2]，而是转向 Astro，这将是一场双赢——开发者不再需要头疼 Hexo 固有架构带来的问题，而 Astro 的生态也能得以发展。
 
 ——只是，写博客的人已经越来越少了，一个“**夕阳产业**”能有足够的动力吗？这就是技术以外的问题了。
 
@@ -50,6 +50,11 @@ import { Icon } from 'astro-icon';
 > - [hexo-theme-icarus 文档页面](https://ppoffice.github.io/hexo-theme-icarus/uncategorized/upgrade-guide/)
 > - [vuepress-theme-hope 作者的博客](https://mrhope.site/code/node-js/cjs.html)
 > - [惶心博客](https://huangxin.dev/past-stories/life-shadows) - 该博客使用了较为轻量的 hexo-theme-iris，链接内博文的 html+css（不含评论系统和音乐播放器）共 48k。
-> - [宝硕博客](https://blog.baoshuo.ren/post/oierdb-ng/) - 博主是 Hexo 的开发人员之一，这个使用 Hexo 和 Next.js 写的博客可以代表 Hexo 博客开发的最高水平。
+> - [宝硕博客](https://blog.baoshuo.ren/post/oierdb-ng/) - 博主是 Hexo 的开发人员之一，~~这个使用 Hexo 和 Next.js 写的博客可以代表 Hexo 博客开发的最高水平~~。与本人确认过，这个博客只是把 Hexo 当成 CMS 来用，网页是由 Next.js 生成的。
 >
 > 我选择的页面都是比较短的文章，至少比我这篇文章更短。
+
+---
+
+[^1]: 后来我知道，Hexo 的 Renderer 层是分离的，可以用任何你想用的模板引擎。
+[^2]: [hexo-theme-yun](https://github.com/YunYouJun/hexo-theme-yun) 开发者云游君已经在半年前转向，甚至直接自己搓了一套博客系统 [valaxy](https://github.com/YunYouJun/valaxy)。看来英雄所见略同。
