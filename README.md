@@ -12,7 +12,7 @@ Currently, there's no i18n support, but since there's few text, you can easily t
 - Pagination
 - UnoCSS
 - Tags
-- Default layout for Markdown and MDX -- no need to write layout froutmatter for each post.
+- Default layout for Markdown and MDX -- no need to write layout frontmatter for each post.
 - Fast -- ~20kB Gzipped for home page
 - Solid.js support, or you can replace it with React, Vue, Svelte, etc.
 - Table of contents(TOC)
