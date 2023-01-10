@@ -6,7 +6,7 @@
   "license": "AGPL-3.0-or-later",
   "packageManager": "pnpm@7.22.0",
   "scripts": {
-    "dev": "cross-env DEV=true astro dev",
+    "dev": "cross-env DEV=true astro dev --host",
     "start": "astro dev",
     "build": "astro build",
     "preview": "astro preview",

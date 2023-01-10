@@ -1,0 +1,13 @@
+# This file is used to develop the blog in Windows
+services:
+  app:
+    image: astro-blog-lithium
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./src:/usr/src/app/src
+      - ./public:/usr/src/app/public
+    ports:
+      - 3000:3000
+    container_name: astro-blog-lithium
