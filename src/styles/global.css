@@ -33,3 +33,7 @@ body {
   scroll-margin-top: 4.5rem;
   animation: 1s ease-in 1 strongify;
 }
+
+html {
+  @apply scroll-smooth;
+}
