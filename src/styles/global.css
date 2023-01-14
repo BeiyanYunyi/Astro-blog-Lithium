@@ -19,3 +19,17 @@ body {
   @apply px-[0.4rem] py-[0.2rem] m-0 text-[85%] rounded-md bg-stone-200 dark:bg-stone-700 font-mono font-normal;
   white-space: break-spaces;
 }
+
+@keyframes strongify {
+  0% {
+    @apply bg-yellow-400 bg-op-40;
+  }
+  100% {
+    background-color: none;
+  }
+}
+
+:target {
+  scroll-margin-top: 4.5rem;
+  animation: 1s ease-in 1 strongify;
+}
