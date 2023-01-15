@@ -13,7 +13,10 @@ const tagsAry = Array.from(tags);
 
 <BaseLayout>
   <article class="card p-6">
-    <ul class="grid grid-flow-row-dense grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2 tags-list">
+    <ul
+      class="grid grid-flow-row-dense grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2 opacity-0"
+      id="tags-list"
+    >
       {
         tagsAry.map((tag) => (
           <li class="hover:underline rounded-md transition-all no-underline hover:shadow-md outline-neutral-200 dark:outline-neutral-600 outline outline-1 p-2 flex tags">
@@ -28,9 +31,10 @@ const tagsAry = Array.from(tags);
       import shuffle from '@utils/shuffle';
       const tagsDOM = Array.from(document.querySelectorAll('.tags'));
       const tagsRenderList = shuffle(tagsDOM);
-      const list = document.querySelector('.tags-list')!;
+      const list = document.querySelector('#tags-list')!;
       list.innerHTML = '';
       list.append(...tagsRenderList);
+      list.classList.remove('opacity-0');
     </script>
   </article>
 </BaseLayout>
