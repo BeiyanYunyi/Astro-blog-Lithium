@@ -30,7 +30,7 @@ body {
 }
 
 :target {
-  scroll-margin-top: 4.5rem;
+  scroll-margin-top: 5.75rem;
   animation: 1s ease-in 1 strongify;
 }
 
