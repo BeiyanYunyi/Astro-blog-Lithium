@@ -51,7 +51,7 @@ V2Ray 绝不是个案：同样是前些日子，V2Board 被爆出[硬编码](htt
 [^4]: [V2fly.org](https://guide.v2fly.org/#%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98-q-a) “白话文教程”宣称，V2Ray“一开始就致力于让大家更好更快的科学上网”。
 [^5]: SSR 作者实现的是对 cfb 的重放攻击，使用 AEAD 可以规避，但 V2Ray 也有类似问题，并且是和 SS 差不多同时换上 AEAD 的，也就是说单纯的 VMess 的安全性从未高于 SS。
 [^6]: 或者第二，视标准而定。
-[^7]: 只是说 Clash 的可扩展性和可配置性好，而不是说[安全性](https://t.me/XueXiNmsland/49983)好。
+[^7]: 只是说 Clash 的可扩展性和可配置性好，而不是说它和它衍生产物的[安全性](https://t.me/XueXiNmsland/49983)好。
 [^8]: [前端编译产物中也存在](https://github.com/v2board/v2board-admin/blob/50b6058bf67fa9cea13f8a6cb9d0cd8d3c30a42b/index.html#L9)，可以相互验证。
 [^9]: 硬编码的这段谷歌统计是为开发者而非部署者收集数据，且没有展示任何相关选项或说明，性质极其恶劣。甚至这段统计代码被作为特征去[申请了专利](https://patents.google.com/patent/CN113505323A/zh)，可谓粗心大意 / 不安好心 vs. 沽名钓誉。
 [^10]: 把流量加密以后套个 WebSocket 发出去，这件事情（无论要不要再套一层 TLS）在 NodeJS 上 100 行代码以内就可以实现，技术要求并没有特别高。大概在 C++ 和 [Go](https://github.com/v2fly/v2ray-core) 上写起来会更难吧。
