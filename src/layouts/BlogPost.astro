@@ -17,34 +17,36 @@ const finalImage = image || heroImage;
 ---
 
 <BaseLayout title={title} description={description} image={finalImage}>
-  <article class="prose prose-neutral dark:prose-invert max-w-none card p-6">
-    <header>
-      <slot name="before-article" />
-      {
-        finalImage && (
-          <img
-            width={720}
-            height={360}
-            class="max-h-[360px] object-contain"
-            src={finalImage}
-            alt="Article cover"
+  <div class="flex">
+    <article class="prose prose-neutral min-w-0 dark:prose-invert max-w-none card p-6">
+      <header>
+        <slot name="before-article" />
+        {
+          finalImage && (
+            <img
+              width={720}
+              height={360}
+              class="max-h-[360px] object-contain"
+              src={finalImage}
+              alt="Article cover"
+            />
+          )
+        }
+        <ArticleTime post={Astro.props} class="mb-2" />
+        <h1 class="mb-6">{title}</h1>
+      </header>
+      <slot />
+      <ArticleTags tag={frontmatter.tag} />
+    </article>
+    {
+      frontmatter.toc && (
+        <aside class="hidden lg:block mt-4 lg:(mt-0 ml-4) flex-shrink-0">
+          <nav
+            class="prose prose-neutral dark:prose-invert sticky top-20 text-sm card px-4 w-[15vw] max-h-[calc(100vh-6rem)] overflow-y-auto"
+            set:html={frontmatter.toc}
           />
-        )
-      }
-      <ArticleTime post={Astro.props} class="mb-2" />
-      <h1 class="mb-6">{title}</h1>
-    </header>
-    <slot />
-    <ArticleTags tag={frontmatter.tag} />
-  </article>
-  {
-    frontmatter.toc && (
-      <div slot="sidebar-right" class="hidden lg:block mt-4 lg:(mt-0 ml-4) flex-shrink-0">
-        <div
-          class="prose prose-neutral dark:prose-invert sticky top-20 text-sm card px-4 w-[15vw] max-h-[calc(100vh-6rem)] overflow-y-auto"
-          set:html={frontmatter.toc}
-        />
-      </div>
-    )
-  }
+        </aside>
+      )
+    }
+  </div>
 </BaseLayout>

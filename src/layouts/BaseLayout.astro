@@ -24,7 +24,6 @@ const { title = SITE_TITLE, description = SITE_DESCRIPTION, image = '/头像方.
         <slot />
         {!process.env.DEV && <Comments />}
       </div>
-      <slot name="sidebar-right" />
     </main>
     <Footer />
   </GlobalContainer>
