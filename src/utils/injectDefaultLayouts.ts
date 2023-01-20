@@ -33,7 +33,7 @@ const injectDefaultLayout: Plugin<[], Root> = () => (tree, file) => {
   if (!astro.frontmatter.toc && fileToc) {
     astro.frontmatter.toc = fileToc;
   }
-  if (file.history[0]?.endsWith('.mdx') && !astro.frontmatter.rawContent) {
+  if (file.extname === '.mdx' && !astro.frontmatter.rawContent) {
     let rawContent = '';
     visit(tree, (node) => {
       if ((node.type as 'mdxjsEsm' | string) !== 'mdxjsEsm' && 'value' in node) {
