@@ -22,7 +22,7 @@ const { title = SITE_TITLE, description = SITE_DESCRIPTION, image = '/头像方.
       <SideBarLeft />
       <div class="flex-auto min-w-0 mt-4 lg:(mt-0 ml-4)">
         <slot />
-        {!process.env.DEV && <Comments />}
+        <Comments />
       </div>
     </main>
     <Footer />

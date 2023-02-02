@@ -4,7 +4,6 @@ import solidJs from '@astrojs/solid-js';
 import compress from 'astro-compress';
 import { defineConfig } from 'astro/config';
 import rehypeKatex from 'rehype-katex';
-import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import UnoCSS from 'unocss/astro';
 import injectDefaultLayout from './src/utils/injectDefaultLayouts';
@@ -15,7 +14,8 @@ export default defineConfig({
   integrations: [mdx(), sitemap(), solidJs(), UnoCSS(), compress()],
   markdown: {
     syntaxHighlight: 'prism',
-    remarkPlugins: [injectDefaultLayout, remarkMath, remarkGfm],
+    remarkPlugins: [injectDefaultLayout, remarkMath],
     rehypePlugins: [rehypeKatex],
+    gfm: true,
   },
 });
