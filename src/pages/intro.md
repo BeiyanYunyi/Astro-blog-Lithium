@@ -16,27 +16,7 @@ date: '2022-11-07'
 
 国际主义 + 科学社会主义者，写的代码全都用了 AGPLv3 协议：![GitHub](https://img.shields.io/github/license/lixiang810/comb?style=for-the-badge)
 
-性别身份：
-
-$$
-\begin{aligned}
-\text{mt}\Psi(x,y,z,t),&&
-\lim\limits_{t\rarr\infty}\Psi^2=\text f
-\end{aligned}
-
-
-$$
-
-性取向：
-
-$$
-\begin{aligned}
-\Psi'(x,y,z,t),&&
-\lim\limits_{t\rarr\infty}{\Psi'}^2=\text ?
-\end{aligned}
-
-
-$$
+She / Her
 
 > 曾经有个年轻人，想把全世界都总结进一个理论里。因为他非常聪明，也确实做到了。他在完成时，回首看着、欣赏着自己所构筑的世界，那非常美丽。地平线默默延续，好像闪耀的冰川，无边无沿。摒除了不完美和不确定的新世界，完美的世界展现眼前。所以那位聪明的年轻人环视他所创造的世界，决定探索它。可是，当他向前迈出第一步——却摔了个四脚朝天。
 > 为什么？为什么，他摔倒了？因为他忽略了摩擦力。冰面平坦光滑，洁净无瑕，所以所有人都无法在上面行走。年轻人坐在那里，他看着自己的精彩造物，放声恸哭。
