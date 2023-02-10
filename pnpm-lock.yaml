@@ -34,7 +34,7 @@ specifiers:
   rehype-katex: ^6.0.2
   remark-math: ^5.1.1
   rollup: ^3.14.0
-  sodesu-comment: 0.0.1-alpha.15
+  sodesu-comment: ^0.0.1-alpha.16
   solid-js: ^1.6.10
   typescript: ^4.9.5
   unified: ^10.1.2
@@ -61,7 +61,7 @@ dependencies:
   mdast-util-toc: 6.1.1
   rehype-katex: 6.0.2
   remark-math: 5.1.1
-  sodesu-comment: 0.0.1-alpha.15
+  sodesu-comment: 0.0.1-alpha.16
   solid-js: 1.6.10
   unified: 10.1.2
   unist-util-visit: 4.1.2
@@ -5736,8 +5736,8 @@ packages:
     engines: {node: '>=12'}
     dev: false
 
-  /sodesu-comment/0.0.1-alpha.15:
-    resolution: {integrity: sha512-1VvzOHQ+xNtNK3cWgOv5WGZV/qjYGhPexZXlj5Ou8x2lnY7ktJgTYn1A0k/vEbvjRGLl/yu0JwJIiHBduXX8wA==}
+  /sodesu-comment/0.0.1-alpha.16:
+    resolution: {integrity: sha512-90zXOXUMfAox6iEwjsJhjsxoeIp8+kgLHGJqfJNY5uSqJocILY7QL3uD6Sd+V5u9+HsS4fqqyFgxF520OTRpow==}
     dependencies:
       '@solid-primitives/date': 2.0.6_solid-js@1.6.10
       '@solid-primitives/storage': 1.3.4_solid-js@1.6.10
