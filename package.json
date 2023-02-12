@@ -19,8 +19,8 @@
     "@astrojs/solid-js": "^2.0.2",
     "@iconify-json/ion": "^1.1.7",
     "@unocss/reset": "^0.49.4",
-    "astro": "^2.0.8",
-    "astro-compress": "^1.1.30",
+    "astro": "^2.0.10",
+    "astro-compress": "^1.1.32",
     "astro-icon": "^0.8.0",
     "canvas": "^2.11.0",
     "cross-env": "^7.0.3",
@@ -31,7 +31,7 @@
     "mdast-util-toc": "^6.1.1",
     "rehype-katex": "^6.0.2",
     "remark-math": "^5.1.1",
-    "sodesu-comment": "^0.0.1-alpha.16",
+    "sodesu-comment": "0.0.1-alpha.17",
     "solid-js": "^1.6.10",
     "unified": "^10.1.2",
     "unist-util-visit": "^4.1.2",
@@ -43,7 +43,7 @@
     "@types/mdast": "^3.0.10",
     "@typescript-eslint/eslint-plugin": "^5.51.0",
     "@typescript-eslint/parser": "^5.51.0",
-    "eslint": "^8.33.0",
+    "eslint": "^8.34.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-airbnb-typescript": "^17.0.0",
     "eslint-config-prettier": "^8.6.0",
@@ -53,7 +53,7 @@
     "eslint-plugin-prettier": "^4.2.1",
     "prettier": "^2.8.4",
     "prettier-plugin-astro": "^0.8.0",
-    "rollup": "^3.14.0",
+    "rollup": "^3.15.0",
     "typescript": "^4.9.5"
   }
 }
