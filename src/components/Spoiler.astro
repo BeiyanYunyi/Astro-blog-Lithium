@@ -1,0 +1,38 @@
+---
+import crypto from 'node:crypto';
+
+interface Props {
+  information?: string;
+}
+
+const { information = 'Spoiler' } = Astro.props;
+
+const targetId = crypto.webcrypto.randomUUID();
+---
+
+<label>
+  <input id={targetId} type="radio" hidden />
+  <div>{information}</div>
+  <div>
+    <slot />
+  </div>
+</label>
+<style>
+  input:checked + div + div {
+    filter: none;
+    user-select: auto;
+    pointer-events: auto;
+  }
+  input + div + div {
+    filter: blur(10px);
+    pointer-events: none;
+    user-select: none;
+  }
+  input:checked + div {
+    display: none;
+  }
+  input + div {
+    display: block;
+    white-space: pre-wrap;
+  }
+</style>
