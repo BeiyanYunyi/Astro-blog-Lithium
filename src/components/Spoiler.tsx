@@ -1,4 +1,4 @@
-import { ParentComponent, createSignal, Show } from 'solid-js';
+import { createSignal, ParentComponent } from 'solid-js';
 
 const Spoiler: ParentComponent<{ information?: string }> = (props) => {
   const [show, setShow] = createSignal(false);
