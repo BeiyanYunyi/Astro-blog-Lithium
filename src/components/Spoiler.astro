@@ -13,7 +13,7 @@ const targetId = crypto.webcrypto.randomUUID();
 <label>
   <input id={targetId} type="radio" hidden />
   <div>{information}</div>
-  <div>
+  <div class="transition-all">
     <slot />
   </div>
 </label>
@@ -28,11 +28,7 @@ const targetId = crypto.webcrypto.randomUUID();
     pointer-events: none;
     user-select: none;
   }
-  input:checked + div {
-    display: none;
-  }
   input + div {
-    display: block;
     white-space: pre-wrap;
   }
 </style>
