@@ -1,12 +1,11 @@
 ---
-import type IFrontmatter from '@app-types/IFrontmatter';
+import type MDInstance from '@app-types/MDInstance';
 import ArticleTags from '@components/ArticleTags.astro';
 import ArticleTime from '@components/ArticleTime.astro';
 import { SITE_DESCRIPTION, SITE_TITLE } from '@config';
-import type { MarkdownInstance } from 'astro';
 import BaseLayout from './BaseLayout.astro';
 
-export type Props = MarkdownInstance<Record<string, any> & IFrontmatter> & { image?: string };
+export type Props = MDInstance & { image?: string };
 
 const {
   content: { title = SITE_TITLE, description = SITE_DESCRIPTION, heroImage, image },

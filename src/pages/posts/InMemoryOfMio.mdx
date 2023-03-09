@@ -7,9 +7,9 @@ tag:
   - 杂谈
 ---
 
-import Spoiler from '@components/Spoiler.astro';
+import Spoiler from '@components/Spoiler.tsx';
 
-<Spoiler information={`这是一篇我写得痛苦，读着也不会好受的文章。鉴于读者未必有足够的心理承受能力，我在此请求所有读者，若在阅读中感到不适，请立即退出并向社群和专业人士请求帮助。\n点击以查看`}>
+<Spoiler information={`这是一篇我写得痛苦，读着也不会好受的文章。鉴于读者未必有足够的心理承受能力，我在此请求所有读者，若在阅读中感到不适，请立即退出并向社群和专业人士请求帮助。\n点击以查看`} client:load>
 
 收到 Mio 的死讯时，我眼中的世界换了一个颜色。她的形象像玻璃一样破碎在我面前。我不顾碎片的尖锐，无视手上一道道伤痕带来的痛苦，想拼凑出她的一生，却只能得到几幅模糊的图像。
 
