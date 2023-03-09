@@ -13,12 +13,19 @@ const Spoiler: ParentComponent<{ information?: string }> = (props) => {
       >
         {props.information || 'Spoiler'}
       </button>
-
       <div
-        classList={{ 'filter-blur pointer-events-none select-none': !show() }}
-        class="transition"
+        onClick={(e) => {
+          e.preventDefault();
+          setShow(true);
+        }}
+        classList={{ 'cursor-pointer': !show() }}
       >
-        {props.children}
+        <div
+          classList={{ 'filter-blur pointer-events-none select-none': !show() }}
+          class="transition"
+        >
+          {props.children}
+        </div>
       </div>
     </div>
   );
