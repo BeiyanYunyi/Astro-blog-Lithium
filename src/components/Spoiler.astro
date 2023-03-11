@@ -1,0 +1,48 @@
+---
+interface Props {
+  information?: string;
+}
+const { information = 'Spoiler' } = Astro.props;
+---
+
+<script>
+  const outDiv = document.querySelector('#spoilerOuter') as HTMLDivElement;
+  const inDiv = document.querySelector('#spoilerInner') as HTMLDivElement;
+  const button = document.querySelector('#spoilerButton') as HTMLButtonElement;
+  let showing = false;
+  const show = () => {
+    outDiv.classList.remove('cursor-pointer');
+    inDiv.classList.remove('filter-blur', 'pointer-events-none', 'select-none');
+    showing = true;
+  };
+  const hide = () => {
+    outDiv.classList.add('cursor-pointer');
+    inDiv.classList.add('filter-blur', 'pointer-events-none', 'select-none');
+    showing = false;
+  };
+  const toggle = () => {
+    if (showing) {
+      hide();
+    } else {
+      show();
+    }
+  };
+  button.addEventListener('click', (e) => {
+    e.preventDefault();
+    toggle();
+  });
+  outDiv.addEventListener('click', (e) => {
+    e.preventDefault();
+    show();
+  });
+</script>
+<div>
+  <button id="spoilerButton" class="text-start">
+    {information}
+  </button>
+  <div id="spoilerOuter" class="cursor-pointer">
+    <div id="spoilerInner" class="transition filter-blur pointer-events-none select-none">
+      <slot />
+    </div>
+  </div>
+</div>
