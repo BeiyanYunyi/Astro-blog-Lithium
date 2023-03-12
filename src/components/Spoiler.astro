@@ -35,13 +35,14 @@ const { information = 'Spoiler' } = Astro.props;
     e.preventDefault();
     show();
   });
+  hide();
 </script>
 <div>
   <button id="spoilerButton" class="text-start">
     {information}
   </button>
-  <div id="spoilerOuter" class="cursor-pointer">
-    <div id="spoilerInner" class="transition filter-blur pointer-events-none select-none">
+  <div id="spoilerOuter">
+    <div id="spoilerInner" class="transition">
       <slot />
     </div>
   </div>
