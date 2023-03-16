@@ -5,38 +5,6 @@ interface Props {
 const { information = 'Spoiler' } = Astro.props;
 ---
 
-<script>
-  const outDiv = document.querySelector('#spoilerOuter') as HTMLDivElement;
-  const inDiv = document.querySelector('#spoilerInner') as HTMLDivElement;
-  const button = document.querySelector('#spoilerButton') as HTMLButtonElement;
-  let showing = false;
-  const show = () => {
-    outDiv.classList.remove('cursor-pointer');
-    inDiv.classList.remove('filter-blur', 'pointer-events-none', 'select-none');
-    showing = true;
-  };
-  const hide = () => {
-    outDiv.classList.add('cursor-pointer');
-    inDiv.classList.add('filter-blur', 'pointer-events-none', 'select-none');
-    showing = false;
-  };
-  const toggle = () => {
-    if (showing) {
-      hide();
-    } else {
-      show();
-    }
-  };
-  button.addEventListener('click', (e) => {
-    e.preventDefault();
-    toggle();
-  });
-  outDiv.addEventListener('click', (e) => {
-    e.preventDefault();
-    show();
-  });
-  hide();
-</script>
 <div>
   <button id="spoilerButton" class="text-start">
     {information}
@@ -47,3 +15,37 @@ const { information = 'Spoiler' } = Astro.props;
     </div>
   </div>
 </div>
+<script>
+  const outDiv = document.querySelector<HTMLDivElement>('#spoilerOuter');
+  const inDiv = document.querySelector<HTMLDivElement>('#spoilerInner');
+  const button = document.querySelector<HTMLButtonElement>('#spoilerButton');
+  if (outDiv && inDiv && button) {
+    let showing = false;
+    const show = () => {
+      outDiv.classList.remove('cursor-pointer');
+      inDiv.classList.remove('filter-blur', 'pointer-events-none', 'select-none');
+      showing = true;
+    };
+    const hide = () => {
+      outDiv.classList.add('cursor-pointer');
+      inDiv.classList.add('filter-blur', 'pointer-events-none', 'select-none');
+      showing = false;
+    };
+    const toggle = () => {
+      if (showing) {
+        hide();
+      } else {
+        show();
+      }
+    };
+    button.addEventListener('click', (e) => {
+      e.preventDefault();
+      toggle();
+    });
+    outDiv.addEventListener('click', (e) => {
+      e.preventDefault();
+      show();
+    });
+    hide();
+  }
+</script>
