@@ -9,7 +9,7 @@
       el: '#comment-container',
       serverURL: 'https://bmhgu5.deta.dev/',
       dark: 'html.dark',
-      pageview: true,
+      pageview: !import.meta.env.DEV,
       path:
         window.location.pathname === '/' ? '/' : window.location.pathname.replace(/\/$/, '.html'),
       commentClassName: 'prose prose-neutral dark:prose-invert min-w-0 max-w-none',
