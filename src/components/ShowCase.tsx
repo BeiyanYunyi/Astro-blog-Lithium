@@ -9,7 +9,7 @@ const ShowCase: Component = () => {
         例如，这是一个使用 solid.js 实现的计数器，而我在博文里
         <a
           target="blank"
-          href="https://github.com/lixiang810/comb/blob/main/src/pages/posts/removeHexo.mdx?plain=1#L10"
+          href="https://github.com/BeiyanYunyi/Astro-Blog-Lithium/blob/main/src/pages/posts/removeHexo.mdx?plain=1#L10"
         >
           只用一行代码
         </a>

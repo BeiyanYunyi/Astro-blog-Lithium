@@ -4,7 +4,7 @@ date: 2020-03-02 21:40:06
 article: false
 ---
 
-流程：评论或 [PR](https://github.com/lixiang810/comb/edit/main/docs/_data/friends.json) 即可。
+流程：评论或 [PR](https://github.com/BeiyanYunyi/Astro-Blog-Lithium/edit/main/docs/_data/friends.json) 即可。
 
 一般认为友链是需要互加的，但不把我加上其实也无所谓。不过，这样的话，我对你博客内容的要求会更高一点。比如，如果一个我单向友链的博客在其中发表了如下言论，那么我可能会移除友链，而双向友链则不受此限制。
 

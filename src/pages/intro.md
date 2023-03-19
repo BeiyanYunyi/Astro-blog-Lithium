@@ -14,7 +14,7 @@ date: '2022-11-07'
 
 民主改革家，一次成功、一次失败。
 
-国际主义 + 科学社会主义者，写的代码全都用了 AGPLv3 协议：![GitHub](https://img.shields.io/github/license/lixiang810/comb?style=for-the-badge)
+国际主义 + 科学社会主义者，写的代码全都用了 AGPLv3 协议：![GitHub](https://img.shields.io/github/license/BeiyanYunyi/Astro-Blog-Lithium?style=for-the-badge)
 
 She / Her
 

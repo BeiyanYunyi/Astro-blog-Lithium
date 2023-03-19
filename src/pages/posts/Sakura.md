@@ -10,7 +10,7 @@ description: >
 
 <!--more-->
 
-[我的 solo 博客](https://lixiang810.github.io) [我的 hexo 博客](https://lixiang3.imfast.io)
+[我的 solo 博客](https://BeiyanYunyi.github.io) [我的 hexo 博客](https://lixiang3.imfast.io)
 
 # 为什么要魔改 Sakura
 

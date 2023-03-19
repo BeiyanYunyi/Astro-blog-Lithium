@@ -5,7 +5,7 @@ description: 迅速解决中国大学 MOOC 互评问题
 tag: [教程]
 ---
 
-![1648991841065-图片.png](https://hsp.penclub.club/api/gh/https://raw.githubusercontent.com/lixiang810/fk-gfw/master/hsp/1648991841065-%E5%9B%BE%E7%89%87.png)
+![1648991841065-图片.png](https://hsp.penclub.club/api/gh/https://raw.githubusercontent.com/BeiyanYunyi/fk-gfw/master/hsp/1648991841065-%E5%9B%BE%E7%89%87.png)
 
 如图，中国大学 MOOC 要求我们完成作业后对他人作业进行互评，还要至少评 5 份。我的这份作业，每人有 3 道题，每题有 3 道小题，评分是用 `<input type="checkbox">` 完成的，这一堆单选框一字排开，操作也不符合人体工程学。评分是一项机械劳动，而将人从机械劳动中解放出来是科学发展的目标之一。
 

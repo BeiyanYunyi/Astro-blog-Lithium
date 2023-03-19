@@ -86,7 +86,7 @@ const PPPPPP = defineComponent({
 export default PPPPPP;
 ```
 
-上面的代码来自我[废弃的博客系统](https://github.com/lixiang810/Boron)。简简单单遍历个 DOM 树然后渲染就行了，没啥好说的。
+上面的代码来自我[废弃的博客系统](https://github.com/BeiyanYunyi/Boron)。简简单单遍历个 DOM 树然后渲染就行了，没啥好说的。
 
 实际上也可以用`querySelectorAll`来做，把特定元素替换成自定义元素，然后注册`Web Components`解决之。
 
