@@ -10,5 +10,8 @@
         "typescript",
         "typescriptreact",
         "astro"
-    ]
+    ],
+    "files.associations": {
+        "*.mdx": "markdown"
+    }
 }
