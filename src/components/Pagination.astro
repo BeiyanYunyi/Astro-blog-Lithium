@@ -46,7 +46,11 @@ const numRegex = /\d+/;
             targetUrl = currentUrl.replace(numRegex, i.toString());
           }
         } else {
-          targetUrl = `${currentUrl}/${i}`;
+          if (currentUrl === '/') {
+            targetUrl = `/${i}`;
+          } else {
+            targetUrl = `${currentUrl}/${i}`;
+          }
         }
         return (
           <PageLink
