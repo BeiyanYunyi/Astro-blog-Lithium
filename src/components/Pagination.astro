@@ -14,10 +14,11 @@ const {
   totalCount,
   previousUrl,
   currentPage,
-  currentUrl,
+
   nextUrl,
   ...rest
 } = Astro.props;
+let { currentUrl } = Astro.props;
 const pageAry = Array.from({ length: totalCount }, (_, i) => i + 1).filter(
   (item) => item > currentPage - 3 && item < currentPage + 4,
 );
@@ -39,6 +40,9 @@ const numRegex = /\d+/;
     totalCount > 1 &&
       pageAry.map((i) => {
         let targetUrl = currentUrl;
+        if (currentUrl === '/') {
+          currentUrl = '';
+        }
         if (numRegex.test(currentUrl)) {
           if (i === 1) {
             targetUrl = currentUrl.replace(numRegex, '');
@@ -46,11 +50,7 @@ const numRegex = /\d+/;
             targetUrl = currentUrl.replace(numRegex, i.toString());
           }
         } else {
-          if (currentUrl === '/') {
-            targetUrl = `/${i}`;
-          } else {
-            targetUrl = `${currentUrl}/${i}`;
-          }
+          targetUrl = `${currentUrl}/${i}`;
         }
         return (
           <PageLink
