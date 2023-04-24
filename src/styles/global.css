@@ -1,3 +1,5 @@
+@import '@unocss/reset/tailwind-compat.css';
+
 a {
   @apply text-neutral-600 dark:text-neutral-200 hover:text-blue-500 dark:hover:text-blue-400;
 }
@@ -37,3 +39,4 @@ body {
 html {
   @apply scroll-smooth;
 }
+
