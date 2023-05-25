@@ -1,9 +1,9 @@
 ---
-import type MDInstance from '@app-types/MDInstance';
-import { Icon } from 'astro-icon';
 import { SITE_TITLE } from '@config';
+import getAllPosts from '@utils/getAllPosts';
+import { Icon } from 'astro-icon';
 
-const allPosts = await Astro.glob<MDInstance>('../pages/posts/*.{md,mdx}');
+const allPosts = await getAllPosts();
 const tags = new Set<string>();
 allPosts.forEach((post) => {
   if (!post.frontmatter.tag) return;

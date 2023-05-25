@@ -1,10 +1,9 @@
 ---
-import type { MarkdownInstance } from 'astro';
-import type IFrontmatter from '@app-types/IFrontmatter';
+import type MDInstance from '@app-types/MDInstance';
 import ArticleTime from './ArticleTime.astro';
 
 export interface Props {
-  post: MarkdownInstance<Record<string, any> & IFrontmatter>;
+  post: MDInstance;
 }
 const { post } = Astro.props;
 ---

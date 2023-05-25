@@ -3,9 +3,10 @@ import PostList from '@components/PostList.astro';
 import BaseLayout from '@layouts/BaseLayout.astro';
 import { Icon } from 'astro-icon';
 import type MDInstance from '@app-types/MDInstance';
+import getAllPosts from '@utils/getAllPosts';
 
 export const getStaticPaths = async () => {
-  const allPosts = await Astro.glob<MDInstance>('../../pages/posts/*.{md,mdx}');
+  const allPosts = await getAllPosts();
   const tags = new Set<string>();
   allPosts.forEach((post) => {
     if (!post.frontmatter.tag) return;
@@ -15,7 +16,7 @@ export const getStaticPaths = async () => {
   return tagsAry.map((tag) => ({ params: { tag } }));
 };
 
-const allPosts = await Astro.glob<MDInstance>('../../pages/posts/*.{md,mdx}');
+const allPosts = await getAllPosts();
 const { tag } = Astro.params;
 const posts: MDInstance[] = [];
 allPosts.forEach((post) => {

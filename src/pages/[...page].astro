@@ -3,9 +3,10 @@ import Pagination from '@components/Pagination.astro';
 import PostList from '@components/PostList.astro';
 import BaseLayout from '@layouts/BaseLayout.astro';
 import type MDInstance from '@app-types/MDInstance';
+import getAllPosts from '@utils/getAllPosts';
 
 export async function getStaticPaths({ paginate }: { paginate: any }) {
-  const allPosts = await Astro.glob('./posts/*.{md,mdx}');
+  const allPosts = await getAllPosts();
   const sortedPosts = allPosts.sort(
     (a, b) => Number(new Date(b.frontmatter.date)) - Number(new Date(a.frontmatter.date)),
   );

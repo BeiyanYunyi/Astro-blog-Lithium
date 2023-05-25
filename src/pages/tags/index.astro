@@ -1,8 +1,8 @@
 ---
 import BaseLayout from '@layouts/BaseLayout.astro';
-import type MDInstance from '@app-types/MDInstance';
+import getAllPosts from '@utils/getAllPosts';
 
-const allPosts = await Astro.glob<MDInstance>('../../pages/posts/*.{md,mdx}');
+const allPosts = await getAllPosts();
 const tags = new Set<string>();
 allPosts.forEach((post) => {
   if (!post.frontmatter.tag) return;

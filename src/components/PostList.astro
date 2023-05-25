@@ -1,10 +1,9 @@
 ---
-import type { MarkdownInstance } from 'astro';
-import type IFrontmatter from '@app-types/IFrontmatter';
 import PostCard from './PostCard.astro';
+import type MDInstance from '@app-types/MDInstance';
 
 export interface Props extends astroHTML.JSX.BaseHTMLAttributes {
-  posts: MarkdownInstance<Record<string, any> & IFrontmatter>[];
+  posts: MDInstance[];
 }
 const { posts, class: className } = Astro.props;
 ---
