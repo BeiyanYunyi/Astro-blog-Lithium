@@ -6,4 +6,5 @@ export default interface IFrontmatter {
   rawContent?: string;
   isMdx: boolean;
   toc?: string;
+  layout: string;
 }
