@@ -22,6 +22,10 @@ body {
   white-space: break-spaces;
 }
 
+.prose :where(section.footnotes):not(:where(.not-prose, pre *)) {
+  @apply text-sm;
+}
+
 @keyframes strongify {
   0% {
     @apply bg-yellow-400 bg-op-40;
@@ -39,4 +43,3 @@ body {
 html {
   @apply scroll-smooth;
 }
-
