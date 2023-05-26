@@ -13,8 +13,11 @@ body {
 }
 
 .prose :where(blockquote):not(:where(.not-prose, pre *)) {
-  font-style: initial;
   @apply text-sm bg-stone-100 py-2 dark:bg-stone-900;
+}
+
+.prose :where(blockquote):not(:where(.not-prose, pre *)) p {
+  font-style: normal;
 }
 
 .prose :where(code):not(:where(.not-prose, pre *)) {
