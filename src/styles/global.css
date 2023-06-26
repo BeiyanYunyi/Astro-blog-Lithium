@@ -46,3 +46,10 @@ body {
 html {
   @apply scroll-smooth;
 }
+
+@font-face {
+  font-family: Chinese Quotes;
+  src: local('PingFang SC Regular'), local('PingFang SC'), local('SimHei'),
+    local('Source Han Sans SC');
+  unicode-range: U+2018, U+2019, U+201C, U+201D;
+}

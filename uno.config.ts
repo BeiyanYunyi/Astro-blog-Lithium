@@ -31,4 +31,28 @@ export default defineConfig({
   ],
   shortcuts: { card: 'bg-white dark:bg-stone-800 rounded-md shadow-app' },
   layers: { shortcuts: -1 },
+  theme: {
+    fontFamily: {
+      sans: [
+        'Chinese Quotes',
+        'Inter var',
+        'Inter',
+        'ui-sans-serif',
+        'system-ui',
+        '-apple-system',
+        'BlinkMacSystemFont',
+        'Segoe UI',
+        'Roboto',
+        'Helvetica Neue',
+        'Helvetica',
+        'Arial',
+        'Noto Sans',
+        'sans-serif',
+        'Apple Color Emoji',
+        'Segoe UI Emoji',
+        'Segoe UI Symbol',
+        'Noto Color Emoji',
+      ],
+    },
+  },
 });
