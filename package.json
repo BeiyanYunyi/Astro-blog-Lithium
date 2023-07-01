@@ -20,7 +20,6 @@
     "@iconify-json/ion": "^1.1.11",
     "@unocss/reset": "^0.53.3",
     "astro": "^2.7.0",
-    "astro-compress": "^1.1.47",
     "astro-icon": "^0.8.1",
     "canvas": "^2.11.2",
     "cross-env": "^7.0.3",
