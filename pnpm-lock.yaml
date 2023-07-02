@@ -57,8 +57,8 @@ dependencies:
     specifier: ^5.1.1
     version: 5.1.1
   sodesu-comment:
-    specifier: 0.0.1-alpha.23
-    version: 0.0.1-alpha.23(solid-js@1.7.6)
+    specifier: 0.0.1-alpha.24
+    version: 0.0.1-alpha.24(solid-js@1.7.6)
   solid-js:
     specifier: ^1.7.6
     version: 1.7.6
@@ -5608,8 +5608,8 @@ packages:
     engines: {node: '>=12'}
     dev: false
 
-  /sodesu-comment@0.0.1-alpha.23(solid-js@1.7.6):
-    resolution: {integrity: sha512-vEsPL4TXDvZolHAlK34MnPUMFMFsKHDaU6ch5Fc62ReEghDv6Wcl81sDK5lj6rlDyl9RkG6fKpdUfSqr4nkPOg==}
+  /sodesu-comment@0.0.1-alpha.24(solid-js@1.7.6):
+    resolution: {integrity: sha512-dGsHBsS9gwanTt1VbGff+pccWY5BS7N26hw0AldDADN/jluBdwzFK+h6a9Qgyk81H2ntwbNMyjkYNdvl5tekcQ==}
     peerDependencies:
       solid-js: ^1.7.6
     dependencies:

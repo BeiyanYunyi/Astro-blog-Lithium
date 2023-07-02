@@ -6,12 +6,20 @@ export interface Props {
   post: MDInstance;
 }
 const { post } = Astro.props;
+const isForward = post.frontmatter.tag?.includes('转载');
 ---
 
 <li class="flex flex-col items-start p-6 card">
   <ArticleTime post={post} class="mb-1" />
   <a href={`${post.url}/`} class="text-[2rem] mb-6">
     {post.frontmatter.title}
+    {
+      isForward && (
+        <span class="text-sm border-[#3273dc] border rounded-full text-[#3273dc] px-2 py-1 ml-2 v-mid">
+          转载
+        </span>
+      )
+    }
   </a>
   <div class="text-neutral-500">{post.frontmatter.description}</div>
 </li>
