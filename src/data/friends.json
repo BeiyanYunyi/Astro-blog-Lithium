@@ -69,5 +69,11 @@
     "avatar": "https://blog.20220228.xyz/images/avatar.png",
     "title": "Seele 的博客",
     "description": "总要在这里留下一些痕迹。"
+  },
+  {
+    "url": "https://septs.blog/",
+    "avatar": "https://github.com/septs.png",
+    "title": "Sept's Blog",
+    "description": "Senior Frontend Developer"
   }
 ]
