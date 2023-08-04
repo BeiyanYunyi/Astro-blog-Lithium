@@ -17,3 +17,4 @@ Currently, there's no i18n support, but since there's few text, you can easily t
 - Solid.js support, or you can replace it with React, Vue, Svelte, etc.
 - Table of contents(TOC)
 - Dark mode and switcher
+- [Sodesu](https://github.com/BeiyanYunyi/Sodesu) -- a simple comment system
