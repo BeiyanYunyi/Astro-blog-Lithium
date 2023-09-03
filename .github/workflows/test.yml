@@ -15,18 +15,16 @@ jobs:
           fetch-depth: 0
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v2.2.1
+        uses: pnpm/action-setup@v2
         with:
-          version: 6.32.4
+          version: latest
+          run_install: true
 
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
-          node-version: '16'
+          node-version: '18'
           cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm i
 
       - name: Build test
         run: pnpm build
