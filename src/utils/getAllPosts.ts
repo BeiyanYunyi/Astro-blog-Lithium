@@ -8,14 +8,14 @@ const getAllPosts = async () => {
 
   //if (allPosts.length === 0) {
   //  lock = true;
-    await Promise.all(
-      Object.values(posts).map(async (iterator, index) => {
-        if (index === 0) {
-          allPosts = [];
-        }
-        allPosts.push(await iterator());
-      }),
-    );
+  await Promise.all(
+    Object.values(posts).map(async (iterator, index) => {
+      if (index === 0) {
+        allPosts = [];
+      }
+      allPosts.push(await iterator());
+    }),
+  );
   //  lock = false;
   //} else if (!lock) {
   //  Promise.all(
