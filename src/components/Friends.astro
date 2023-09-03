@@ -25,21 +25,19 @@ const friendRenderList = [dustella!, ...shuffle(toshuffle)];
         href={friend.url}
         class="hover:underline rounded-md transition-all no-underline hover:shadow-md outline-neutral-200 dark:outline-neutral-600 outline outline-1 friend"
       >
-        <div class="p-2">
-          <div class="flex items-start">
-            {friend.avatar && (
-              <img
-                height="75"
-                width="75"
-                src={friend.avatar}
-                alt={friend.title}
-                class="object-contain"
-              />
-            )}
-            <div class="ml-2">
-              <p>{friend.title}</p>
-              <p>{friend.description || ''}</p>
-            </div>
+        <div class="flex items-start p-2">
+          {friend.avatar && (
+            <img
+              height="75"
+              width="75"
+              src={friend.avatar}
+              alt={friend.title}
+              class="object-contain"
+            />
+          )}
+          <div class="ml-2">
+            <p>{friend.title}</p>
+            <p>{friend.description || ''}</p>
           </div>
         </div>
       </a>
