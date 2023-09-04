@@ -10,7 +10,7 @@ const posts = Object.values(importResults).map((item) => ({
   customData: `<description>${item.frontmatter.description}</description>`,
 }));
 
-export const get = () =>
+export const GET = () =>
   rss({
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
