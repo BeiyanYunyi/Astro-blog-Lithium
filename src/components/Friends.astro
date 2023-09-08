@@ -8,8 +8,7 @@ const friendRenderList = [dustella!, ...shuffle(toshuffle)];
 <script>
   import shuffle from '@utils/shuffle';
   const friendsDOM = Array.from(document.querySelectorAll('.friend'));
-  const [dustella, ...toshuffle] = friendsDOM;
-  const friendRenderList = [dustella!, ...shuffle(toshuffle)];
+  const friendRenderList = shuffle(friendsDOM);
   const list = document.querySelector('#friend-list')!;
   list.innerHTML = '';
   list.append(...friendRenderList);
