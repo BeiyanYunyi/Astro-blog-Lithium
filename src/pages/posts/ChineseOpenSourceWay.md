@@ -49,7 +49,7 @@ V2Ray 绝不是个案：同样是前些日子，V2Board 被爆出[硬编码](htt
 [^2]: 和 pjax 指的是同一个技术。
 [^3]: 尽管这个目标不一定是正确的，毕竟“没有特征就是最大的特征”。
 [^4]: [V2fly.org](https://guide.v2fly.org/#%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98-q-a) “白话文教程”宣称，V2Ray“一开始就致力于让大家更好更快的科学上网”。
-[^5]: SSR 作者实现的是对 cfb 的重放攻击，使用 AEAD 可以规避，但 V2Ray 也有类似问题，并且是和 SS 差不多同时换上 AEAD 的，也就是说单纯的 VMess 的安全性从未高于 SS。
+[^5]: SSR 作者实现的是对 AES-CFB 的重放攻击，使用 AEAD 可以规避，但 V2Ray 也有类似问题，并且是和 SS 差不多同时换上 AEAD 加密方式（AES-GCM、ChaCha20-IETF-Poly1305 等）的，也就是说单纯的 VMess 的安全性从未高于 SS。
 [^6]: 或者第二，视标准而定。
 [^7]: 只是说 Clash 的可扩展性和可配置性好，而不是说它和它衍生产物的[安全性](https://t.me/XueXiNmsland/49983)好。
 [^8]: [前端编译产物中也存在](https://github.com/v2board/v2board-admin/blob/50b6058bf67fa9cea13f8a6cb9d0cd8d3c30a42b/index.html#L9)，可以相互验证。
