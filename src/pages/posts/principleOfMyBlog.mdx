@@ -7,6 +7,7 @@ tag:
   - 杂谈
 ---
 
+import { Image } from 'astro:assets';
 import screenShot1 from '@assets/principleOfMyBlog-1.png';
 import screenShot2 from '@assets/principleOfMyBlog-2.gif';
 
@@ -40,7 +41,7 @@ import screenShot2 from '@assets/principleOfMyBlog-2.gif';
 
 而当我们把网页的字体指定为其它字体时，微软雅黑-Windows 字体渲染器的这一组合就被打破了。造成的结果是，在低分屏上，当文字比较小时，字体的笔画不再能被清晰地显示出来，就像下面这张图一样：
 
-<img src={screenShot1} alt="字体显示效果图" />
+<Image src={screenShot1} alt="字体显示效果图" />
 
 字体为思源宋体可变字重版，操作系统为 Windows 11，DPI 为 120，字体大小为 14px。可以看到，即使是在 120DPI 的屏幕上，这些字的很多横画都仍然很不清晰。
 
@@ -50,7 +51,7 @@ import screenShot2 from '@assets/principleOfMyBlog-2.gif';
 
 一些博客主题提供了非常炫酷的特效和动画，如果使用得当，它们将能提升用户体验——比如一个伪进度条就能改善用户的等待体验。但当特效喧宾夺主时就是另一回事了。比如，这是我在我博客引入一个鼠标特效后的结果：
 
-<img src={screenShot2} alt="喧宾夺主的特效" />
+<Image src={screenShot2} alt="喧宾夺主的特效" />
 
 可以说，这个特效摧毁了我的博客。
 
