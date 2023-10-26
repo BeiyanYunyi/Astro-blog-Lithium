@@ -1,2 +1,5 @@
 /.well-known/webfinger
   Content-Type: application/jrd+json
+
+/api/activitypub/actor
+  Content-Type: application/activity+json

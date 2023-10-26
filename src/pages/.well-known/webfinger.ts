@@ -9,7 +9,11 @@ export const GET = () =>
           type: 'text/html',
           href: 'https://blog.yunyi.beiyan.us/intro',
         },
-        { rel: 'self', type: 'application/activity+json', href: 'https://blog.yunyi.beiyan.us' },
+        {
+          rel: 'self',
+          type: 'application/activity+json',
+          href: 'https://blog.yunyi.beiyan.us/api/activitypub/actor',
+        },
         // {
         //   rel: 'http://ostatus.org/schema/1.0/subscribe',
         //   template: '',

@@ -17,5 +17,6 @@
       "@assets/*": ["src/assets/*"]
     }
   },
-  "include": ["src/**/*.astro", "src/**/*.ts", "src/**/*.tsx", "uno.config.ts", "astro.config.ts"]
+  "include": ["src/**/*.astro", "src/**/*.ts", "src/**/*.tsx", "uno.config.ts", "astro.config.ts"],
+  "references": [{ "path": "functions/tsconfig.json" }]
 }
