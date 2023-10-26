@@ -30,6 +30,7 @@ export const GET = () =>
       icon: [
         { type: 'Image', mediaType: 'image/png', url: 'https://blog.yunyi.beiyan.us/头像方.png' },
       ],
+      manuallyApprovesFollowers: false,
       discoverable: true,
       indexable: true,
       published: '2018-05-31T00:00:00Z',
