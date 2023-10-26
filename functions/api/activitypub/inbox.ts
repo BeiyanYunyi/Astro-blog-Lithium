@@ -39,19 +39,19 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
   const db = new Kysely<Database>({ dialect: new D1Dialect({ database: ctx.env.ap }) });
   // await db.insertInto('follower').values({ actorId: '114514', inbox: '1919810' }).execute();
 
-  try {
-    const body: AP.Follow | AP.Undo = await ctx.request.json();
-    if (typeof body.type !== 'string') throw new Error('Not Implemented');
-    if (!['Follow', 'Undo'].includes(body.type)) throw new Error('Not Implemented');
-    switch (body.type) {
-      case 'Follow':
-        return await handleFollow(body as AP.Follow, db);
-      // case 'Undo':
-      //   return await handleUnfollow(body as AP.Undo);
-      default:
-        throw new Error('Not Implemented');
-    }
-  } catch (e) {
-    return new Response('Bad Request', { status: 400 });
+  // try {
+  const body: AP.Follow | AP.Undo = await ctx.request.json();
+  if (typeof body.type !== 'string') throw new Error('Not Implemented');
+  if (!['Follow', 'Undo'].includes(body.type)) throw new Error('Not Implemented');
+  switch (body.type) {
+    case 'Follow':
+      return handleFollow(body as AP.Follow, db);
+    // case 'Undo':
+    //   return await handleUnfollow(body as AP.Undo);
+    default:
+      throw new Error('Not Implemented');
   }
+  // } catch (e) {
+  //   return new Response('Bad Request', { status: 400 });
+  // }
 };
