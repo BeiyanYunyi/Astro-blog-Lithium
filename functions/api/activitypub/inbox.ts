@@ -22,7 +22,9 @@ const handleFollow = async (body: AP.Follow, db: Kysely<Database>) => {
   let aid = '';
   if (typeof body.actor === 'string') aid = body.actor;
   if (typeof body.actor === 'object') aid = (body.actor as unknown as { id: string }).id;
-  const info: AP.Actor = await (await fetch(aid)).json();
+  const info: AP.Actor = await (
+    await fetch(aid, { headers: { Accept: 'application/activity+json' } })
+  ).json();
   await db
     .insertInto('follower')
     .values({ actorId: aid, inbox: info.inbox as unknown as string })
