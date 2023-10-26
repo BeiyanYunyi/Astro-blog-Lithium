@@ -18,7 +18,7 @@ interface Env {
 }
 
 const handleFollow = async (body: AP.Follow, db: Kysely<Database>) => {
-  if (Array.isArray(body.actor)) throw new Error('');
+  if (Array.isArray(body.actor)) throw new Error('Not Implemented');
   let aid = '';
   if (typeof body.actor === 'string') aid = body.actor;
   if (typeof body.actor === 'object') aid = (body.actor as unknown as { id: string }).id;
@@ -35,7 +35,14 @@ const handleFollow = async (body: AP.Follow, db: Kysely<Database>) => {
   return new Response('Ok');
 };
 
-const handleUnfollow = async (body: AP.Undo) => {};
+const handleUnfollow = async (body: AP.Undo, db: Kysely<Database>) => {
+  if ((body.object as { type: string })?.type !== 'Follow') throw new Error('Not Implemented');
+  let aid = '';
+  if (typeof body.actor === 'string') aid = body.actor;
+  if (typeof body.actor === 'object') aid = (body.actor as unknown as { id: string }).id;
+  await db.deleteFrom('follower').where('actorId', '=', aid).execute();
+  return new Response('Ok');
+};
 
 export const onRequestPost: PagesFunction<Env> = async (ctx) => {
   const db = new Kysely<Database>({ dialect: new D1Dialect({ database: ctx.env.ap }) });
@@ -48,8 +55,8 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
   switch (body.type) {
     case 'Follow':
       return handleFollow(body as AP.Follow, db);
-    // case 'Undo':
-    //   return await handleUnfollow(body as AP.Undo);
+    case 'Undo':
+      return handleUnfollow(body as AP.Undo, db);
     default:
       throw new Error('Not Implemented');
   }
