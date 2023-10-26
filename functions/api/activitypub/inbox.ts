@@ -1,21 +1,8 @@
+/* eslint-disable import/prefer-default-export */
 import type { AP } from 'activitypub-core-types';
 import { Kysely } from 'kysely';
 import { D1Dialect } from 'kysely-d1';
-
-interface FollowerTable {
-  actorId: string;
-  inbox: string;
-}
-
-interface Database {
-  follower: FollowerTable;
-}
-
-/* eslint-disable import/prefer-default-export */
-
-interface Env {
-  ap: D1Database;
-}
+import type { Database, Env } from './types';
 
 const handleFollow = async (body: AP.Follow, db: Kysely<Database>) => {
   if (Array.isArray(body.actor)) throw new Error('Not Implemented');
