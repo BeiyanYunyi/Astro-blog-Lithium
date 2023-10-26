@@ -1,9 +1,13 @@
 {
-  "extends": "../tsconfig.json",
+  // "extends": "../tsconfig.json",
   "compilerOptions": {
+    "composite": true,
     "target": "esnext",
     "module": "esnext",
+    "moduleResolution": "Bundler",
     "lib": ["esnext"],
-    "types": ["@cloudflare/workers-types", "activitypub-core-types"]
-  }
+    "types": ["@cloudflare/workers-types", "activitypub-core-types"],
+    "rootDir": "./"
+  },
+  "include": ["./**/*.ts"],
 }

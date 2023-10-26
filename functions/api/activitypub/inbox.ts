@@ -19,6 +19,24 @@ const handleFollow = async (body: AP.Follow, db: Kysely<Database>) => {
       oc.column('actorId').doUpdateSet({ inbox: info.inbox as unknown as string }),
     )
     .execute();
+  await fetch(info.inbox as unknown as string, {
+    method: 'post',
+    headers: { 'Content-Type': 'application/activity+json', Accept: 'application/activity+json' },
+    body: JSON.stringify({
+      '@context': 'https://www.w3.org/ns/activitystreams',
+      id: `https://blog.yunyi.beiyan.us/api/activitypub/accepts/follows/${Math.floor(
+        Math.random() * 10000,
+      )}`,
+      type: 'Accept',
+      actor: 'https://blog.yunyi.beiyan.us/api/activitypub/actor',
+      object: {
+        id: body.id,
+        type: 'Follow',
+        actor: aid,
+        object: 'https://blog.yunyi.beiyan.us/api/activitypub/actor',
+      },
+    }),
+  });
   return new Response('Ok');
 };
 
