@@ -37,8 +37,8 @@ export const GET = () =>
         id: 'https://blog.yunyi.beiyan.us/api/activitypub/actor#main-key',
         owner: 'https://blog.yunyi.beiyan.us/api/activitypub/actor',
         publicKeyPem: `-----BEGIN PUBLIC KEY-----
-        MCowBQYDK2VwAyEAK32mZ6NHWvErlVDNipED0uv0WoxpHvcL2OWCQ/mCLBw=
-        -----END PUBLIC KEY-----`,
+MCowBQYDK2VwAyEAK32mZ6NHWvErlVDNipED0uv0WoxpHvcL2OWCQ/mCLBw=
+-----END PUBLIC KEY-----`,
       },
     }),
     { headers: { 'Content-Type': 'application/activity+json' } },
