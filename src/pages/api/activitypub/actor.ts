@@ -12,7 +12,9 @@ export const GET = () =>
       inbox: 'https://blog.yunyi.beiyan.us/api/activitypub/inbox',
       outbox: 'https://blog.yunyi.beiyan.us/api/activitypub/outbox',
       followers: 'https://blog.yunyi.beiyan.us/api/activitypub/followers',
-      icon: ['https://blog.yunyi.beiyan.us/头像圆.png'],
+      icon: [
+        { type: 'Image', mediaType: 'image/png', url: 'https://blog.yunyi.beiyan.us/头像方.png' },
+      ],
       publicKey: {
         id: 'https://blog.yunyi.beiyan.us/api/activitypub/actor#main-key',
         owner: 'https://blog.yunyi.beiyan.us/api/activitypub/actor',
