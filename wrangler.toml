@@ -1,0 +1,7 @@
+name = "ap"
+compatibility_date = "2023-10-26"
+
+[[d1_databases]]
+binding = "ap" # i.e. available in your Worker on env.DB
+database_name = "ap"
+database_id = "007ff8f3-681b-47e1-9f6e-e9ded6295b43"
