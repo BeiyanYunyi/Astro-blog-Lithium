@@ -25,7 +25,7 @@ const handleFollow = async (body: AP.Follow, db: Kysely<Database>) => {
   const info: AP.Actor = await (await fetch(aid)).json();
   await db
     .insertInto('follower')
-    .values({ actorId: '114', inbox: info.inbox as unknown as string })
+    .values({ actorId: aid, inbox: info.inbox as unknown as string })
     .onConflict((oc) =>
       oc.column('actorId').doUpdateSet({ inbox: info.inbox as unknown as string }),
     )
