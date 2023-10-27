@@ -5,6 +5,7 @@ import { D1Dialect } from 'kysely-d1';
 import type { Database, Env } from './types';
 import { getPrivateKey } from '../../src/utils/getKey';
 import { signRequest } from '../../src/utils/http-signing';
+import { generateDigestHeader } from '../../src/utils/http-signing-cavage';
 
 const handleFollow = async (body: AP.Follow, db: Kysely<Database>, env: Env) => {
   if (Array.isArray(body.actor)) throw new Error('Not Implemented');
@@ -21,23 +22,29 @@ const handleFollow = async (body: AP.Follow, db: Kysely<Database>, env: Env) => 
       oc.column('actorId').doUpdateSet({ inbox: info.inbox as unknown as string }),
     )
     .execute();
+  const reqBody = JSON.stringify({
+    '@context': 'https://www.w3.org/ns/activitystreams',
+    id: `https://blog.yunyi.beiyan.us/api/activitypub/accepts/follows/${Math.floor(
+      Math.random() * 10000,
+    )}`,
+    type: 'Accept',
+    actor: 'https://blog.yunyi.beiyan.us/api/activitypub/actor',
+    object: {
+      id: body.id,
+      type: 'Follow',
+      actor: aid,
+      object: 'https://blog.yunyi.beiyan.us/api/activitypub/actor',
+    },
+  });
+  const digest = await generateDigestHeader(reqBody);
   const acceptReq = new Request(info.inbox as unknown as string, {
     method: 'post',
-    headers: { 'Content-Type': 'application/activity+json', Accept: 'application/activity+json' },
-    body: JSON.stringify({
-      '@context': 'https://www.w3.org/ns/activitystreams',
-      id: `https://blog.yunyi.beiyan.us/api/activitypub/accepts/follows/${Math.floor(
-        Math.random() * 10000,
-      )}`,
-      type: 'Accept',
-      actor: 'https://blog.yunyi.beiyan.us/api/activitypub/actor',
-      object: {
-        id: body.id,
-        type: 'Follow',
-        actor: aid,
-        object: 'https://blog.yunyi.beiyan.us/api/activitypub/actor',
-      },
-    }),
+    headers: {
+      'Content-Type': 'application/activity+json',
+      Accept: 'application/activity+json',
+      Digest: digest,
+    },
+    body: reqBody,
   });
   const privKey = await getPrivateKey(env);
   await signRequest(
