@@ -3,8 +3,10 @@ import type { AP } from 'activitypub-core-types';
 import { Kysely } from 'kysely';
 import { D1Dialect } from 'kysely-d1';
 import type { Database, Env } from './types';
+import { getPrivateKey } from '../../src/utils/getKey';
+import { signRequest } from '../../src/utils/http-signing';
 
-const handleFollow = async (body: AP.Follow, db: Kysely<Database>) => {
+const handleFollow = async (body: AP.Follow, db: Kysely<Database>, env: Env) => {
   if (Array.isArray(body.actor)) throw new Error('Not Implemented');
   let aid = '';
   if (typeof body.actor === 'string') aid = body.actor;
@@ -19,7 +21,7 @@ const handleFollow = async (body: AP.Follow, db: Kysely<Database>) => {
       oc.column('actorId').doUpdateSet({ inbox: info.inbox as unknown as string }),
     )
     .execute();
-  await fetch(info.inbox as unknown as string, {
+  const acceptReq = new Request(info.inbox as unknown as string, {
     method: 'post',
     headers: { 'Content-Type': 'application/activity+json', Accept: 'application/activity+json' },
     body: JSON.stringify({
@@ -37,6 +39,13 @@ const handleFollow = async (body: AP.Follow, db: Kysely<Database>) => {
       },
     }),
   });
+  const privKey = await getPrivateKey(env);
+  await signRequest(
+    acceptReq,
+    privKey,
+    new URL('https://blog.yunyi.beiyan.us/api/activitypub/actor'),
+  );
+  await fetch(acceptReq);
   return new Response('Ok');
 };
 
@@ -59,7 +68,7 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
   if (!['Follow', 'Undo'].includes(body.type)) throw new Error('Not Implemented');
   switch (body.type) {
     case 'Follow':
-      return handleFollow(body as AP.Follow, db);
+      return handleFollow(body as AP.Follow, db, ctx.env);
     case 'Undo':
       return handleUnfollow(body as AP.Undo, db);
     default:

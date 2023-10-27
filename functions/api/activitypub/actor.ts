@@ -1,6 +1,8 @@
 /* eslint-disable import/prefer-default-export */
 
-export const GET = () =>
+import { Env } from './types';
+
+export const onRequestGet: PagesFunction<Env> = (ctx) =>
   new Response(
     JSON.stringify({
       '@context': ['https://www.w3.org/ns/activitystreams', 'https://w3id.org/security/v1'],
@@ -37,9 +39,7 @@ export const GET = () =>
       publicKey: {
         id: 'https://blog.yunyi.beiyan.us/api/activitypub/actor#main-key',
         owner: 'https://blog.yunyi.beiyan.us/api/activitypub/actor',
-        publicKeyPem: `-----BEGIN PUBLIC KEY-----
-MCowBQYDK2VwAyEAK32mZ6NHWvErlVDNipED0uv0WoxpHvcL2OWCQ/mCLBw=
------END PUBLIC KEY-----`,
+        publicKeyPem: JSON.parse(ctx.env.PUBLIC_KEY),
       },
     }),
     { headers: { 'Content-Type': 'application/activity+json' } },
