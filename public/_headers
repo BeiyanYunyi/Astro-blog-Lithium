@@ -3,3 +3,6 @@
 
 /api/activitypub/actor
   Content-Type: application/activity+json
+
+/api/activitypub/note/*
+  Content-Type: application/activity+json
