@@ -22,9 +22,9 @@ export const GET: APIRoute = async ({ params }) => {
       type: 'Note',
       attributedTo: 'https://blog.yunyi.beiyan.us/api/activitypub/actor',
       cc: ['https://blog.yunyi.beiyan.us/api/activitypub/followers'],
-      content: `<p>发布了新的博文：<a href="https://blog.yunyi.beiyan.us${post.url}">${
+      content: `<p><a rel= href="https://blog.yunyi.beiyan.us${post.url}">${
         post.frontmatter.title
-      }</a><br>${post.frontmatter.description || ''}</p>`,
+      }</a></p><p>${post.frontmatter.description || ''}</p>`,
       published: new Date(post.frontmatter.date).toISOString(),
       to: ['https://www.w3.org/ns/activitystreams#Public'],
       url: `https://blog.yunyi.beiyan.us${post.url}`,
