@@ -6,3 +6,6 @@
 
 /api/activitypub/note/*
   Content-Type: application/activity+json
+
+/api/activitypub/outbox
+  Content-Type: application/activity+json
