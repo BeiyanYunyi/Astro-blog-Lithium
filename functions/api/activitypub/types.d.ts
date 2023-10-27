@@ -38,6 +38,25 @@ export interface Person extends Actor {
   };
 }
 
+export interface Link {
+  type: string;
+  href: URL;
+  name: string;
+}
+
+export interface Note extends APObject {
+  content: string;
+  attributedTo?: string;
+  summary?: string;
+  inReplyTo?: string;
+  replies?: string;
+  to: Array<string>;
+  attachment: Array<APObject>;
+  cc: Array<string>;
+  tag: Array<Link>;
+  spoiler_text?: string;
+}
+
 interface FollowerTable {
   id: number;
   actorId: string;
