@@ -2,10 +2,9 @@
 import type { AP } from 'activitypub-core-types';
 import { Kysely } from 'kysely';
 import { D1Dialect } from 'kysely-d1';
+import actorURL from '../../src/const/actorURL';
+import AppRequest from '../../src/utils/AppRequest';
 import type { Database, Env } from './types';
-import { getPrivateKey } from '../../src/utils/getKey';
-import { signRequest } from '../../src/utils/http-signing';
-import { generateDigestHeader } from '../../src/utils/http-signing-cavage';
 
 const handleFollow = async (body: AP.Follow, db: Kysely<Database>, env: Env) => {
   if (Array.isArray(body.actor)) throw new Error('Not Implemented');
@@ -28,30 +27,18 @@ const handleFollow = async (body: AP.Follow, db: Kysely<Database>, env: Env) => 
       Math.random() * 10000,
     )}`,
     type: 'Accept',
-    actor: 'https://blog.yunyi.beiyan.us/api/activitypub/actor',
+    actor: actorURL,
     object: {
       id: body.id,
       type: 'Follow',
       actor: aid,
-      object: 'https://blog.yunyi.beiyan.us/api/activitypub/actor',
+      object: actorURL,
     },
   });
-  const digest = await generateDigestHeader(reqBody);
-  const acceptReq = new Request(info.inbox as unknown as string, {
-    method: 'post',
-    headers: {
-      'Content-Type': 'application/activity+json',
-      Accept: 'application/activity+json',
-      Digest: digest,
-    },
+  const acceptReq = new AppRequest(info.inbox as unknown as string, {
     body: reqBody,
   });
-  const privKey = await getPrivateKey(env);
-  await signRequest(
-    acceptReq,
-    privKey,
-    new URL('https://blog.yunyi.beiyan.us/api/activitypub/actor'),
-  );
+  await acceptReq.digestAndSign(env);
   await fetch(acceptReq);
   return new Response('Ok');
 };

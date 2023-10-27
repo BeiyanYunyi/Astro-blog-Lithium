@@ -1,12 +1,13 @@
 /* eslint-disable import/prefer-default-export */
 
+import actorURL from '../../src/const/actorURL';
 import { Env } from './types';
 
 export const onRequestGet: PagesFunction<Env> = (ctx) =>
   new Response(
     JSON.stringify({
       '@context': ['https://www.w3.org/ns/activitystreams', 'https://w3id.org/security/v1'],
-      id: 'https://blog.yunyi.beiyan.us/api/activitypub/actor',
+      id: actorURL,
       type: 'Person',
       name: '北雁云依',
       preferredUsername: 'BeiyanYunyi',
@@ -37,8 +38,8 @@ export const onRequestGet: PagesFunction<Env> = (ctx) =>
       indexable: true,
       published: '2018-05-31T00:00:00Z',
       publicKey: {
-        id: 'https://blog.yunyi.beiyan.us/api/activitypub/actor#main-key',
-        owner: 'https://blog.yunyi.beiyan.us/api/activitypub/actor',
+        id: `${actorURL}#main-key`,
+        owner: actorURL,
         publicKeyPem: JSON.parse(ctx.env.PUBLIC_KEY),
       },
     }),
