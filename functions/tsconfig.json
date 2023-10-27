@@ -6,7 +6,7 @@
     "module": "esnext",
     "moduleResolution": "Bundler",
     "lib": ["esnext"],
-    "types": ["@cloudflare/workers-types", "activitypub-core-types"],
+    "types": ["@cloudflare/workers-types"],
     "rootDir": "./"
   },
   "include": ["./**/*.ts"],
