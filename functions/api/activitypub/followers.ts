@@ -9,7 +9,11 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
   // await db.insertInto('follower').values({ actorId: '114514', inbox: '1919810' }).execute();
 
   // try {
-  const followers = await db.selectFrom('follower').select('actorId').execute();
+  const followers = await db
+    .selectFrom('follower')
+    .select('actorId')
+    .orderBy('actorId desc')
+    .execute();
   const followersArray = followers.map((follower) => follower.actorId);
   return new Response(
     JSON.stringify({

@@ -39,6 +39,7 @@ export interface Person extends Actor {
 }
 
 interface FollowerTable {
+  id: number;
   actorId: string;
   inbox: string;
 }
