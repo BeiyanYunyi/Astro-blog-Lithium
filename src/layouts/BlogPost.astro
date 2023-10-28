@@ -10,6 +10,7 @@ export type Props = MDInstance & { image?: string };
 const {
   content: { title = SITE_TITLE, description = SITE_DESCRIPTION, heroImage, image },
   frontmatter,
+  url,
 } = Astro.props;
 
 const finalImage = image || heroImage;
@@ -36,6 +37,15 @@ const finalImage = image || heroImage;
       </header>
       <slot />
       <ArticleTags tag={frontmatter.tag} />
+      <hr />
+      <p>
+        复制如下链接到邦联宇宙搜索框以分享本文
+        <code class="break-all select-all"
+          >https://blog.yunyi.beiyan.us/api/activitypub/note/{
+            url?.substring(7).replaceAll('/', '_')
+          }</code
+        >
+      </p>
     </article>
     {
       frontmatter.toc && (
