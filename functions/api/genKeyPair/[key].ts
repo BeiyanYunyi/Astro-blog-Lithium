@@ -1,11 +1,11 @@
 /* eslint-disable import/prefer-default-export */
+import { Env } from '../../src/types';
 import {
   arrayBufferToBase64,
   generateUserKey,
   importPrivKey,
   unwrapPrivateKey,
 } from '../../src/utils/key-ops';
-import { Env } from '../activitypub/types';
 
 export const onRequestGet: PagesFunction<Env> = async (ctx) => {
   const res = await generateUserKey(ctx.params.key as string);

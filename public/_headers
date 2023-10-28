@@ -9,3 +9,6 @@
 
 /api/activitypub/outbox
   Content-Type: application/activity+json
+
+/api/activitypub/create/*
+  Content-Type: application/activity+json

@@ -7,7 +7,9 @@ const postToNote = (post: MDInstance) => ({
       HashTag: 'as:HashTag',
     },
   ],
-  id: `https://blog.yunyi.beiyan.us/api/activitypub/note${post.url}`,
+  id: `https://blog.yunyi.beiyan.us/api/activitypub/note/${post
+    .url!.substring(7)
+    .replaceAll('/', '_')}`,
   type: 'Note',
   attributedTo: 'https://blog.yunyi.beiyan.us/api/activitypub/actor',
   cc: ['https://blog.yunyi.beiyan.us/api/activitypub/followers'],

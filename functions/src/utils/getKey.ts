@@ -1,4 +1,4 @@
-import { Env } from '../../api/activitypub/types';
+import { Env } from '../types';
 import { importPrivKey, importPublicKey } from './key-ops';
 
 export const getPublicKey = async (env: Env) => importPublicKey(JSON.parse(env.PUBLIC_KEY));

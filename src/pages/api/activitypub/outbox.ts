@@ -1,6 +1,6 @@
 /* eslint-disable import/prefer-default-export */
 import getAllPosts from '@utils/getAllPosts';
-import postToNote from '@utils/postToNote';
+import postToCreate from '@utils/noteToCreate';
 import type { APIRoute } from 'astro';
 
 export const GET: APIRoute = async () => {
@@ -14,7 +14,7 @@ export const GET: APIRoute = async () => {
       id: 'https://blog.yunyi.beiyan.us/api/activitypub/outbox',
       type: 'OrderedCollection',
       totalItems: allPosts.length,
-      orderedItems: allPosts.map((post) => postToNote(post)),
+      orderedItems: allPosts.map((post) => postToCreate(post)),
     }),
   );
 };

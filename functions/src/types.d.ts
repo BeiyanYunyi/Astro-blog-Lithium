@@ -73,4 +73,5 @@ export interface Env {
   ap: D1Database;
   PUBLIC_KEY: string;
   PRIV_KEY: string;
+  ASSETS: Fetcher;
 }

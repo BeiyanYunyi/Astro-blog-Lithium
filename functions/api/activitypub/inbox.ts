@@ -3,8 +3,8 @@ import type { AP } from 'activitypub-core-types';
 import { Kysely } from 'kysely';
 import { D1Dialect } from 'kysely-d1';
 import actorURL from '../../src/const/actorURL';
+import type { Database, Env } from '../../src/types';
 import AppRequest from '../../src/utils/AppRequest';
-import type { Database, Env } from './types';
 
 const handleFollow = async (body: AP.Follow, db: Kysely<Database>, env: Env) => {
   if (Array.isArray(body.actor)) throw new Error('Not Implemented');

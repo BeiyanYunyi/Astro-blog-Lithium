@@ -1,5 +1,5 @@
-import type { Env } from '../../api/activitypub/types';
 import actorURL from '../const/actorURL';
+import type { Env } from '../types';
 import { getPrivateKey } from './getKey';
 import { signRequest } from './http-signing';
 import { generateDigestHeader } from './http-signing-cavage';

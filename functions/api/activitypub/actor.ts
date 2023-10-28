@@ -1,7 +1,7 @@
 /* eslint-disable import/prefer-default-export */
 
 import actorURL from '../../src/const/actorURL';
-import { Env } from './types';
+import { Env } from '../../src/types';
 
 export const onRequestGet: PagesFunction<Env> = (ctx) =>
   new Response(
