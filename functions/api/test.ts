@@ -19,7 +19,7 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
   for await (const req of reqs) {
     await req.digestAndSign(ctx.env);
     const es = await fetch(req);
-    console.log(await es.json());
+    console.log(await es.text(), es.status);
   }
   return new Response(JSON.stringify(json.orderedItems), {
     headers: { 'Content-Type': 'application/activity+json' },
