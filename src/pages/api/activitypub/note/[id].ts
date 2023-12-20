@@ -1,15 +1,16 @@
-import getAllPosts from '@utils/getAllPosts';
+import idToSlug from '@utils/idToSlug';
 import postToNote from '@utils/postToNote';
 import type { APIRoute } from 'astro';
+import { getCollection } from 'astro:content';
 
 export const getStaticPaths = async () => {
-  const posts = await getAllPosts();
-  return posts.map((post) => ({ params: { id: post.url!.substring(7).replaceAll('/', '_') } }));
+  const posts = await getCollection('posts');
+  return posts.map((post) => ({ params: { id: idToSlug(post.id) } }));
 };
 
 export const GET: APIRoute = async ({ params }) => {
-  const allPosts = await getAllPosts();
-  const post = allPosts.find((item) => item.url === `/posts/${params.id!.replaceAll('_', '/')}`)!;
+  const allPosts = await getCollection('posts');
+  const post = allPosts.find((item) => idToSlug(item.id) === params.id)!;
 
   return new Response(JSON.stringify(postToNote(post)));
 };

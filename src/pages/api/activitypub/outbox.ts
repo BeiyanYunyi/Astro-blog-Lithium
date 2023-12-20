@@ -1,11 +1,11 @@
 /* eslint-disable import/prefer-default-export */
-import getAllPosts from '@utils/getAllPosts';
 import postToCreate from '@utils/noteToCreate';
 import type { APIRoute } from 'astro';
+import { getCollection } from 'astro:content';
 
 export const GET: APIRoute = async () => {
-  const allPosts = (await getAllPosts()).sort(
-    (a, b) => new Date(b.frontmatter.date).getTime() - new Date(a.frontmatter.date).getTime(),
+  const allPosts = (await getCollection('posts')).sort(
+    (a, b) => b.data.date.getTime() - a.data.date.getTime(),
   );
 
   return new Response(

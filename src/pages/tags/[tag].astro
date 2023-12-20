@@ -2,26 +2,25 @@
 import PostList from '@components/PostList.astro';
 import BaseLayout from '@layouts/BaseLayout.astro';
 import { Icon } from 'astro-icon';
-import type MDInstance from '@app-types/MDInstance';
-import getAllPosts from '@utils/getAllPosts';
+import { getCollection, type CollectionEntry } from 'astro:content';
 
 export const getStaticPaths = async () => {
-  const allPosts = await getAllPosts();
+  const allPosts = await getCollection('posts');
   const tags = new Set<string>();
   allPosts.forEach((post) => {
-    if (!post.frontmatter.tag) return;
-    post.frontmatter.tag.forEach((t) => tags.add(t));
+    if (!post.data.tag) return;
+    post.data.tag.forEach((t) => tags.add(t));
   });
   const tagsAry = Array.from(tags);
   return tagsAry.map((tag) => ({ params: { tag } }));
 };
 
-const allPosts = await getAllPosts();
+const allPosts = await getCollection('posts');
 const { tag } = Astro.params;
-const posts: MDInstance[] = [];
+const posts: CollectionEntry<'posts'>[] = [];
 allPosts.forEach((post) => {
-  if (!post.frontmatter.tag) return;
-  if (post.frontmatter.tag.includes(tag || '')) {
+  if (!post.data.tag) return;
+  if (post.data.tag.includes(tag || '')) {
     posts.push(post);
   }
 });

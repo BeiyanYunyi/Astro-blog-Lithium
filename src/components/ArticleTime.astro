@@ -1,39 +1,28 @@
 ---
-import getWordCount from '@utils/getWordCount';
-import type MDInstance from '@app-types/MDInstance';
 export interface Props extends astroHTML.JSX.BaseHTMLAttributes {
-  post: MDInstance;
+  slug: string;
+  date: Date;
 }
-const { post, class: className } = Astro.props;
-let { words, time } = { words: 0, time: '' };
-if (post.frontmatter.rawContent) {
-  ({ words, time } = getWordCount(post.frontmatter.rawContent));
-} else if (!post.frontmatter.isMdx) {
-  ({ words, time } = getWordCount(post.rawContent()));
-}
+const { slug, date, class: className } = Astro.props;
 ---
 
 <div class:list={[className, 'text-xs', 'flex', 'text-neutral-500']}>
   <time>
     {
-      new Date(post.frontmatter.date).toLocaleDateString('zh-cn', {
+      date.toLocaleDateString('zh-cn', {
         year: 'numeric',
         month: 'short',
         day: 'numeric',
       })
     }
   </time>
-  <span class="ml-2">·</span>
-  <span class="ml-2">{words} 字</span>
-  <span class="ml-2">·</span>
-  <span class="ml-2">{time}</span>
   {
     // Disable pageview count in dev mode
     !process.env.DEV && (
       <>
         <span class="ml-2">·</span>
         <span class="ml-2">
-          <span class="waline-pageview-count" data-path={`${post.url}/`} /> 浏览
+          <span class="waline-pageview-count" data-path={`/posts/${slug}/`} /> 浏览
         </span>
       </>
     )

@@ -38,35 +38,9 @@ const injectDefaultLayout: Plugin<[], Root> = () => (tree, file) => {
     if (!astro.frontmatter.toc && fileToc) {
       frontmatterToSet.toc = fileToc;
     }
-    if (file.extname === '.mdx' && !astro.frontmatter.rawContent) {
-      let rawContent = '';
-      visit(tree, (node) => {
-        if ((node.type as 'mdxjsEsm' | string) !== 'mdxjsEsm' && 'value' in node) {
-          rawContent += (node as { value: string }).value;
-        }
-      });
-      frontmatterToSet.rawContent = rawContent;
-      frontmatterToSet.isMdx = true;
-    } else {
-      frontmatterToSet.isMdx = false;
+    if (!file.dirname?.includes('posts')) {
+      frontmatterToSet.layout = '@layouts/BlogPost.astro';
     }
-    const moreLabel = tree.children.findIndex(
-      (elem) => elem.type === 'html' && elem.value === '<!--more-->',
-    );
-    let val = '';
-    if (!astro.frontmatter.description) {
-      if (moreLabel !== -1) {
-        const targetNodes = tree.children.slice(0, moreLabel);
-        val = targetNodes.map((node) => getText(node)).join('');
-      } else {
-        val = tree.children
-          .slice(0, 1)
-          .map((node) => getText(node))
-          .join('');
-      }
-    }
-    frontmatterToSet.description = astro.frontmatter.description || val;
-    frontmatterToSet.layout = '@layouts/BlogPost.astro';
     frontmatterCache.set(file.basename!, frontmatterToSet);
     return frontmatterToSet;
   };

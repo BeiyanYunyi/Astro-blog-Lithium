@@ -2,6 +2,7 @@
 title: 用 VS Code + MSYS 搞定 Windows 上的 Fortran 开发
 date: 2022-03-02 20:07:00
 tag: [教程]
+description: 用 VS Code + MSYS 搞定 Windows 上的 Fortran 开发
 ---
 
 我是真不知道为什么现在还有人要用 Fortran，当听说要学 Fortran 时我也是震惊的。作为世界上第一门高级语言，我本以为它只能作为历史被我所知，即使是在科学计算领域。因为在《数字文明：物理学和计算机》中，郝柏林院士已经明确地说：

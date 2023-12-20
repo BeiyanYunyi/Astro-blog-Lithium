@@ -1,14 +1,14 @@
 ---
+import type { CollectionEntry } from 'astro:content';
 import PostCard from './PostCard.astro';
-import type MDInstance from '@app-types/MDInstance';
 
-export interface Props extends astroHTML.JSX.BaseHTMLAttributes {
-  posts: MDInstance[];
+export interface Props {
+  posts: CollectionEntry<'posts'>[];
 }
-const { posts, class: className } = Astro.props;
+const { posts } = Astro.props;
 ---
 
-<section class:list={[className]}>
+<section>
   <ul class="flex flex-col gap-2">
     {posts.map((post) => <PostCard post={post} />)}
   </ul>

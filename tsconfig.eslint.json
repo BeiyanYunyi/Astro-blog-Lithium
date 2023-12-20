@@ -8,6 +8,7 @@
   "include": [
     // whatever paths you intend to lint
     "src",
-    "functions"
+    "functions",
+    "uno.config.ts"
   ]
 }

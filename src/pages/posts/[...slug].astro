@@ -1,0 +1,27 @@
+---
+import BlogPost from '@components/BlogPost.astro';
+import idToSlug from '@utils/idToSlug';
+import type { GetStaticPaths } from 'astro';
+import { getCollection } from 'astro:content';
+
+export const getStaticPaths = (async () => {
+  const blogEntries = await getCollection('posts');
+  return blogEntries.map((entry) => ({
+    params: { slug: idToSlug(entry.id) },
+    props: { entry },
+  }));
+}) satisfies GetStaticPaths;
+
+const { entry } = Astro.props;
+const { Content, remarkPluginFrontmatter } = await entry.render();
+---
+
+<BlogPost
+  title={entry.data.title}
+  date={entry.data.date}
+  remarkPluginFrontmatter={remarkPluginFrontmatter}
+  slug={idToSlug(entry.id)}
+  description={entry.data.description}
+>
+  <Content />
+</BlogPost>

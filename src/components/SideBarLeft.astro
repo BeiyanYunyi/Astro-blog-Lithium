@@ -1,13 +1,13 @@
 ---
 import { SITE_TITLE } from '@config';
-import getAllPosts from '@utils/getAllPosts';
 import { Icon } from 'astro-icon';
+import { getCollection } from 'astro:content';
 
-const allPosts = await getAllPosts();
+const allPosts = await getCollection('posts');
 const tags = new Set<string>();
 allPosts.forEach((post) => {
-  if (!post.frontmatter.tag) return;
-  post.frontmatter.tag.forEach((t) => tags.add(t));
+  if (!post.data.tag) return;
+  post.data.tag.forEach((t) => tags.add(t));
 });
 const tagsLength = Array.from(tags).length;
 ---

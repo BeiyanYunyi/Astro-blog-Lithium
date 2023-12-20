@@ -1,12 +1,12 @@
 ---
 import BaseLayout from '@layouts/BaseLayout.astro';
-import getAllPosts from '@utils/getAllPosts';
+import { getCollection } from 'astro:content';
 
-const allPosts = await getAllPosts();
+const allPosts = await getCollection('posts');
 const tags = new Set<string>();
 allPosts.forEach((post) => {
-  if (!post.frontmatter.tag) return;
-  post.frontmatter.tag.forEach((t) => tags.add(t));
+  if (!post.data.tag) return;
+  post.data.tag.forEach((t) => tags.add(t));
 });
 const tagsAry = Array.from(tags);
 ---

@@ -1,0 +1,47 @@
+---
+import ArticleTags from '@components/ArticleTags.astro';
+import ArticleTime from '@components/ArticleTime.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+export type Props = {
+  remarkPluginFrontmatter: any;
+  title: string;
+  slug: string;
+  description: string;
+  tag?: string[];
+  date: Date;
+};
+
+const { title, slug, remarkPluginFrontmatter, description, tag, date } = Astro.props;
+---
+
+<BaseLayout title={title} description={description}>
+  <div class="flex">
+    <article class="prose prose-neutral min-w-0 dark:prose-invert max-w-none card p-6 flex-grow">
+      <header>
+        <slot name="before-article" />
+        <ArticleTime slug={slug} date={date} class="mb-2" />
+        <h1 class="mb-6">{title}</h1>
+      </header>
+      <slot />
+      <ArticleTags tag={tag} />
+      <hr />
+      <p>
+        复制如下链接到邦联宇宙搜索框以分享本文
+        <code class="break-all select-all"
+          >https://blog.yunyi.beiyan.us/api/activitypub/note/{slug.replaceAll('/', '_')}</code
+        >
+      </p>
+    </article>
+    {
+      'toc' in remarkPluginFrontmatter && (
+        <aside class="hidden lg:block mt-4 lg:(mt-0 ml-4) flex-shrink-0">
+          <nav
+            class="prose prose-neutral dark:prose-invert sticky top-20 text-sm card px-4 w-[15vw] max-h-[calc(100vh-6rem)] overflow-y-auto"
+            set:html={remarkPluginFrontmatter.toc}
+          />
+        </aside>
+      )
+    }
+  </div>
+</BaseLayout>

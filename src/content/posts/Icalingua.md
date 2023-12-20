@@ -2,6 +2,7 @@
 title: 从 Icalingua 项目谈 SQL 数据库结构的最佳实践
 date: 2021-10-07 14:30:00
 tag: [杂谈]
+description: 这最早是 Icalingua 项目下的一个 issue，因比较详细地叙述了一系列 bug 的诞生，具备一定的参考价值，故独立出来发布。
 ---
 
 这最早是 [Icalingua](https://github.com/Icalingua/Icalingua)（下简称`Il`）项目下的一个 issue，因比较详细地叙述了一系列 bug 的诞生，具备一定的参考价值，故独立出来发布。

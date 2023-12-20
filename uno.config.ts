@@ -35,6 +35,7 @@ export default defineConfig({
     fontFamily: {
       sans: [
         'Chinese Quotes',
+        // 'MiSans',
         'Inter var',
         'Inter',
         'ui-sans-serif',

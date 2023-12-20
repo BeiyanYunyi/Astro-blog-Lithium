@@ -1,18 +1,19 @@
 ---
-import type MDInstance from '@app-types/MDInstance';
+import type { CollectionEntry } from 'astro:content';
 import ArticleTime from './ArticleTime.astro';
+import idToSlug from '@utils/idToSlug';
 
 export interface Props {
-  post: MDInstance;
+  post: CollectionEntry<'posts'>;
 }
 const { post } = Astro.props;
-const isForward = post.frontmatter.tag?.includes('转载');
+const isForward = post.data.tag?.includes('转载');
 ---
 
 <li class="flex flex-col items-start p-6 card">
-  <ArticleTime post={post} class="mb-1" />
-  <a href={`${post.url}/`} class="text-[2rem] mb-6">
-    {post.frontmatter.title}
+  <ArticleTime slug={idToSlug(post.id)} date={post.data.date} class="mb-1" />
+  <a href={`/posts/${idToSlug(post.id)}/`} class="text-[2rem] mb-6">
+    {post.data.title}
     {
       isForward && (
         <span class="break-keep text-sm border-[#3273dc] border rounded-full text-[#3273dc] px-2 py-1 ml-2 v-mid">
@@ -21,5 +22,5 @@ const isForward = post.frontmatter.tag?.includes('转载');
       )
     }
   </a>
-  <div class="text-neutral-500">{post.frontmatter.description}</div>
+  <div class="text-neutral-500">{post.data.description}</div>
 </li>
