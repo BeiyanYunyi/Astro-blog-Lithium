@@ -26,12 +26,17 @@ const { title, slug, remarkPluginFrontmatter, description, tag, date } = Astro.p
       <slot />
       <ArticleTags tag={tag} />
       <hr />
-      <p>
-        复制如下链接到邦联宇宙搜索框以分享本文
-        <code class="break-all select-all"
-          >https://blog.yunyi.beiyan.us/api/activitypub/note/{slug.replaceAll('/', '_')}</code
-        >
-      </p>
+      <details>
+        <summary>分享</summary>
+        <p>
+          复制此页面地址到邦联宇宙搜索框以在邦联宇宙分享本文：<code
+            id="page_address"
+            class="break-all select-all"
+            >https://blog.yunyi.beiyan.us/posts/{slug.replaceAll('/', '_')}
+            <!-- https://blog.yunyi.beiyan.us/api/activitypub/note/{slug.replaceAll('/', '_')} -->
+          </code>
+        </p>
+      </details>
     </article>
     {
       'toc' in remarkPluginFrontmatter && (
@@ -44,4 +49,8 @@ const { title, slug, remarkPluginFrontmatter, description, tag, date } = Astro.p
       )
     }
   </div>
+  <script>
+    const pageAddress = document.getElementById('page_address');
+    if (pageAddress) pageAddress.innerHTML = location.href;
+  </script>
 </BaseLayout>
