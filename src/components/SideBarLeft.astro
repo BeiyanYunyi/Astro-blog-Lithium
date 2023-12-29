@@ -13,45 +13,69 @@ const tagsLength = Array.from(tags).length;
 ---
 
 <div class="flex-shrink-0 mx-auto w-full lg:w-fit">
-  <address class="sticky top-20 p-6 card">
-    <div class="mb-6 flex flex-col items-center">
-      <img
-        src="/头像圆.webp"
-        class="object-cover h-32 w-32 mb-2"
-        height="128"
-        width="128"
-        alt="My avatar"
-      />
-      <p class="text-2xl">{SITE_TITLE}</p>
-      <p class="text-base mb-6">把信拿去吧，你可以假戏真做</p>
-      <div class="flex justify-around w-full mb-6">
-        <a href="/" class="flex flex-col items-center">
-          <p class="text-[11px]">POSTS</p>
-          <p>{allPosts.length}</p>
-        </a>
-        <a href="/tags" class="flex flex-col items-center">
-          <p class="text-[11px]">TAGS</p>
-          <p>{tagsLength}</p>
-        </a>
-      </div>
-      <a
-        href="/rss.xml"
-        class="bg-[#3273dc] hover:bg-[#276cda] w-full flex justify-center items-center p-2 rounded-full text-neutral-50 hover:text-neutral-50 dark:hover:text-neutral-50"
-      >
-        <Icon name="fa:rss" size={16} class="inline-block mr-2" />
-         RSS
+  <address class="sticky top-20 p-6 card flex flex-col items-center">
+    <img
+      src="/头像圆.webp"
+      class="object-cover h-32 w-32 mb-2"
+      height="128"
+      width="128"
+      alt="My avatar"
+    />
+    <p class="text-2xl">{SITE_TITLE}</p>
+    <p class="text-base mb-6">把信拿去吧，你可以假戏真做</p>
+    <div class="flex justify-around w-full mb-6">
+      <a href="/" class="flex flex-col items-center">
+        <p class="text-[11px]">POSTS</p>
+        <p>{allPosts.length}</p>
       </a>
-      <div class="mt-4 flex flex-wrap items-center">
-        <a rel="me" href="https://github.com/BeiyanYunyi/Astro-blog-Lithium" target="_blank">
-          <Icon name="fa:github" size={24} class="inline-block" />
-        </a>
-        <a rel="me" href="https://twitter.com/Beiyan_Yunyi" target="_blank" class="ml-4">
-          <Icon name="fa:twitter" size={24} class="inline-block" />
-        </a>
-        <a rel="me" href="https://o3o.ca/@21018365486" target="_blank" class="ml-4">
-          <Icon name="mdi:mastodon" size={24} class="inline-block" />
-        </a>
-      </div>
+      <a href="/tags" class="flex flex-col items-center">
+        <p class="text-[11px]">TAGS</p>
+        <p>{tagsLength}</p>
+      </a>
+    </div>
+    <form
+      class="flex w-full items-center focus-within:(outline-(2 blue-600 solid) text-blue-500 dark:text-blue-400) rounded-full outline-(dashed 1 blue-500) text-neutral-600 dark:text-neutral-200"
+      id="search"
+    >
+      <Icon name="mdi:magnify" size={24} class="flex-shrink-0 mx-2" />
+      <input
+        class="w-0 flex-grow flex-shrink bg-transparent p-2 rounded-md focus-visible:outline-none text-neutral-600 dark:text-neutral-200"
+      />
+    </form>
+    <a
+      href="/rss.xml"
+      class="mt-4 bg-blue-600 hover:bg-blue-700 w-full flex justify-center items-center p-2 rounded-full text-neutral-50 hover:text-neutral-50 dark:hover:text-neutral-50"
+    >
+      <Icon name="fa:rss" size={16} class="inline-block mr-2" />
+       RSS
+    </a>
+    <div class="mt-4 flex flex-wrap items-center">
+      <a rel="me" href="https://github.com/BeiyanYunyi/Astro-blog-Lithium" target="_blank">
+        <Icon name="fa:github" size={24} class="inline-block" />
+      </a>
+      <a rel="me" href="https://twitter.com/Beiyan_Yunyi" target="_blank" class="ml-4">
+        <Icon name="fa:twitter" size={24} class="inline-block" />
+      </a>
+      <a rel="me" href="https://o3o.ca/@21018365486" target="_blank" class="ml-4">
+        <Icon name="mdi:mastodon" size={24} class="inline-block" />
+      </a>
     </div>
   </address>
 </div>
+<script>
+  (() => {
+    const search = document.getElementById('search');
+    if (!search) return;
+    const input = search.querySelector('input');
+    if (!input) return;
+    search.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const value = input.value;
+      if (!value) return;
+      window.location.href = `https://www.google.com/search?q=site:${location.host}+${value.replace(
+        /\s+/g,
+        '+',
+      )}`;
+    });
+  })();
+</script>
