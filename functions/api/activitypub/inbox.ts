@@ -59,14 +59,16 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
   // try {
   const body: AP.Follow | AP.Undo = await ctx.request.json();
   if (typeof body.type !== 'string') throw new Error('Not Implemented');
-  if (!['Follow', 'Undo'].includes(body.type)) throw new Error(`Not Implemented: ${body.type}`);
+  if (!['Follow', 'Undo'].includes(body.type))
+    console.error(new Error(`Not Implemented: ${body.type}`));
   switch (body.type) {
     case 'Follow':
       return handleFollow(body as AP.Follow, db, ctx.env);
     case 'Undo':
       return handleUnfollow(body as AP.Undo, db);
     default:
-      throw new Error(`Not Implemented: ${body.type}`);
+      console.error(new Error(`Not Implemented: ${body.type}`));
+      return new Response('Ok');
   }
   // } catch (e) {
   //   return new Response('Bad Request', { status: 400 });
