@@ -1,6 +1,5 @@
 ---
 import { SITE_TITLE } from '@config';
-import { Icon } from 'astro-icon';
 import { getCollection } from 'astro:content';
 
 const allPosts = await getCollection('posts');
@@ -37,7 +36,7 @@ const tagsLength = Array.from(tags).length;
       class="flex w-full items-center focus-within:(outline-(2 blue-600 solid) text-blue-500 dark:text-blue-400) rounded-full outline-(dashed 1 blue-500) text-neutral-600 dark:text-neutral-200"
       id="search"
     >
-      <Icon name="mdi:magnify" size={24} class="flex-shrink-0 mx-2" />
+      <span class="flex-shrink-0 mx-2 i-ion:search text-6" />
       <input
         class="w-0 flex-grow flex-shrink bg-transparent p-2 rounded-md focus-visible:outline-none text-neutral-600 dark:text-neutral-200"
       />
@@ -46,18 +45,18 @@ const tagsLength = Array.from(tags).length;
       href="/rss.xml"
       class="mt-4 bg-blue-600 hover:bg-blue-700 w-full flex justify-center items-center p-2 rounded-full text-neutral-50 hover:text-neutral-50 dark:hover:text-neutral-50"
     >
-      <Icon name="fa:rss" size={16} class="inline-block mr-2" />
+      <span class="inline-block mr-2 i-ion:logo-rss" />
        RSS
     </a>
     <div class="mt-4 flex flex-wrap items-center">
       <a rel="me" href="https://github.com/BeiyanYunyi/Astro-blog-Lithium" target="_blank">
-        <Icon name="fa:github" size={24} class="inline-block" />
+        <span class="inline-block i-ion:logo-github text-6" />
       </a>
       <a rel="me" href="https://twitter.com/Beiyan_Yunyi" target="_blank" class="ml-4">
-        <Icon name="fa:twitter" size={24} class="inline-block" />
+        <span class="inline-block i-ion:logo-twitter text-6" />
       </a>
       <a rel="me" href="https://o3o.ca/@21018365486" target="_blank" class="ml-4">
-        <Icon name="mdi:mastodon" size={24} class="inline-block" />
+        <span class="inline-block i-ion:logo-mastodon text-6" />
       </a>
     </div>
   </address>

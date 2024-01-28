@@ -1,7 +1,6 @@
 ---
 import PostList from '@components/PostList.astro';
 import BaseLayout from '@layouts/BaseLayout.astro';
-import { Icon } from 'astro-icon';
 import { getCollection, type CollectionEntry } from 'astro:content';
 
 export const getStaticPaths = async () => {
@@ -29,9 +28,7 @@ allPosts.forEach((post) => {
 <BaseLayout>
   <div class="flex-grow">
     <div class="flex items-center p-6 card mb-2">
-      <a class="mr-4" href="/tags">
-        <Icon name="mdi:tag-multiple-outline" size={24} />
-      </a>
+      <a class="mr-4 inline i-ion:pricetags-outline text-6" href="/tags" />
       <h1 class="text-3xl">{tag}</h1>
     </div>
     <PostList posts={posts} />

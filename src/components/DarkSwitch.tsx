@@ -1,4 +1,4 @@
-import { Component, createEffect, createRoot, createSignal, Show } from 'solid-js';
+import { type Component, createEffect, createRoot, createSignal, Show } from 'solid-js';
 
 const createDarkMode = () => {
   const [dark, setDark] = createSignal(window.matchMedia('(prefers-color-scheme: dark)').matches);
