@@ -8,7 +8,6 @@ tag:
 ---
 
 import ShowCase from '@components/ShowCase.tsx';
-import { Icon } from 'astro-icon';
 
 我在 2019 年开始用 Hexo 写博客。在那之前我用的是 jekyll 和 WordPress。出于身份隔离的需要，我有好几个博客，这个博客的域名是 `stblog.penclub.club`，其中的 `st` 是 `static` 的意思，与 `dynamic` 相对应。那时我没有接触前端技术（事实上还不会编程），在我当时的概念里，网页分为动态网页和静态网页，动态网页需要一个能运行 PHP 之类东西的服务端，静态网页则只需要一个静态文件服务器。
 
@@ -36,7 +35,7 @@ import { Icon } from 'astro-icon';
 
 <ShowCase client:load />
 
-再来插一个图标<Icon name="fa:github" size={16} class="inline-block" />，[Astro 的图标插件](https://github.com/natemoo-re/astro-icon) 支持引入 [Iconify](https://iconify.design/) 上的任何图标，其中当然包括 Hexo 博客主题常用的 Font Awesome。但使用 `astro-icon` 引入的图标是**按需加载**并以 svg 的形式（而非字体）内联的，没用到的图标**永远**不会被加载。
+再来插一个图标<span class="i-ion:logo-github inline-block" />，[Astro 的图标插件](https://github.com/natemoo-re/astro-icon) 和 [UnoCSS Preset Icons](https://unocss.dev/presets/icons) 均支持引入 [Iconify](https://iconify.design/) 上的任何图标，其中当然包括 Hexo 博客主题常用的 Font Awesome。但使用它们引入的图标是**按需加载**并以 svg 的形式（而非字体）内联的，没用到的图标**永远**不会被加载。
 
 现在我们可以说，除了生态不如 Hexo，Astro 就是 Hexo 的完全上位替代——体积更小、功能更多、开发更便捷。只是因为刚刚出现，Astro 的生态比 VuePress2 的还差。幸好该有的东西全都有，而且很大程度上它能复用已有的现代前端技术成果（比如 [tailwindcss](https://tailwindcss.com) 和我正在使用的 [UnoCSS](https://github.com/unocss/unocss)）。于是我在上面从零开始写了一个自己的博客主题。我对自己的审美能力有些自知之明，知道自己是开发者而非设计师，因此我照抄了 `hexo-theme-icarus` 的页面布局。在总共约几个小时的 coding 以后，我实现了我想要的大部分功能（RSS、SEO、友链和评论系统），然后把自己的博客换成了它，从而实现了总共只有 35k 的首页加载体积。即使在博文页面（40k），加上 katex 的 23k（css），和 182k 的 waline 评论系统（css+js）后，体积也依然比 hexo-theme-volantis 更低。比较可惜的地方是，在迁移过程中，我发现老博客有些地方破坏了我的身份隔离，因此我重置了历史记录，并且 `push -f` 了一遍。如果不是这样的话，我将能用 commit history 展示自己从 Hexo 换成 VuePress2 再换成 Astro 的全过程。
 
