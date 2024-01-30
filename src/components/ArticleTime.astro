@@ -16,6 +16,10 @@ const { slug, date, class: className } = Astro.props;
       })
     }
   </time>
+  <span class="ml-2 hidden wordcount">·</span>
+  <span class="ml-2 hidden wordcount" id="wordCount"></span>
+  <span class="ml-2 hidden wordcount">·</span>
+  <span class="ml-2 hidden wordcount" id="approxTime"></span>
   {
     // Disable pageview count in dev mode
     !process.env.DEV && (

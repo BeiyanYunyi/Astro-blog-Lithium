@@ -7,7 +7,7 @@ dayjs.extend(duration);
 dayjs.extend(relativeTime);
 /** Modified from [hexo-theme-icarus](https://github.com/ppoffice/hexo-theme-icarus/blob/master/layout/common/article.jsx)
  *
- * - Change moment.js to datefns
+ * - Change moment.js to dayjs
  * - Pure Function
  */
 const getWordCount = (content: string) => {

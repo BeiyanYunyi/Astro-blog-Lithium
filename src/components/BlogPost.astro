@@ -17,27 +17,31 @@ const { title, slug, remarkPluginFrontmatter, description, tag, date } = Astro.p
 
 <BaseLayout title={title} description={description}>
   <div class="flex">
-    <article class="prose prose-neutral min-w-0 dark:prose-invert max-w-none card p-6 flex-grow">
-      <header>
-        <slot name="before-article" />
-        <ArticleTime slug={slug} date={date} class="mb-2" />
-        <h1 class="mb-6">{title}</h1>
-      </header>
-      <slot />
-      <ArticleTags tag={tag} />
-      <hr />
-      <details>
-        <summary>分享</summary>
-        <p>
-          复制此页面地址到邦联宇宙搜索框以在邦联宇宙分享本文：<code
-            id="page_address"
-            class="break-all select-all"
-            >https://blog.yunyi.beiyan.us/posts/{slug.replaceAll('/', '_')}
-            <!-- https://blog.yunyi.beiyan.us/api/activitypub/note/{slug.replaceAll('/', '_')} -->
-          </code>
-        </p>
-      </details>
-    </article>
+    <div class="flex-grow max-w-none">
+      <article class="prose prose-neutral min-w-0 dark:prose-invert max-w-none card p-6">
+        <header>
+          <slot name="before-article" />
+          <ArticleTime slug={slug} date={date} class="mb-2" />
+          <h1 class="mb-6">{title}</h1>
+          <ArticleTags tag={tag} />
+        </header>
+        <slot />
+        <ArticleTags tag={tag} />
+      </article>
+      <div class="prose prose-neutral min-w-0 dark:prose-invert max-w-none">
+        <details class="rounded-md card">
+          <summary>分享</summary>
+          <p>
+            复制此页面地址到邦联宇宙搜索框以在邦联宇宙分享本文：<code
+              id="page_address"
+              class="break-all select-all"
+              >https://blog.yunyi.beiyan.us/posts/{slug.replaceAll('/', '_')}
+              <!-- https://blog.yunyi.beiyan.us/api/activitypub/note/{slug.replaceAll('/', '_')} -->
+            </code>
+          </p>
+        </details>
+      </div>
+    </div>
     {
       'toc' in remarkPluginFrontmatter && (
         <aside class="hidden lg:block mt-4 lg:(mt-0 ml-4) flex-shrink-0" id="toc">
@@ -50,6 +54,14 @@ const { title, slug, remarkPluginFrontmatter, description, tag, date } = Astro.p
     }
   </div>
   <script>
+    import getWordCount from '@utils/getWordCount';
+    const content = document.querySelector('article.prose')?.textContent || '';
+    const wordCount = getWordCount(content);
+    document.getElementById('wordCount')!.innerHTML = `${wordCount.words} 字`;
+    document.getElementById('approxTime')!.innerHTML = wordCount.time;
+    document.querySelectorAll('span.wordcount').forEach((e) => {
+      e.classList.remove('hidden');
+    });
     const pageAddress = document.getElementById('page_address');
     if (pageAddress) pageAddress.innerHTML = location.href;
   </script>
