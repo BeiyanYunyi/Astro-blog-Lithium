@@ -231,4 +231,4 @@ sbctl enroll-keys -mcft
 
 ---
 
-[^1]: 根据[这篇文章](https://mp.weixin.qq.com/s/lLTR0XI6br46lEyaDCzfXA)（[备份链接](http://web.archive.org/web/20230713193954/https://mp.weixin.qq.com/s/lLTR0XI6br46lEyaDCzfXA)），把密钥放 TPM 而不配置 Secure Boot 的结果是被装上恶意硬件进行 DMA 攻击。当然配置了 Secure Boot 也是有洞的，已知特定版本雷电™接口具有可被利用的漏洞。如果不想 TPM 变成突破口，就**不要**把密钥丢 TPM 里。
+[^1]: 可以参考[这篇文章](https://mp.weixin.qq.com/s/lLTR0XI6br46lEyaDCzfXA)（[备份链接](http://web.archive.org/web/20230713193954/https://mp.weixin.qq.com/s/lLTR0XI6br46lEyaDCzfXA)）和[这篇文章](https://blog.men.ci/luks-with-tpm2-secure-boot/#%E6%94%BB%E5%87%BB%E9%9D%A2)（[备份链接](https://archive.is/3qAJu#%E6%94%BB%E5%87%BB%E9%9D%A2)）。如果不想 TPM 变成突破口，就**不要**把密钥丢 TPM 里。
