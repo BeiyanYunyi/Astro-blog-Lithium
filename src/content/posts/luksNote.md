@@ -1,5 +1,5 @@
 ---
-title: LUKS2 YubiKey 手稿
+title: LUKS2 YubiKey 全盘加密手稿
 date: 2024-02-10 06:37:55
 tag:
   - 教程
