@@ -3,9 +3,10 @@
     "eslint:recommended",
     "prettier",
     "plugin:astro/recommended",
-    "plugin:astro/jsx-a11y-recommended"
+    "plugin:astro/jsx-a11y-recommended",
+    "plugin:mdx/recommended"
   ],
-  "plugins": ["astro", "@typescript-eslint", "prettier"],
+  "plugins": ["astro", "@typescript-eslint", "prettier", "mdx"],
   "rules": {
     "prettier/prettier": "error"
   },
