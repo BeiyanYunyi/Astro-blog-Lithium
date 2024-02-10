@@ -17,8 +17,8 @@ const { title, slug, remarkPluginFrontmatter, description, tag, date } = Astro.p
 
 <BaseLayout title={title} description={description}>
   <div class="flex">
-    <div class="flex-grow max-w-none">
-      <article class="prose prose-neutral min-w-0 dark:prose-invert max-w-none card p-6">
+    <div class="flex-grow min-w-0">
+      <article class="prose prose-neutral dark:prose-invert max-w-full card p-6">
         <header>
           <slot name="before-article" />
           <ArticleTime slug={slug} date={date} class="mb-2" />
