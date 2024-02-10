@@ -8,7 +8,7 @@ description: 让我看看是谁除夕了还在重装系统：archlinux, LUKS2, U
 
 ## 前言
 
-自从[发现自己随时可能被中华*人民*共和国*人民*警察们搜查](/posts/CornerOfTheWorld)以来，我的安全偏执就复发了。我决定用 LUKS2 和 YubiKey 武装我的电脑。可能的话，我还要把这枚 YubiKey 改造得易于摧毁。
+自从[发现自己随时可能被中华*人民*共和国*人民*警察们搜查](/posts/CornerOfTheWorld)以来，我的加密偏执就复发了。我决定用 LUKS2 和 YubiKey 武装我的电脑。可能的话，我还要把这枚 YubiKey 改造得易于摧毁。
 
 不过，配置环境起码要两天左右，我手头上的事太多了，[中间还有一个半月在医院度过](/posts/SurgeryNote)，因此迟迟没有动手。4 个月后，我终于有时间了。于是开干。
 
@@ -27,13 +27,15 @@ description: 让我看看是谁除夕了还在重装系统：archlinux, LUKS2, U
 
 本方案会使用 `linux-zen` 而非 `linux` 内核。
 
-本方案不会使用 `TPM`。
+本方案不会使用 `TPM`。`TPM` 配置不当可能导致你的加密功亏一篑。[^1]如确有需要，可参考“准备工作”一节中的第二篇文章。
 
-本文是手稿，不是操作说明。本文中的命令仅作示意，实际操作过程中可能会有所不同。
+尽管我会加入很多可能不必要的细节，<del>但这只是因为我的神经多样性，</del>本文的性质仍然是笔记 / 手稿，不是操作说明。本文中的命令仅作示意，实际操作过程中可能会有所不同。
 
-本文作于 2024 年 2 月 10 日。你阅读这篇文章时，内容可能已经过时。
+本文作于 2024 年 2 月 10 日。你阅读这篇文章时，内容可能已经过时。我并不具备足够的安全知识，本文的操作无法确保安全。
 
 ## 安装系统
+
+此时你的 Secure Boot 应该在关闭状态。我觉得不会有谁想在安装系统时开启 Secure Boot。
 
 首先，遵循安装指南，至[安装指南#建立硬盘分区](https://wiki.archlinuxcn.org/wiki/%E5%AE%89%E8%A3%85%E6%8C%87%E5%8D%97#%E5%BB%BA%E7%AB%8B%E7%A1%AC%E7%9B%98%E5%88%86%E5%8C%BA)为止。
 
@@ -42,7 +44,9 @@ lsblk
 cfdisk /dev/nvme0n1
 ```
 
-第一个分区分 1G 或者 0.5G，剩下的全分给第二个。不再分一个 Swap 分区的原因是当前 btrfs 已经支持 swapfile，并且我 RAM 充足。
+第一个分区会作为 EFI 分区，分 1G 或者 0.5G 即可，后续 UKI 会占用 ~100MB。
+
+剩下的空间全分给第二个分区，这将是你的加密分区。不再分一个 Swap 分区的原因是当前 btrfs 已经支持 swapfile，并且我 RAM 充足。
 
 ```bash
 mkfs.vfat -n EFI /dev/nvme0n1p1 # 假设这是第一个分区
@@ -55,6 +59,8 @@ cryptsetup luksFormat /dev/nvme0n1p2 # 假设这是第二个分区
 cryptsetup open /dev/nvme0n1p2 system
 mkfs.btrfs --label system /dev/mapper/system
 ```
+
+`cryptsetup luksFormat /dev/nvme0n1p2` 时，会提示你输入密码。这时可以设置一个安装时临时使用的密码，配置完 YubiKey 后再改。
 
 **临时**挂载 btrfs 根，创建 subvolume（子卷）：
 
@@ -81,14 +87,15 @@ mount --mkdir /dev/nvme0n1p1 /mnt/efi
 
 ```bash
 vim /etc/pacman.d/mirrorlist
+# 此处 -K 的含义是复制 keyring
 pacstrap -K /mnt base linux-zen linux-firmware intel-ucode btrfs-progs
 ```
 
 此后，遵循[安装指南#配置系统](https://wiki.archlinuxcn.org/wiki/%E5%AE%89%E8%A3%85%E6%8C%87%E5%8D%97#%E9%85%8D%E7%BD%AE%E7%B3%BB%E7%BB%9F)，对系统进行配置。配置好以后，别急着 `umount` 和重启。你需要配置引导。
 
 ```bash
+# 如果遵循前述步骤，此时你应该在 arch-chroot 环境中
 pacman -Syu networkmanager base-devel vim sbctl efibootmgr
-systemctl enable NetworkManager
 vim /etc/mkinitcpio.conf
 ```
 
@@ -98,11 +105,15 @@ vim /etc/mkinitcpio.conf
 HOOKS=(base udev autodetect modconf kms keyboard keymap consolefont block encrypt filesystems fsck)
 ```
 
-先不加入 `plymouth` 和 配置 `ykfde`（YubiKey），等引导成功后再加入。创建 `/etc/kernel/cmdline`，写入：
+先不加入 `plymouth` 和 配置 `ykfde`（YubiKey），等引导成功后再加入。
+
+创建 `/etc/kernel/cmdline`，写入：
 
 ```plaintext
 fbcon=nodefer rw rd.luks.allow-discards cryptdevice=/dev/nvme0n1p2:system bgrt_disable root=LABEL=system rootflags=subvol=@root,rw splash vt.global_cursor_default=0
 ```
+
+这将是你的内核参数，以后需要配置内核参数的话就改这里。`sbctl` 会自动配置好 `microcode`。安装 `intel-ucode` 或 `amd-ucode` 即可，无需额外在参数里加上。
 
 创建 `/etc/crypttab.initramfs`，写入：
 
@@ -110,13 +121,26 @@ fbcon=nodefer rw rd.luks.allow-discards cryptdevice=/dev/nvme0n1p2:system bgrt_d
 system /dev/nvme0n1p2 none timeout=180
 ```
 
+这一步是让 `initramfs` 启动时解密位于 `/dev/nvme0n1p2` 的 LUKS2 容器，并挂载到 `/dev/mapper/system`。
+
+创建或编辑 `/etc/vconsole.conf`：
+
+```plaintext
+KEYMAP=us
+FONT=lat2-16
+```
+
+这将能解决 `mkinitcpio` 时的警告。
+
 创建密钥并生成 Unified Kernel Image，加入引导：
 
 ```bash
 sbctl create-keys
 # 因为用的是 linux-zen 而非 linux，所以需要指定内核和 initramfs 文件名
 sbctl bundle -k /boot/vmlinuz-linux-zen -i /boot/intel-ucode.img -f /boot/initramfs-linux-zen.img -s /efi/main.efi
-sbctl sign-all -g
+# 想打 AMD 微码用这行，区别在 -i 和 -a 参数
+sbctl bundle -k /boot/vmlinuz-linux-zen -a /boot/amd-ucode.img -f /boot/initramfs-linux-zen.img -s /efi/main.efi
+mkinitcpio -P
 efibootmgr --disk /dev/nvme0n1 --part 1 --create --label "Arch Linux" --loader /efi/main.efi
 exit # 退出 chroot
 umount -R /mnt
@@ -138,9 +162,15 @@ nmtui
 timedatectl set-ntp true
 ```
 
-遵循 [Yubikey#Challenge-response_2](https://wiki.archlinux.org/title/YubiKey#Challenge-response_2) 配置 YubiKey（ykfde），可以配置为 1FA 或 2FA。过程中可以加入 Plymouth。
+## 配置 YubiKey
 
-可以通过 `cryptsetup luksChangeKey /dev/nvme0n1p2` 来修改密码，改个强一点的，最好你自己也记不住的，然后写在纸上（最好用遇水能洇开的墨水），放在安全但又随手可及的地方。
+按照[建议阅读](https://wiki.archlinuxcn.org/wiki/%E5%BB%BA%E8%AE%AE%E9%98%85%E8%AF%BB)，配置好多用户与桌面。
+
+遵循 [Yubikey#Challenge-response_2](https://wiki.archlinux.org/title/YubiKey#Challenge-response_2) 配置 YubiKey（`yubikey-full-disk-encryption`），可以配置为 1FA 或 2FA。
+
+重启系统，确认 YubiKey 配置成功。
+
+确定 YubiKey 可以运行后，记得通过 `cryptsetup luksChangeKey /dev/nvme0n1p2` 来修改此前临时设置的密码。改个强一点、最好你自己也记不住的，然后写在纸上（最好用遇水能洇开的墨水），放在安全但又随手可及的地方。
 
 可以用如下命令生成：
 
@@ -148,9 +178,57 @@ timedatectl set-ntp true
 openssl rand -base64 16
 ```
 
+## 配置 Plymouth
+
+想看 Plymouth 的话，此时也可以配置好。我的 Plymouth 在启动时会出现方块，原因是 `initramfs` 里没有字体，解决方法为在 `mkinitcpio` 时加入。照着下面的例子编辑 `/etc/mkinitcpio.conf`：
+
+```systemd
+# 你可以改成别的字体
+FILES=(/usr/share/fonts/noto/NotoSans-Regular.ttf)
+```
+
+## 配置 Snapper
+
+Snapper 可以对你的 btrfs 进行定期快照与恢复。我使用图形化的 Btrfs Assistant 配置，因此这里没什么可以说的。
+
+## 配置 Secure Boot
+
+**此步操作不当可能导致你的数据丢失。**
+
+把这放到最后一步是因为它最麻烦，并且开了 Secure Boot 以后，从系统维护盘启动进行修正会变得困难。
+
+不使用 TPM 的前提下，配置 Secure Boot 的用处并不大，反而会带来很多麻烦。但如果使用了 TPM（把密钥写入了 TPM），那么不配置 Secure Boot 就会导致安全性下降。[^1]我也是因为 Windows 那边开了 Bitlocker（加密系统盘时，会把密钥写入 TPM）才想着配置 Secure Boot。
+
+如果你的电脑有 Windows 系统，并且 Windows 系统盘开启了 Bitlocker，那么请备份并保管好恢复密钥，下次启动 Windows 时很可能会用到。
+
+在 BIOS 界面，开启 Secure Boot，并重置为 Setup Mode。重启进入 Linux。使用如下命令将密钥安装进 Secure Boot：
+
+```bash
+sbctl enroll-keys -mcft
+```
+
+如果你的 Secure Boot 没被重置为 Setup Mode，那么这一步会报错。**请勿强行写入**。
+
+各参数说明：
+
+| 参数 | 说明                                              |
+| ---- | ------------------------------------------------- |
+| `-m` | Microsoft，添加微软密钥，从而使 Windows 能够启动  |
+| `-c` | custom，添加自定义密钥，从而使你的 Linux 能够启动 |
+| `-f` | firmware-builtin，添加固件内置密钥                |
+| `-t` | tpm-eventlog，添加 TPM 事件日志                   |
+
+`sbctl` 在此前 `sbctl bundle ... -s /efi/main.efi` 时，会将构建信息保存（`-s` 参数），并在每次 `mkinitcpio` 时自动更新。因此，你不需要手动更新。你也可以参考 `sbctl` 的手册页来获得更多用法。例如，使用 `sbctl` 对 `refind` 或 `systemd-boot` 进行签名。
+
 ## 当那一天来临
 
 如果需要紧急销毁密钥，正确的步骤是：
 
-1. 找到前述写有密码的纸条，将其销毁。
-2. 掰断的 YubiKey，确保其芯片（内部的硅片）破碎。如果你此前配置的是 1FA，那么这步应当先做。
+- 找到前述写有密码的纸条，将其销毁。
+- 销毁 YubiKey，确保其芯片（内部的硅片）破碎。**如果你此前配置的是 1FA，那么这步应当先做。** YubiKey 比较坚固，你可能要用些工具，或在平时就将它改造得易于摧毁。
+
+这以后，就可以微笑着迎接破门而入的军警宪特了。祝你不要有这一天。
+
+---
+
+[^1]: 根据[这篇文章](https://mp.weixin.qq.com/s/lLTR0XI6br46lEyaDCzfXA)（[备份链接](http://web.archive.org/web/20230713193954/https://mp.weixin.qq.com/s/lLTR0XI6br46lEyaDCzfXA)），把密钥放 TPM 而不配置 Secure Boot 的结果是被装上恶意硬件进行 DMA 攻击。当然配置了 Secure Boot 也是有洞的，已知特定版本雷电™接口具有可被利用的漏洞。如果不想 TPM 变成突破口，就**不要**把密钥丢 TPM 里。
