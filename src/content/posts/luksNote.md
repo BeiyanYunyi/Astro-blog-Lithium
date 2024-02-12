@@ -77,9 +77,9 @@ btrfs subvolume create /mnt/@var
 
 ```bash
 umount -R /mnt
-mount --mkdir -o defaults,compress=zstd,ssd,noatime,subvol=@root /dev/mapper/system /mnt
-mount --mkdir -o defaults,compress=zstd,ssd,noatime,subvol=@home /dev/mapper/system /mnt/home
-mount --mkdir -o defaults,compress=zstd,ssd,noatime,subvol=@var /dev/mapper/system /mnt/var
+mount --mkdir -o noatime,subvol=@root /dev/mapper/system /mnt
+mount --mkdir -o noatime,subvol=@home /dev/mapper/system /mnt/home
+mount --mkdir -o noatime,subvol=@var /dev/mapper/system /mnt/var
 mount --mkdir /dev/nvme0n1p1 /mnt/efi
 ```
 
