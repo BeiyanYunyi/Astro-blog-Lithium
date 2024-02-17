@@ -17,5 +17,4 @@ export default defineConfig({
     rehypePlugins: [rehypeKatex],
     gfm: true,
   },
-  experimental: { contentCollectionCache: true },
 });
