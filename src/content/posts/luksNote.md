@@ -103,7 +103,7 @@ vim /etc/mkinitcpio.conf
 将它的 `HOOKS` 一栏配置为如下形式：
 
 ```systemd
-HOOKS=(base systemd plymouth autodetect modconf kms keyboard sd-vconsole block sd-encrypt filesystems fsck)
+HOOKS=(base systemd sd-plymouth autodetect modconf kms keyboard sd-vconsole block sd-encrypt filesystems fsck)
 ```
 
 先不加入 `plymouth`，等引导成功后再加入，便于观察输出
