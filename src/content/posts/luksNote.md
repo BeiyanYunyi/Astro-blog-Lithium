@@ -3,7 +3,7 @@ title: LUKS2 YubiKey 全盘加密手稿
 date: 2024-02-10 06:37:55
 tag:
   - 教程
-description: 让我看看是谁除夕了还在重装系统：archlinux, LUKS2, Unified Kernel Image, Secure Boot (sbctl), YubiKey, btrfs (with subvolume), UEFI, Snapper
+description: 让我看看是谁除夕了还在重装系统：archlinux, LUKS2, Unified Kernel Image, Secure Boot (sbctl), YubiKey, btrfs (with subvolume), UEFI, Snapper, FIDO2
 ---
 
 ## 前言
@@ -18,8 +18,9 @@ description: 让我看看是谁除夕了还在重装系统：archlinux, LUKS2, U
 
 - [archlinux Wiki CN: dm-crypt](https://wiki.archlinuxcn.org/wiki/Dm-crypt/%E5%8A%A0%E5%AF%86%E6%95%B4%E4%B8%AA%E7%B3%BB%E7%BB%9F#Btrfs%E5%AD%90%E5%8D%B7%EF%BC%8C%E5%B8%A6swap)
 - [User:ZachHilman/Installation - Btrfs + LUKS2 + Secure Boot](https://wiki.archlinux.org/title/User:ZachHilman/Installation_-_Btrfs_%2B_LUKS2_%2B_Secure_Boot#Install_More_Packages)
+- [Unlocking LUKS2 volumes with TPM2, FIDO2, PKCS#11 Security Hardware on systemd 248](https://0pointer.net/blog/unlocking-luks2-volumes-with-tpm2-fido2-pkcs11-security-hardware-on-systemd-248.html)
 
-结合两者优劣，得出了自己的方案。事先在虚拟机里尝试了两遍，最终得到了比较满意的结果。
+结合各方优劣，得出了自己的方案。事先在虚拟机里尝试了两遍，最终得到了比较满意的结果。
 
 ## 方案介绍
 
@@ -102,10 +103,10 @@ vim /etc/mkinitcpio.conf
 将它的 `HOOKS` 一栏配置为如下形式：
 
 ```systemd
-HOOKS=(base udev autodetect modconf kms keyboard keymap consolefont block encrypt filesystems fsck)
+HOOKS=(base systemd plymouth autodetect modconf kms keyboard sd-vconsole block sd-encrypt filesystems fsck)
 ```
 
-先不加入 `plymouth` 和 配置 `ykfde`（YubiKey），等引导成功后再加入。
+先不加入 `plymouth`，等引导成功后再加入，便于观察输出
 
 创建 `/etc/kernel/cmdline`，写入：
 
@@ -118,7 +119,7 @@ fbcon=nodefer rw rd.luks.allow-discards cryptdevice=/dev/nvme0n1p2:system bgrt_d
 创建 `/etc/crypttab.initramfs`，写入：
 
 ```plaintext
-system /dev/nvme0n1p2 none timeout=180
+system /dev/nvme0n1p2 none timeout=180,fido2-device=auto
 ```
 
 这一步是让 `initramfs` 启动时解密位于 `/dev/nvme0n1p2` 的 LUKS2 容器，并挂载到 `/dev/mapper/system`。
@@ -166,9 +167,37 @@ timedatectl set-ntp true
 
 按照[建议阅读](https://wiki.archlinuxcn.org/wiki/%E5%BB%BA%E8%AE%AE%E9%98%85%E8%AF%BB)，配置好多用户与桌面。
 
-遵循 [Yubikey#Challenge-response_2](https://wiki.archlinux.org/title/YubiKey#Challenge-response_2) 配置 YubiKey（`yubikey-full-disk-encryption`），可以配置为 1FA 或 2FA。
+使用如下命令确保你的 YubiKey 具备 FIDO2 功能：
 
-重启系统，确认 YubiKey 配置成功。
+```bash
+sudo systemd-cryptenroll --fido2-device=list
+```
+
+你将能得到类似下面的输出：
+
+```plaintext
+PATH         MANUFACTURER PRODUCT
+/dev/hidraw0 Yubico       YubiKey FIDO+CCID
+```
+
+使用如下命令将 YubiKey 添加到 LUKS2 容器的解密设备列表：
+
+```bash
+sudo systemd-cryptenroll /dev/nvme1n1p2 --fido2-device=auto --fido2-with-client-pin=no --fido2-credential-algorithm=eddsa
+```
+
+参数意义如下：
+
+| 参数                           | 说明                                                                                         |
+| ------------------------------ | -------------------------------------------------------------------------------------------- |
+| `/dev/nvme1n1p2`               | 设备路径                                                                                     |
+| `--fido2-device`               | 设备，可用 auto，或前面的 `/dev/hidraw0`                                                     |
+| `--fido2-with-client-pin`      | 默认是 `yes`，此处置 `no`，从而开机时只需要触摸 YubiKey 而不需输入 PIN，可自行调整为需要 PIN |
+| `--fido2-credential-algorithm` | 算法，此处选择 `eddsa`                                                                       |
+
+可参考 [systemd-cryptenroll#FIDO2_tokens](https://wiki.archlinux.org/title/Systemd-cryptenroll#FIDO2_tokens)
+
+`sudo mkinitcpio -P` 后重启系统，确认 YubiKey 配置成功。
 
 确定 YubiKey 可以运行后，记得通过 `cryptsetup luksChangeKey /dev/nvme0n1p2` 来修改此前临时设置的密码。改个强一点、最好你自己也记不住的，然后写在纸上（最好用遇水能洇开的墨水），放在安全但又随手可及的地方。
 
