@@ -4,7 +4,7 @@
   "version": "3.0.0",
   "description": "拿去吧！",
   "license": "AGPL-3.0-or-later",
-  "packageManager": "pnpm@8.15.3",
+  "packageManager": "pnpm@8.15.4",
   "scripts": {
     "dev": "cross-env DEV=true astro dev --host",
     "start": "astro dev",

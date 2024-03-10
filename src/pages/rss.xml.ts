@@ -1,13 +1,14 @@
 import rss from '@astrojs/rss';
-import { SITE_TITLE, SITE_DESCRIPTION } from '@config';
-import type MDInstance from '@app-types/MDInstance';
+import { SITE_DESCRIPTION, SITE_TITLE } from '@config';
+import idToSlug from '@utils/idToSlug';
+import { getCollection } from 'astro:content';
 
-const importResults = import.meta.glob<MDInstance>('./posts/*.{md,mdx}', { eager: true });
-const posts = Object.values(importResults).map((item) => ({
-  link: item.url!,
-  title: item.frontmatter.title,
-  pubDate: new Date(item.frontmatter.date),
-  customData: `<description>${item.frontmatter.description}</description>`,
+const importResults = await getCollection('posts');
+const posts = importResults.map((item) => ({
+  link: idToSlug(item.id),
+  title: item.data.title,
+  pubDate: item.data.date,
+  customData: `<description>${item.data.description}</description>`,
 }));
 
 export const GET = () =>
