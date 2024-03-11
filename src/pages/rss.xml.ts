@@ -5,7 +5,7 @@ import { getCollection } from 'astro:content';
 
 const importResults = await getCollection('posts');
 const posts = importResults.map((item) => ({
-  link: idToSlug(item.id),
+  link: `posts/${idToSlug(item.id)}`,
   title: item.data.title,
   pubDate: item.data.date,
   customData: `<description>${item.data.description}</description>`,
