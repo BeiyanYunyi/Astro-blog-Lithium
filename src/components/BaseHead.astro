@@ -1,9 +1,10 @@
 ---
 // Import the global.css file here so that it is included on
 // all pages through the use of the <BaseHead /> component.
-import 'uno.css';
+import { useMiSans } from '@config';
 import '@styles/global.css';
 import '@styles/prism-tomorrow.min.css';
+import 'uno.css';
 
 export interface Props {
   title: string;
@@ -39,7 +40,13 @@ const { title, description, image = '/头像方.png' } = Astro.props;
 <meta property="twitter:description" content={description} />
 <meta property="twitter:image" content={new URL(image, Astro.url)} />
 
-<!-- <link
-  href="https://font.sec.miui.com/font/css?family=MiSans:400,700:Chinese_Simplify,Chinese_Traditional,Latin,Numeric&display=swap"
-  rel="stylesheet"
-/> -->
+{
+  useMiSans && (
+    <link
+      href="https://font.sec.miui.com/font/css?family=MiSans:400,700:Chinese_Simplify,Chinese_Traditional,Latin,Numeric&display=swap"
+      rel="stylesheet"
+    />
+  )
+}
+
+<!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-screen-web/style.css" /> -->

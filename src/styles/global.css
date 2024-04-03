@@ -54,7 +54,7 @@ html {
   unicode-range: U+2018, U+2019, U+201C, U+201D;
 }
 
-ul p.active a{
+ul p.active a {
   @apply text-blue-500 dark:text-blue-400;
 }
 

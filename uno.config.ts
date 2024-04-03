@@ -1,3 +1,5 @@
+import presetSodesu from 'sodesu-comment/dist/preset';
+import safeList from 'sodesu-comment/dist/safeList';
 import {
   defineConfig,
   presetAttributify,
@@ -7,8 +9,30 @@ import {
   transformerDirectives,
   transformerVariantGroup,
 } from 'unocss';
-import presetSodesu from 'sodesu-comment/dist/preset';
-import safeList from 'sodesu-comment/dist/safeList';
+import { useMiSans } from './src/config';
+
+const sansFont = [
+  'Chinese Quotes',
+  'Inter var',
+  'Inter',
+  'ui-sans-serif',
+  'system-ui',
+  '-apple-system',
+  'BlinkMacSystemFont',
+  'Segoe UI',
+  'Roboto',
+  'Helvetica Neue',
+  'Helvetica',
+  'Arial',
+  'Noto Sans',
+  'sans-serif',
+  'Apple Color Emoji',
+  'Segoe UI Emoji',
+  'Segoe UI Symbol',
+  'Noto Color Emoji',
+];
+
+if (useMiSans) sansFont.unshift('MiSans');
 
 export default defineConfig({
   presets: [
@@ -33,27 +57,7 @@ export default defineConfig({
   layers: { shortcuts: -1 },
   theme: {
     fontFamily: {
-      sans: [
-        'Chinese Quotes',
-        // 'MiSans',
-        'Inter var',
-        'Inter',
-        'ui-sans-serif',
-        'system-ui',
-        '-apple-system',
-        'BlinkMacSystemFont',
-        'Segoe UI',
-        'Roboto',
-        'Helvetica Neue',
-        'Helvetica',
-        'Arial',
-        'Noto Sans',
-        'sans-serif',
-        'Apple Color Emoji',
-        'Segoe UI Emoji',
-        'Segoe UI Symbol',
-        'Noto Color Emoji',
-      ],
+      sans: sansFont,
     },
   },
 });
