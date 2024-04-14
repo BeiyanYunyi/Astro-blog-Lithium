@@ -23,12 +23,13 @@ allPosts.forEach((post) => {
     posts.push(post);
   }
 });
+posts.sort((a, b) => Number(b.data.date) - Number(a.data.date));
 ---
 
 <BaseLayout>
   <div class="flex-grow">
     <div class="flex items-center p-6 card mb-2">
-      <a class="mr-4 inline i-ion:pricetags-outline text-6" href="/tags" />
+      <a class="mr-4 inline i-ion:pricetags-outline text-6" href="/tags"></a>
       <h1 class="text-3xl">{tag}</h1>
     </div>
     <PostList posts={posts} />

@@ -17,6 +17,7 @@
       "@assets/*": ["src/assets/*"]
     }
   },
+  "mdx": { "checkMdx": true },
   "include": ["src/**/*.astro", "src/**/*.ts", "src/**/*.tsx", "uno.config.ts", "astro.config.ts"]
   // "references": [{ "path": "./functions/tsconfig.json" }]
 }

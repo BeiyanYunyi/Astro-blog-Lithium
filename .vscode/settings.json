@@ -13,6 +13,10 @@
         "markdown",
         "mdx"
     ],
+    "editor.codeActionsOnSave": {
+        "source.fixAll": "explicit",
+        "source.organizeImports": "never"
+      },
     "eslint.options": {
         "extensions": [
             ".js",
