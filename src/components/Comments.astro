@@ -33,6 +33,11 @@
     crossorigin="anonymous"
     async></script>
   <script>
+    import { pageviewCount } from '@waline/client/pageview';
+    if (!(import.meta as unknown as { env: Record<string, string> }).env.DEV)
+      pageviewCount({ serverURL: 'https://waline.penclub.club/' });
+  </script>
+  <script>
     // import Sodesu from 'sodesu-comment';
     // Sodesu.init({
     //   el: '#comment-container',
