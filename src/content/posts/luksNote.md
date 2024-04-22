@@ -12,6 +12,8 @@ description: 让我看看是谁除夕了还在重装系统：archlinux, LUKS2, U
 
 不过，配置环境起码要两天左右，我手头上的事太多了，[中间还有一个半月在医院度过](/posts/SurgeryNote)，因此迟迟没有动手。4 个月后，我终于有时间了。于是开干。
 
+> 该文章由多人完成，切不可直接复制参数！
+
 ## 准备工作
 
 我阅读了几篇文章：
@@ -105,6 +107,7 @@ vim /etc/mkinitcpio.conf
 ```systemd
 HOOKS=(base systemd sd-plymouth autodetect modconf kms keyboard sd-vconsole block sd-encrypt filesystems fsck)
 ```
+> sd-plymouth 可能没有被安装，需要先安装 [plymouth](https://wiki.archlinux.org/title/plymouth) 软件包
 
 先不加入 `plymouth`，等引导成功后再加入，便于观察输出
 
@@ -214,6 +217,43 @@ openssl rand -base64 16
 ```systemd
 # 你可以改成别的字体
 FILES=(/usr/share/fonts/noto/NotoSans-Regular.ttf)
+```
+
+如果你在开机的时候显示的还是一行行的日志，那么你应该根据使用的引导加载器修改引导配置。
+
+### systemd-boot
+配置文件可能在`/boot/loader/entries/2023-11-14_14-30-58_linux.conf`
+
+如果你不打算LUKS加密，它应该被修改为类似下面的样子
+```shell
+options root=UUID=xxxx-xxxx rw quiet splash loglevel=3 rd.udev.log-priority=3 vt.global_cursor_default=0 rd.systemd.show_status=false vga=current
+```
+当然既然你找到了这篇文章，那么下面的样子更可能是你需要的。
+```shell
+options rd.luks.name=e1e64958-e1d0-4e50-83d4-72d61101babf=root rd.luks.options=fido2-device=auto,password-echo=no root=/dev/mapper/root zswap.enabled=0 rootflags=subvol=@ rw rootfstype=btrfs quiet splash loglevel=3 rd.udev.log-priority=3 vt.global_cursor_default=0 rd.systemd.show_status=false vga=current
+```
+
+### grub2
+配置文件大概在`/etc/default/grub`
+
+修改 GRUB_CMDLINE_LINUX 行:
+
+在文件中找到 GRUB_CMDLINE_LINUX 这一行。
+
+它看起来可能是这样的：
+```makefile
+GRUB_CMDLINE_LINUX="quiet splash"
+```
+
+将您的参数添加到引号内，保持现有参数,如下：
+```makefile
+GRUB_CMDLINE_LINUX="quiet splash loglevel=3 rd.udev.log-priority=3 vt.global_cursor_default=0 rd.systemd.show_status=false vga=current rd.luks.name=e1e64958-e1d0-4e50-83d4-72d61101babf=root rd.luks.options=fido2-device=auto,password-echo=no root=/dev/mapper/root zswap.enabled=0 rootflags=subvol=@ rw rootfstype=btrfs"
+```
+
+记得更新grub
+
+```shell
+sudo update-grub 或者 sudo grub-mkconfig -o /boot/grub/grub.cfg
 ```
 
 ## 配置 Snapper
