@@ -266,6 +266,8 @@ Snapper 可以对你的 btrfs 进行定期快照与恢复。我使用图形化�
 
 **此步操作不当可能导致你的数据丢失。**
 
+**此步骤完成后必须开启BIOS密码**
+
 把这放到最后一步是因为它最麻烦，并且开了 Secure Boot 以后，从系统维护盘启动进行修正会变得困难。
 
 不使用 TPM 的前提下，配置 Secure Boot 的用处并不大，反而会带来很多麻烦。但如果使用了 TPM（把密钥写入了 TPM），那么不配置 Secure Boot 就会导致安全性下降。[^1]我也是因为 Windows 那边开了 Bitlocker（加密系统盘时，会把密钥写入 TPM）才想着配置 Secure Boot。
@@ -290,6 +292,15 @@ sbctl enroll-keys -mcft
 | `-t` | tpm-eventlog，添加 TPM 事件日志                   |
 
 `sbctl` 在此前 `sbctl bundle ... -s /efi/main.efi` 时，会将构建信息保存（`-s` 参数），并在每次 `mkinitcpio` 时自动更新。因此，你不需要手动更新。你也可以参考 `sbctl` 的手册页来获得更多用法。例如，使用 `sbctl` 对 `refind` 或 `systemd-boot` 进行签名。
+
+## 开启BIOS密码
+一般在进入BIOS的第一个页面就有显著的 “Administrator Password”和“User Password”.
+建议全部设置上密码。
+
+当电脑被强制清除CMOS，BIOS密码也会失效，TPM大概率会被关闭，这与厂商的TPM状态设计有关。
+
+如果你使用的是AMD的CPU，且使用的是CPU内部模拟的fTPM，那么一旦CMOS被清除，TPM信息必定被删除。在半个月前用Widnows bitlocker磁盘数据全部丢失的惨痛教训验证了这点。
+
 
 ## 当那一天来临
 
