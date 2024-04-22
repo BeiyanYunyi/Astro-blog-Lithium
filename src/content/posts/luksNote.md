@@ -219,7 +219,9 @@ openssl rand -base64 16
 FILES=(/usr/share/fonts/noto/NotoSans-Regular.ttf)
 ```
 
-如果你在开机的时候显示的还是一行行的日志，那么你应该根据使用的引导加载器修改引导配置。
+如果你在开机的时候显示的还是一行行的日志，那么使用的引导加载器不是上面提到的 Unified Kernel Image。
+
+那么你应该根据使用的引导加载器修改引导配置。
 
 ### systemd-boot
 配置文件可能在`/boot/loader/entries/2023-11-14_14-30-58_linux.conf`
