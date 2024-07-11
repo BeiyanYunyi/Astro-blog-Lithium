@@ -22,7 +22,6 @@
     "@unocss/reset": "0.61.3",
     "@waline/client": "^3.3.0",
     "astro": "^4.11.5",
-    "canvas": "^2.11.2",
     "cross-env": "^7.0.3",
     "dayjs": "^1.11.11",
     "eslint-plugin-solid": "^0.14.1",
