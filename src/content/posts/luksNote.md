@@ -6,6 +6,8 @@ tag:
 description: 让我看看是谁除夕了还在重装系统：archlinux, LUKS2, Unified Kernel Image, Secure Boot (sbctl), YubiKey, btrfs (with subvolume), UEFI, Snapper, FIDO2
 ---
 
+> 本文最近一次更新于 2024 年 8 月 6 日。
+
 ## 前言
 
 自从[发现自己随时可能被中华*人民*共和国*人民*警察们搜查](/posts/CornerOfTheWorld)以来，我的加密偏执就复发了。我决定用 LUKS2 和 YubiKey 武装我的电脑。可能的话，我还要把这枚 YubiKey 改造得易于摧毁。
@@ -47,7 +49,7 @@ cfdisk /dev/nvme0n1
 
 第一个分区会作为 EFI 分区，分 1G 或者 0.5G 即可，后续 UKI 会占用 ~100MB。
 
-剩下的空间全分给第二个分区，这将是你的加密分区。不再分一个 Swap 分区的原因是当前 btrfs 已经支持 swapfile，并且我 RAM 充足。
+剩下的空间全分给第二个分区，这将是你的加密分区。不再分一个 Swap 分区的原因是当前 btrfs 已经支持 swapfile，可在 btrfs 分卷时或完成安装后[自行配置](https://wiki.archlinux.org/title/Btrfs#Swap_file)，本文不再赘述。
 
 ```bash
 mkfs.vfat -n EFI /dev/nvme0n1p1 # 假设这是第一个分区
@@ -103,10 +105,35 @@ vim /etc/mkinitcpio.conf
 将它的 `HOOKS` 一栏配置为如下形式：
 
 ```systemd
-HOOKS=(base systemd sd-plymouth autodetect modconf kms keyboard sd-vconsole block sd-encrypt filesystems fsck)
+HOOKS=(base systemd autodetect modconf kms keyboard sd-vconsole block sd-encrypt filesystems fsck)
 ```
 
-先不加入 `plymouth`，等引导成功后再加入，便于观察输出
+先不加入 `plymouth`，等引导成功后再加入，便于观察输出。
+
+```bash
+vim /etc/mkinitcpio.d/linux-zen.preset
+```
+
+注释 `default_image`，并取消 `default_uki` 和 `default_options` 的注释。必要时更改 `default_image` 的路径。示例：
+
+```ini
+# mkinitcpio preset file for the 'linux-zen' package
+
+#ALL_config="/etc/mkinitcpio.conf"
+ALL_kver="/boot/vmlinuz-linux-zen"
+
+PRESETS=('default' 'fallback')
+
+#default_config="/etc/mkinitcpio.conf"
+#default_image="/boot/initramfs-linux-zen.img"
+default_uki="/efi/main.efi"
+default_options="--splash /usr/share/systemd/bootctl/splash-arch.bmp"
+
+#fallback_config="/etc/mkinitcpio.conf"
+#fallback_image="/boot/initramfs-linux-zen-fallback.img"
+fallback_uki="/efi/fallback.efi"
+fallback_options="-S autodetect"
+```
 
 创建 `/etc/kernel/cmdline`，写入：
 
@@ -114,7 +141,7 @@ HOOKS=(base systemd sd-plymouth autodetect modconf kms keyboard sd-vconsole bloc
 fbcon=nodefer rw rd.luks.allow-discards cryptdevice=/dev/nvme0n1p2:system bgrt_disable root=LABEL=system rootflags=subvol=@root,rw splash vt.global_cursor_default=0
 ```
 
-这将是你的内核参数，以后需要配置内核参数的话就改这里。`sbctl` 会自动配置好 `microcode`。安装 `intel-ucode` 或 `amd-ucode` 即可，无需额外在参数里加上。
+这将是你的内核参数，以后需要配置内核参数的话就改这里。`mkinitcpio` 会自动配置好 `microcode`。安装 `intel-ucode` 或 `amd-ucode` 即可，无需额外在参数里加上。
 
 创建 `/etc/crypttab.initramfs`，写入：
 
@@ -137,10 +164,6 @@ FONT=lat2-16
 
 ```bash
 sbctl create-keys
-# 因为用的是 linux-zen 而非 linux，所以需要指定内核和 initramfs 文件名
-sbctl bundle -k /boot/vmlinuz-linux-zen -i /boot/intel-ucode.img -f /boot/initramfs-linux-zen.img -s /efi/main.efi
-# 想打 AMD 微码用这行，区别在 -i 和 -a 参数
-sbctl bundle -k /boot/vmlinuz-linux-zen -a /boot/amd-ucode.img -f /boot/initramfs-linux-zen.img -s /efi/main.efi
 mkinitcpio -P
 efibootmgr --disk /dev/nvme0n1 --part 1 --create --label "Arch Linux" --loader /efi/main.efi
 exit # 退出 chroot
@@ -193,7 +216,7 @@ sudo systemd-cryptenroll /dev/nvme1n1p2 --fido2-device=auto --fido2-with-client-
 | `/dev/nvme1n1p2`               | 设备路径                                                                                     |
 | `--fido2-device`               | 设备，可用 auto，或前面的 `/dev/hidraw0`                                                     |
 | `--fido2-with-client-pin`      | 默认是 `yes`，此处置 `no`，从而开机时只需要触摸 YubiKey 而不需输入 PIN，可自行调整为需要 PIN |
-| `--fido2-credential-algorithm` | 算法，此处选择 `eddsa`                                                                       |
+| `--fido2-credential-algorithm` | 算法，此处选择 `eddsa`。我没有打错字，不是 `ecdsa`                                           |
 
 可参考 [systemd-cryptenroll#FIDO2_tokens](https://wiki.archlinux.org/title/Systemd-cryptenroll#FIDO2_tokens)
 
@@ -247,7 +270,7 @@ sbctl enroll-keys -mcft
 | `-f` | firmware-builtin，添加固件内置密钥                |
 | `-t` | tpm-eventlog，添加 TPM 事件日志                   |
 
-`sbctl` 在此前 `sbctl bundle ... -s /efi/main.efi` 时，会将构建信息保存（`-s` 参数），并在每次 `mkinitcpio` 时自动更新。因此，你不需要手动更新。你也可以参考 `sbctl` 的手册页来获得更多用法。例如，使用 `sbctl` 对 `refind` 或 `systemd-boot` 进行签名。
+`sbctl` 有一个 `Hook`，它会在每次 `mkinitcpio` 输出镜像时自动签名。因此，你不需要手动更新。你也可以参考 `sbctl` 的手册页来获得更多用法。例如，使用 `sbctl` 对 `refind` 或 `systemd-boot` 进行签名。
 
 ## 当那一天来临
 
