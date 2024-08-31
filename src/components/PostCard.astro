@@ -2,6 +2,7 @@
 import type { CollectionEntry } from 'astro:content';
 import ArticleTime from './ArticleTime.astro';
 import idToSlug from '@utils/idToSlug';
+import { Image } from 'astro:assets';
 
 export interface Props {
   post: CollectionEntry<'posts'>;
@@ -10,17 +11,24 @@ const { post } = Astro.props;
 const isForward = post.data.tag?.includes('转载');
 ---
 
-<li class="flex flex-col items-start p-6 card">
-  <ArticleTime slug={idToSlug(post.id)} date={post.data.date} class="mb-1" />
-  <a href={`/posts/${idToSlug(post.id)}/`} class="text-[2rem] mb-6">
-    {post.data.title}
-    {
-      isForward && (
-        <span class="break-keep text-sm border-[#3273dc] border rounded-full text-[#3273dc] px-2 py-1 ml-2 v-mid">
-          转载
-        </span>
-      )
-    }
-  </a>
-  <div class="text-neutral-500">{post.data.description}</div>
+<li class="flex flex-col items-start card overflow-clip">
+  {
+    post.data.image && (
+      <Image class="object-contain w-full mb-2" src={post.data.image} alt="Article cover" />
+    )
+  }
+  <div class="p-6">
+    <ArticleTime slug={idToSlug(post.id)} date={post.data.date} class="mb-1" />
+    <a href={`/posts/${idToSlug(post.id)}/`} class="text-[2rem] mb-6">
+      {post.data.title}
+      {
+        isForward && (
+          <span class="break-keep text-sm border-[#3273dc] border rounded-full text-[#3273dc] px-2 py-1 ml-2 v-mid">
+            转载
+          </span>
+        )
+      }
+    </a>
+    <div class="text-neutral-500">{post.data.description}</div>
+  </div>
 </li>

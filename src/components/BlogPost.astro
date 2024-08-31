@@ -2,6 +2,8 @@
 import ArticleTags from '@components/ArticleTags.astro';
 import ArticleTime from '@components/ArticleTime.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
 
 export type Props = {
   remarkPluginFrontmatter: any;
@@ -9,24 +11,30 @@ export type Props = {
   slug: string;
   description: string;
   tag: string[] | undefined;
+  image: CollectionEntry<'posts'>['data']['image'];
   date: Date;
 };
 
-const { title, slug, remarkPluginFrontmatter, description, tag, date } = Astro.props;
+const { title, slug, remarkPluginFrontmatter, description, tag, date, image } = Astro.props;
 ---
 
 <BaseLayout title={title} description={description}>
   <div class="flex">
     <div class="flex-grow min-w-0">
-      <article class="prose prose-neutral dark:prose-invert max-w-full card p-6">
+      <article class="prose prose-neutral dark:prose-invert max-w-full card overflow-clip">
         <header>
           <slot name="before-article" />
-          <ArticleTime slug={slug} date={date} class="mb-2" />
-          <h1 class="mb-6">{title}</h1>
-          <ArticleTags tag={tag} />
+          {image && <Image class="w-full object-contain" src={image} alt="Article cover" />}
+          <div class="p-6 pb-0">
+            <ArticleTime slug={slug} date={date} class="mb-2" />
+            <h1 class="mb-6">{title}</h1>
+            <ArticleTags tag={tag} />
+          </div>
         </header>
-        <slot />
-        <ArticleTags tag={tag} />
+        <div class="p-6">
+          <slot />
+          <ArticleTags tag={tag} />
+        </div>
       </article>
       <div class="prose prose-neutral min-w-0 dark:prose-invert max-w-none">
         <details class="rounded-md card">

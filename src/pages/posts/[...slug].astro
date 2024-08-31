@@ -23,6 +23,7 @@ const { Content, remarkPluginFrontmatter } = await entry.render();
   slug={idToSlug(entry.id)}
   description={entry.data.description}
   tag={entry.data.tag}
+  image={entry.data.image}
 >
   <Content />
 </BlogPost>
