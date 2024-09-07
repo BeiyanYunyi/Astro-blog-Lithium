@@ -4,6 +4,7 @@ import ArticleTime from '@components/ArticleTime.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
+import svgPathToName from '@utils/svgPathToName';
 
 export type Props = {
   remarkPluginFrontmatter: any;
@@ -18,7 +19,11 @@ export type Props = {
 const { title, slug, remarkPluginFrontmatter, description, tag, date, image } = Astro.props;
 ---
 
-<BaseLayout title={title} description={description} image={image?.src}>
+<BaseLayout
+  title={title}
+  description={description}
+  image={image?.src ? `/og-image/${svgPathToName(image?.src)}.png` : '/头像方.png'}
+>
   <div class="flex">
     <div class="flex-grow min-w-0">
       <article class="prose prose-neutral dark:prose-invert max-w-full card overflow-clip">
