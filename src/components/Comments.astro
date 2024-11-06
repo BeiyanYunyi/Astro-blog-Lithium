@@ -4,7 +4,8 @@
 
 <div class="mt-2">
   <div id="comment-container">
-    <div class="prose prose-neutral dark:prose-invert min-w-0 max-w-none">
+    {
+      /* <div class="prose prose-neutral dark:prose-invert min-w-0 max-w-none">
       <p>
         我遭到了来自<a target="_blank" href="/posts/SexualAssaultNote">性侵</a
         >者的持续骚扰，精神状态亦受影响。为了保护我的精神状态，原匿名评论区无限期关闭。
@@ -13,8 +14,11 @@
           href="/CommentFromSexualAssaultNote">打开</a
         >阅读前，请务必确保自身精神状况。
       </p><p>在原评论区恢复使用前，还请注册 GitHub 账号以使用临时评论区</p>
-    </div>
+    </div> */
+    }
   </div>
+  {
+    /*
   <!-- <script
     is:inline
     src="https://giscus.app/client.js"
@@ -36,15 +40,16 @@
     import { pageviewCount } from '@waline/client/pageview';
     if (!(import.meta as unknown as { env: Record<string, string> }).env.DEV)
       pageviewCount({ serverURL: 'https://waline.penclub.club/' });
-  </script>
+  </script> */
+  }
   <script>
-    // import Sodesu from 'sodesu-comment';
-    // Sodesu.init({
-    //   el: '#comment-container',
-    //   serverURL: 'https://waline.penclub.club/',
-    //   dark: 'html.dark',
-    //   pageview: !import.meta.env.DEV,
-    //   commentClassName: 'prose prose-neutral dark:prose-invert min-w-0 max-w-none',
-    // });
+    import Sodesu from 'sodesu-comment';
+    Sodesu.init({
+      el: '#comment-container',
+      serverURL: 'https://waline.penclub.club/',
+      dark: 'html.dark',
+      pageview: !import.meta.env.DEV,
+      commentClassName: 'prose prose-neutral dark:prose-invert min-w-0 max-w-none',
+    });
   </script>
 </div>
