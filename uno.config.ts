@@ -1,5 +1,5 @@
-import presetSodesu from 'sodesu-comment/dist/preset';
-import safeList from 'sodesu-comment/dist/safeList';
+import presetSodesu from 'sodesu-comment/preset';
+import safeList from 'sodesu-comment/safeList';
 import {
   defineConfig,
   presetAttributify,
