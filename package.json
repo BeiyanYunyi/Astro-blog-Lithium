@@ -19,7 +19,7 @@
     "@astrojs/sitemap": "^3.2.1",
     "@astrojs/solid-js": "^4.4.2",
     "@iconify-json/ion": "^1.2.1",
-    "@unocss/reset": "^0.63.6",
+    "@unocss/reset": "^0.65.1",
     "@waline/client": "^3.3.2",
     "astro": "^4.16.8",
     "cross-env": "^7.0.3",
@@ -33,11 +33,11 @@
     "rehype-katex": "^7.0.1",
     "remark-math": "^6.0.0",
     "sharp": "^0.33.5",
-    "sodesu-comment": "^0.1.0",
+    "sodesu-comment": "^0.2.0",
     "solid-js": "^1.9.3",
     "unified": "^11.0.5",
     "unist-util-visit": "^5.0.0",
-    "unocss": "^0.63.6",
+    "unocss": "^0.65.1",
     "vite": "^5.4.10"
   },
   "devDependencies": {
