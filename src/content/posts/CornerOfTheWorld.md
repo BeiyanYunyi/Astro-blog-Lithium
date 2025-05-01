@@ -5,6 +5,7 @@ description: 记一次失败的跨女营救行动
 tag:
   - 杂谈
   - 随笔
+image: src/assets/CornerOfTheWorld.svg
 ---
 
 ——记一次失败的跨女营救行动
