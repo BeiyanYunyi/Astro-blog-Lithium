@@ -68,6 +68,7 @@ const { title, slug, remarkPluginFrontmatter, description, tag, date, image } = 
   </div>
   <script>
     import getWordCount from '@utils/getWordCount';
+
     const content = document.querySelector('article.prose')?.textContent || '';
     const wordCount = getWordCount(content);
     document.getElementById('wordCount')!.innerHTML = `${wordCount.words} 字`;
@@ -76,9 +77,13 @@ const { title, slug, remarkPluginFrontmatter, description, tag, date, image } = 
       e.classList.remove('hidden');
     });
     const pageAddress = document.getElementById('page_address');
-    if (pageAddress) pageAddress.innerHTML = location.href;
+    if (pageAddress) {
+      pageAddress.innerHTML = location.href;
+    }
   </script>
   <script>
-    if (document.querySelector('aside#toc')) import('@utils/tocHighlight');
+    if (document.querySelector('aside#toc')) {
+      import('@utils/tocHighlight');
+    }
   </script>
 </BaseLayout>

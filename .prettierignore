@@ -1,6 +1,0 @@
-.yarn
-node_modules
-.vscode
-dist
-pnpm-lock.yaml
-public

@@ -29,6 +29,7 @@ const tagsAry = Array.from(tags);
     </ul>
     <script>
       import shuffle from '@utils/shuffle';
+
       const tagsDOM = Array.from(document.querySelectorAll('.tags'));
       const tagsRenderList = shuffle(tagsDOM);
       const list = document.querySelector('#tags-list')!;

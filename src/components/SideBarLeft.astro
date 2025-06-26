@@ -81,17 +81,20 @@ const tagsLength = Array.from(tags).length;
 <script>
   (() => {
     const search = document.getElementById('search');
-    if (!search) return;
+    if (!search) {
+      return;
+    }
     const input = search.querySelector('input');
-    if (!input) return;
+    if (!input) {
+      return;
+    }
     search.addEventListener('submit', (e) => {
       e.preventDefault();
       const value = input.value;
-      if (!value) return;
-      window.location.href = `https://www.google.com/search?q=site:${location.host}+${value.replace(
-        /\s+/g,
-        '+',
-      )}`;
+      if (!value) {
+        return;
+      }
+      window.location.href = `https://www.google.com/search?q=site:${location.host}+${value.replace(/\s+/g, '+')}`;
     });
   })();
 </script>

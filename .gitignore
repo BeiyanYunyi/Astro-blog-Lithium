@@ -19,3 +19,6 @@ pnpm-debug.log*
 .DS_Store
 .astro
 .wrangler
+
+# ESLint cache
+.eslintcache
