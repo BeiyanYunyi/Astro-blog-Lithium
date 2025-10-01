@@ -89,8 +89,8 @@
     "description": "以梦为马，不负韶华"
   },
   {
-    "url": "https://chisakakanako.notion.site/96f67217a4c0410eb35c4200f835eafa",
-    "avatar": "https://chisakakanako.notion.site/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2F0e351199-eb3e-4bc2-ac48-dd890d7481c8%2F0791aa06-8440-4d00-89c3-864bcb44624e%2F%25E5%25A4%25B4%25E5%2583%258F%25E6%2596%25B0.jpeg?table=block&id=96f67217-a4c0-410e-b35c-4200f835eafa&spaceId=0e351199-eb3e-4bc2-ac48-dd890d7481c8&width=250&userId=&cache=v2",
+    "url": "https://chisakakanako.notion.site/ChisakaKanako-96f67217a4c0410eb35c4200f835eafa",
+    "avatar": "https://cdn.jsdelivr.net/gh/BeiyanYunyi/fk-gfw/image.jpeg",
     "title": "千坂神奈子的博客",
     "description": ""
   },
@@ -117,5 +117,11 @@
     "avatar": "https://raw.githubusercontent.com/OverflowCat/blog/test_a/imgs/avatar/xni.webp",
     "title": "新世界的大门",
     "description": "因此幻想是世界，谁若懂得，谁就会歌唱"
+  },
+  {
+    "url": "https://geekertao.top/",
+    "avatar": "https://geekertao.top/static/img/logo.png",
+    "title": "Geekertao 的博客",
+    "description": "看看这世界如此美丽！"
   }
 ]
