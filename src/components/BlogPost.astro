@@ -29,7 +29,7 @@ const { title, slug, remarkPluginFrontmatter, description, tag, date, image } = 
       <article class="prose prose-neutral dark:prose-invert max-w-full card overflow-clip">
         <header>
           <slot name="before-article" />
-          {image && <Image class="w-full object-contain" src={image} alt="Article cover" />}
+          {image && <Image class="w-full object-contain my-0" src={image} alt="Article cover" />}
           <div class="p-6 pb-0">
             <ArticleTime slug={slug} date={date} class="mb-2" />
             <h1 class="mb-6">{title}</h1>
@@ -41,8 +41,8 @@ const { title, slug, remarkPluginFrontmatter, description, tag, date, image } = 
           <ArticleTags tag={tag} />
         </div>
       </article>
-      <div class="prose prose-neutral min-w-0 dark:prose-invert max-w-none">
-        <details class="rounded-md card">
+      <div class="prose prose-neutral min-w-0 dark:prose-invert max-w-none my-4">
+        <details class="rounded-md card py-5 px-6">
           <summary>分享</summary>
           <p>
             复制此页面地址到邦联宇宙搜索框以在邦联宇宙分享本文：<code

@@ -1,15 +1,15 @@
-import presetSodesu from 'sodesu-comment/preset';
-import safeList from 'sodesu-comment/safeList';
+import presetSodesu from 'sodesu-comment/preset'
+import safeList from 'sodesu-comment/safeList'
 import {
   defineConfig,
   presetAttributify,
   presetIcons,
   presetTypography,
-  presetWind,
+  presetWind3,
   transformerDirectives,
   transformerVariantGroup,
-} from 'unocss';
-import { useMiSans } from './src/config';
+} from 'unocss'
+import { useMiSans } from './src/config'
 
 const sansFont = [
   'Chinese Quotes',
@@ -30,18 +30,21 @@ const sansFont = [
   'Segoe UI Emoji',
   'Segoe UI Symbol',
   'Noto Color Emoji',
-];
+]
 
-if (useMiSans) sansFont.unshift('MiSans');
+if (useMiSans)
+  sansFont.unshift('MiSans')
 
 export default defineConfig({
   presets: [
-    presetWind(),
+    presetWind3(),
     presetAttributify(),
     presetTypography({
       cssExtend: {
-        'blockquote:before, blockquote:after, code:before, code:after': { content: 'none' },
-        p: { 'white-space': 'pre-line' },
+        'blockquote:before, blockquote:after, code:before, code:after': {
+          content: 'none',
+        },
+        'p': { 'white-space': 'pre-line' },
       },
     }),
     presetIcons(),
@@ -50,7 +53,13 @@ export default defineConfig({
   safelist: safeList,
   transformers: [transformerDirectives(), transformerVariantGroup()],
   rules: [
-    ['shadow-app', { 'box-shadow': '0 4px 10px rgba(0, 0, 0, 0.05), 0 0 1px rgba(0, 0, 0, 0.1)' }],
+    [
+      'shadow-app',
+      {
+        'box-shadow':
+          '0 4px 10px rgba(0, 0, 0, 0.05), 0 0 1px rgba(0, 0, 0, 0.1)',
+      },
+    ],
     ['pre-wrap', { 'white-space': 'pre-wrap' }],
   ],
   shortcuts: { card: 'bg-white dark:bg-stone-800 rounded-md shadow-app' },
@@ -60,4 +69,4 @@ export default defineConfig({
       sans: sansFont,
     },
   },
-});
+})
