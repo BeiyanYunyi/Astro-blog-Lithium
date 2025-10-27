@@ -59,7 +59,7 @@ const { title, slug, remarkPluginFrontmatter, description, tag, date, image } = 
       'toc' in remarkPluginFrontmatter && (
         <aside class="hidden lg:block mt-4 lg:(mt-0 ml-4) flex-shrink-0" id="toc">
           <nav
-            class="prose prose-neutral dark:prose-invert sticky top-20 text-sm card px-4 w-[15vw] max-h-[calc(100vh-6rem)] overflow-y-auto"
+            class="prose prose-neutral dark:prose-invert sticky top-20 text-sm card px-4 w-[15rem] max-h-[calc(100vh-6rem)] overflow-y-auto"
             set:html={remarkPluginFrontmatter.toc}
           />
         </aside>
