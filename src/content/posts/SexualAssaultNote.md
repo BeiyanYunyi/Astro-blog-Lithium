@@ -5,7 +5,7 @@ description: 我在 1 月 12 日 - 1 月 14 日期间遭到了一个有一定家
 tag:
   - 杂谈
   - 随笔
-image: src/assets/SexualAssaultNote.svg
+image: ../../assets/SexualAssaultNote.svg
 ---
 
 我在 1 月 12 日 - 1 月 14 日期间遭到了一个有一定家庭背景的跨性别男性的骚扰、性侵和 PUA。昨天见的朋友说：“这肯定是一个惯犯。”我也这么觉得。

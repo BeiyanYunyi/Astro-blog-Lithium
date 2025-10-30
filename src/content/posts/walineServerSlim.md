@@ -2,7 +2,7 @@
 title: 如何把 waline 服务端的体积缩小 60%
 date: 2025-10-26 10:17:04
 description: waline 是我的博客目前使用的评论系统。它有比较丰富的生态和比较高的适应性（可以部署在各类托管环境中），但在我的使用环境下，它有非常多可以精简的地方。
-image: src/assets/walineServerSlim.svg
+image: ../../assets/walineServerSlim.svg
 tag:
   - 项目
   - 教程
