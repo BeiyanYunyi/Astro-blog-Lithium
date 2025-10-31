@@ -95,14 +95,20 @@
   </script> -->
 
   <script>
-    import { init } from 'sodesu-comment';
+    import { init as sodesuInit } from 'sodesu-comment';
 
-    init({
+    const sodesuInstance = sodesuInit({
       el: '#comment-container',
       serverURL: 'https://waline.penclub.club/',
       dark: 'html.dark',
       pageview: !import.meta.env.DEV,
       commentClassName: 'prose prose-neutral dark:prose-invert min-w-0 max-w-none',
+    });
+
+    document.addEventListener('astro:page-load', () => {
+      sodesuInstance.update({
+        path: window.location.pathname,
+      });
     });
   </script>
 </div>

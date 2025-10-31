@@ -20,7 +20,7 @@ const { title = SITE_TITLE, description = SITE_DESCRIPTION, image = '/头像方.
     <Header />
     <main class="flex flex-col-reverse lg:flex-row">
       <SideBarLeft />
-      <div class="flex-auto min-w-0 mt-4 lg:(mt-0 ml-4)">
+      <div class="flex-auto min-w-0 mt-4 lg:(mt-0 ml-4)" transition:name="main">
         <slot />
         <Comments />
       </div>
