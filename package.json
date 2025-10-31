@@ -19,6 +19,7 @@
     "@astrojs/sitemap": "^3.6.0",
     "@astrojs/solid-js": "^5.1.2",
     "@iconify-json/ion": "^1.2.6",
+    "@solid-primitives/storage": "^4.3.3",
     "@unocss/reset": "^66.5.4",
     "astro": "^5.15.3",
     "cross-env": "^10.1.0",
