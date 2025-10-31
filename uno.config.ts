@@ -41,7 +41,7 @@ export default defineConfig({
     presetAttributify(),
     presetTypography({
       cssExtend: {
-        'blockquote:before, blockquote:after, code:before, code:after': {
+        'blockquote *::before, blockquote *::after': {
           content: 'none',
         },
         'p': { 'white-space': 'pre-line' },
