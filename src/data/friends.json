@@ -123,5 +123,11 @@
     "avatar": "https://geekertao.top/static/img/logo.png",
     "title": "Geekertao 的博客",
     "description": "看看这世界如此美丽！"
+  },
+  {
+    "url": "https://importmengjie.github.io",
+    "avatar": "https://importmengjie.github.io/images/avatar.jpg",
+    "title": "ImportMengjie",
+    "description": "一个车端C++软件开发程序猿"
   }
 ]
