@@ -2,9 +2,12 @@
   "name": "code-of-my-blog",
   "type": "module",
   "version": "3.0.0",
-  "packageManager": "pnpm@10.20.0+sha512.cf9998222162dd85864d0a8102e7892e7ba4ceadebbf5a31f9c2fce48dfce317a9c53b9f6464d1ef9042cba2e02ae02a9f7c143a2b438cd93c91840f0192b9dd",
+  "packageManager": "pnpm@10.28.1+sha512.7d7dbbca9e99447b7c3bf7a73286afaaf6be99251eb9498baefa7d406892f67b879adb3a1d7e687fc4ccc1a388c7175fbaae567a26ab44d1067b54fcb0d6a316",
   "description": "拿去吧！",
   "license": "AGPL-3.0-or-later",
+  "engines": {
+    "node": ">=25.0.0"
+  },
   "scripts": {
     "dev": "cross-env DEV=true astro dev --host",
     "start": "astro dev",
