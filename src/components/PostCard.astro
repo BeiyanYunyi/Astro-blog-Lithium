@@ -14,7 +14,12 @@ const isForward = post.data.tag?.includes('转载');
 <li class="flex flex-col items-start card overflow-clip">
   {
     post.data.image && (
-      <Image class="object-contain w-full mb-2" src={post.data.image} alt="Article cover" />
+      <Image
+        class="object-contain w-full mb-2"
+        src={post.data.image}
+        alt="Article cover"
+        inferSize
+      />
     )
   }
   <div class="p-6">

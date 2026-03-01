@@ -29,7 +29,11 @@ const { title, slug, remarkPluginFrontmatter, description, tag, date, image } = 
       <article class="prose prose-neutral dark:prose-invert max-w-full card overflow-clip">
         <header>
           <slot name="before-article" />
-          {image && <Image class="w-full object-contain my-0" src={image} alt="Article cover" />}
+          {
+            image && (
+              <Image class="w-full object-contain my-0" src={image} alt="Article cover" inferSize />
+            )
+          }
           <div class="p-6 pb-0">
             <ArticleTime slug={slug} date={date} class="mb-2" />
             <h1 class="mb-6">{title}</h1>
