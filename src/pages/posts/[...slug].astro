@@ -2,7 +2,7 @@
 import BlogPost from '@components/BlogPost.astro';
 import idToSlug from '@utils/idToSlug';
 import type { GetStaticPaths } from 'astro';
-import { getCollection } from 'astro:content';
+import { getCollection, render } from 'astro:content';
 
 export const getStaticPaths = (async () => {
   const blogEntries = await getCollection('posts');
@@ -13,7 +13,7 @@ export const getStaticPaths = (async () => {
 }) satisfies GetStaticPaths;
 
 const { entry } = Astro.props;
-const { Content, remarkPluginFrontmatter } = await entry.render();
+const { Content, remarkPluginFrontmatter } = await render(entry);
 ---
 
 <BlogPost
