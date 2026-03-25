@@ -10,6 +10,7 @@ body {
   @apply m-auto max-w-7xl font-sans dark:bg-stone-900 dark:text-neutral-200 text-neutral-800;
   @apply bg-[#f7f7f7];
   line-height: 1.5;
+  text-autospace: normal;
 }
 
 .prose :where(blockquote):not(:where(.not-prose, pre *)) {
@@ -49,8 +50,8 @@ html {
 
 @font-face {
   font-family: Chinese Quotes;
-  src: local('PingFang SC Regular'), local('PingFang SC'), local('SimHei'),
-    local('Source Han Sans SC');
+  src:
+    local('PingFang SC Regular'), local('PingFang SC'), local('SimHei'), local('Source Han Sans SC');
   unicode-range: U+2018, U+2019, U+201C, U+201D;
 }
 

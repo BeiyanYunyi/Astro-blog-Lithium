@@ -1,11 +1,11 @@
 ---
-title: 给 Node.js 开发者的 Golang 教程
+title: 给Node.js开发者的Golang教程
 date: 2022-04-04 16:07:00
 tag: [教程, 翻译]
-description: 原文出自 https://github.com/miguelmota/golang-for-nodejs-developers
+description: 原文出自https://github.com/miguelmota/golang-for-nodejs-developers
 ---
 
-> 译注：于 2022 年 4 月 4 日（即 404 节）开始翻译自[原文](https://github.com/miguelmota/golang-for-nodejs-developers)
+> 译注：于2022年4月4日（即404节）开始翻译自[原文](https://github.com/miguelmota/golang-for-nodejs-developers)
 
 ![Header](https://user-images.githubusercontent.com/168240/114315374-8ff5b480-9ab3-11eb-8323-b83858e8e74f.png)
 
@@ -13,7 +13,7 @@ description: 原文出自 https://github.com/miguelmota/golang-for-nodejs-develo
 
 [![License](http://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/miguelmota/golang-for-nodejs-developers/master/LICENSE) [![Mentioned in Awesome Go](https://awesome.re/mentioned-badge.svg)](https://github.com/avelino/awesome-go) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](#contributing)
 
-这篇充满示例的文章是为那些已经学会 Node.js 而正向 Go 进军的人准备的（当然反过来也成立）。这不是说这篇教程是一个完整的教程，因为我们假设你已经学习了 [Tour of Go](https://tour.golang.org/)。这个教程的目的是让你在较高水平上理解如何在 _Y_ 上实现 _X_，当然你还要有进一步的自学能力。
+这篇充满示例的文章是为那些已经学会Node.js而正向Go进军的人准备的（当然反过来也成立）。这不是说这篇教程是一个完整的教程，因为我们假设你已经学习了 [Tour of Go](https://tour.golang.org/)。这个教程的目的是让你在较高水平上理解如何在 _Y_ 上实现 _X_，当然你还要有进一步的自学能力。
 
 ## Examples
 
@@ -92,7 +92,7 @@ format example 1
 print to stderr
 ```
 
-### 打印 log
+### 打印log
 
 ---
 

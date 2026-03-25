@@ -1,8 +1,8 @@
 ---
-title: Vue 对 HTML 自定义渲染
+title: Vue对HTML自定义渲染
 date: 2022-02-27 20:00:00
 tag: [简单记录]
-description: Vue 对 HTML 自定义渲染
+description: Vue对HTML自定义渲染
 ---
 
 ```typescript
@@ -87,8 +87,8 @@ const PPPPPP = defineComponent({
 export default PPPPPP;
 ```
 
-上面的代码来自我[废弃的博客系统](https://github.com/BeiyanYunyi/Boron)。简简单单遍历个 DOM 树然后渲染就行了，没啥好说的。
+上面的代码来自我[废弃的博客系统](https://github.com/BeiyanYunyi/Boron)。简简单单遍历个DOM树然后渲染就行了，没啥好说的。
 
 实际上也可以用`querySelectorAll`来做，把特定元素替换成自定义元素，然后注册`Web Components`解决之。
 
-博客系统写到一半，这边 vuepress-theme-hope 的 bug 已经被解决掉了，所以直接上 vuepress 摆烂。看看回头开发 HexoSharp 怎么样。
+博客系统写到一半，这边vuepress-theme-hope的bug已经被解决掉了，所以直接上vuepress摆烂。看看回头开发HexoSharp怎么样。

@@ -8,15 +8,15 @@ date: '2022-11-07'
 
 🇵🇸 反对以色列对巴勒斯坦的侵略，以及用性少数为自己“漂粉”的行为。支持巴勒斯坦人民的反侵略斗争。
 
-业余 TypeScript 全栈，会 React、Express、knexjs、sequelize、mongoose 等，正拿 Astro + SolidJS 摸博客。
+业余TypeScript全栈，会React、Express、knexjs、sequelize、mongoose等，正拿Astro + SolidJS摸博客。
 
 前化竞党，后转行劝退，没听劝的奥赛生后来都后悔了。
 
-业余活动家，被校方约谈数次、被区派出所约谈 1 次，写的文章天天被删。B 站疑似因拉黑官媒被永封。偶尔会写些不那么容易被删的技术类文章。
+业余活动家，被校方约谈数次、被区派出所约谈1次，写的文章天天被删。B站疑似因拉黑官媒被永封。偶尔会写些不那么容易被删的技术类文章。
 
 民主改革家，一次成功、一次失败。
 
-国际主义 + 科学社会主义者，写的代码全都用了 AGPLv3 协议：![GitHub](https://img.shields.io/github/license/BeiyanYunyi/Astro-Blog-Lithium?style=for-the-badge)
+国际主义 + 科学社会主义者，写的代码全都用了AGPLv3协议：![GitHub](https://img.shields.io/github/license/BeiyanYunyi/Astro-Blog-Lithium?style=for-the-badge)
 
 She / Her
 
