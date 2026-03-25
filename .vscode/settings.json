@@ -1,9 +1,8 @@
 {
   "typescript.tsdk": "node_modules/typescript/lib",
   "editor.formatOnSave": false,
-  "css.customData": [
-    "./css-data.json"
-  ],
+  "css.customData": ["./css-data.json"],
+  "prettier.enable": false,
   "editor.codeActionsOnSave": {
     "source.fixAll": "explicit",
     "source.organizeImports": "never"

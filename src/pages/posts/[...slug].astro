@@ -1,13 +1,13 @@
 ---
 import BlogPost from '@components/BlogPost.astro';
-import idToSlug from '@utils/idToSlug';
+import { filePathToSlug } from '@utils/idToSlug';
 import type { GetStaticPaths } from 'astro';
 import { getCollection, render } from 'astro:content';
 
 export const getStaticPaths = (async () => {
   const blogEntries = await getCollection('posts');
   return blogEntries.map((entry) => ({
-    params: { slug: idToSlug(entry.id) },
+    params: { slug: filePathToSlug(entry.filePath) },
     props: { entry },
   }));
 }) satisfies GetStaticPaths;
@@ -20,7 +20,7 @@ const { Content, remarkPluginFrontmatter } = await render(entry);
   title={entry.data.title}
   date={entry.data.date}
   remarkPluginFrontmatter={remarkPluginFrontmatter}
-  slug={idToSlug(entry.id)}
+  slug={filePathToSlug(entry.filePath)}
   description={entry.data.description}
   tag={entry.data.tag}
   image={entry.data.image}

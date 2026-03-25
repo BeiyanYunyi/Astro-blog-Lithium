@@ -1,7 +1,7 @@
 ---
 import type { CollectionEntry } from 'astro:content';
 import ArticleTime from './ArticleTime.astro';
-import idToSlug from '@utils/idToSlug';
+import idToSlug, { filePathToSlug } from '@utils/idToSlug';
 import { Image } from 'astro:assets';
 
 export interface Props {
@@ -23,8 +23,8 @@ const isForward = post.data.tag?.includes('转载');
     )
   }
   <div class="p-6">
-    <ArticleTime slug={idToSlug(post.id)} date={post.data.date} class="mb-1" />
-    <a href={`/posts/${idToSlug(post.id)}/`} class="text-[2rem] mb-6">
+    <ArticleTime slug={filePathToSlug(post.filePath)} date={post.data.date} class="mb-1" />
+    <a href={`/posts/${filePathToSlug(post.filePath)}/`} class="text-[2rem] mb-6">
       {post.data.title}
       {
         isForward && (
