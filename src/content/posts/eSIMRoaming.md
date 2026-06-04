@@ -34,7 +34,7 @@ tag:
 
 要想写入，我们还需要对应的软件。你可以使用[ESTKme](https://store.estk.me/downloads)出品的软件（实际上能写别的eSIM容器）、[EasyLPAC](https://github.com/creamlike1024/EasyLPAC)或者[EasyEUICC](https://easyeuicc.org/zh-hant/)。我没有Android设备，就没法直接用手机的SIM卡槽写入，而只能插在读卡器上，用EasyLPAC进行写入。写入之后，启用对应的Profile，再切换手机流量卡（可能还要启用数据漫游），就能使用eSIM上网了。
 
-‍---
+<span class="text-xs">本文应EasyEUICC开发者的邀请写就。本文作者接受了其赞助。</span>
 
 [^1]: Dler Cloud不可用大约半个月后恢复，持续运营至今。但其核心维护人员（墙洞）仍然失联。
 [^2]: 通常而言确实如此。但也存在“本地出口”（Local Breakout, LBO）的情况，这种情况下，流量可能会直接走当地出口。此外，运营商也可能实施某些分流策略，让特定流量在特定出口落地。
