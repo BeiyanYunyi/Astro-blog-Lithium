@@ -1,6 +1,7 @@
 ---
 title: 本站评论政策
 date: 2025-03-31 06:00:00
+layout: '@layouts/BlogPost.astro'
 description: >
   本站评论政策
 ---

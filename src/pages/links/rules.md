@@ -1,6 +1,7 @@
 ---
 title: 友链规则与流程
 date: 2020-03-02 21:40:06
+layout: '@layouts/BlogPost.astro'
 article: false
 ---
 

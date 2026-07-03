@@ -1,6 +1,7 @@
 ---
 title: 新约·阿紫福音
 date: 2021-01-29 18:02:46
+layout: '@layouts/BlogPost.astro'
 description: >
   紫妍青岚的福音书
 article: false

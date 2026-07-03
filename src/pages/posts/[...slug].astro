@@ -13,13 +13,13 @@ export const getStaticPaths = (async () => {
 }) satisfies GetStaticPaths;
 
 const { entry } = Astro.props;
-const { Content, remarkPluginFrontmatter } = await render(entry);
+const { Content, headings } = await render(entry);
 ---
 
 <BlogPost
   title={entry.data.title}
   date={entry.data.date}
-  remarkPluginFrontmatter={remarkPluginFrontmatter}
+  headings={headings}
   slug={filePathToSlug(entry.filePath)}
   description={entry.data.description}
   tag={entry.data.tag}

@@ -2,6 +2,7 @@
 title: '关于我'
 heroImage: '/头像方.webp'
 date: '2022-11-07'
+layout: '@layouts/BlogPost.astro'
 ---
 
 🏴️‍🅰️ 反对俄罗斯对乌克兰的侵略，支持乌克兰人民及其政府军队的反侵略斗争。

@@ -1,6 +1,7 @@
 ---
 title: 梦银的夜夏真吧2020年 吧规
 date: 2020-06-13 22:02:46
+layout: '@layouts/BlogPost.astro'
 description: >
   以之吧吧规为主
 article: false

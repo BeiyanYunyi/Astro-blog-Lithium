@@ -1,6 +1,7 @@
 ---
 title: NUY WiFi登录 隐私政策
 date: 2020-11-29 02:02:46
+layout: '@layouts/BlogPost.astro'
 description: >
   NUY WiFi登录 隐私政策
 ---

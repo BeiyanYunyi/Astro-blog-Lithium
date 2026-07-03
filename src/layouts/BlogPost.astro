@@ -3,17 +3,21 @@ import type MDInstance from '@app-types/MDInstance';
 import ArticleTags from '@components/ArticleTags.astro';
 import ArticleTime from '@components/ArticleTime.astro';
 import { SITE_DESCRIPTION, SITE_TITLE } from '@config';
+import type { MarkdownHeading } from 'astro';
+import headingsToToc from '@utils/headingsToToc';
 import BaseLayout from './BaseLayout.astro';
 
-export type Props = MDInstance & { image?: string };
+export type Props = MDInstance & { headings?: MarkdownHeading[]; image?: string };
 
 const {
   content: { title = SITE_TITLE, description = SITE_DESCRIPTION, heroImage, image },
   frontmatter,
+  headings = [],
   url,
 } = Astro.props;
 
 const finalImage = image || heroImage;
+const toc = headingsToToc(headings);
 ---
 
 <BaseLayout title={title} description={description} image={finalImage}>
@@ -39,11 +43,11 @@ const finalImage = image || heroImage;
       <ArticleTags tag={frontmatter.tag} />
     </article>
     {
-      frontmatter.toc && (
+      toc && (
         <aside class="hidden lg:block mt-4 lg:(mt-0 ml-4) flex-shrink-0" id="toc">
           <nav
             class="prose prose-neutral dark:prose-invert sticky top-20 text-sm card px-4 w-[15rem] max-h-[calc(100vh-6rem)] overflow-y-auto"
-            set:html={frontmatter.toc}
+            set:html={toc}
           />
         </aside>
       )

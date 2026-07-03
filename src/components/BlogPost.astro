@@ -3,11 +3,13 @@ import ArticleTags from '@components/ArticleTags.astro';
 import ArticleTime from '@components/ArticleTime.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { Image } from 'astro:assets';
+import type { MarkdownHeading } from 'astro';
 import type { CollectionEntry } from 'astro:content';
 import svgPathToName from '@utils/svgPathToName';
+import headingsToToc from '@utils/headingsToToc';
 
 export type Props = {
-  remarkPluginFrontmatter: any;
+  headings: MarkdownHeading[];
   title: string;
   slug: string;
   description: string;
@@ -16,7 +18,8 @@ export type Props = {
   date: Date;
 };
 
-const { title, slug, remarkPluginFrontmatter, description, tag, date, image } = Astro.props;
+const { title, slug, headings, description, tag, date, image } = Astro.props;
+const toc = headingsToToc(headings);
 ---
 
 <BaseLayout
@@ -60,11 +63,11 @@ const { title, slug, remarkPluginFrontmatter, description, tag, date, image } = 
       </div>
     </div>
     {
-      'toc' in remarkPluginFrontmatter && (
+      toc && (
         <aside class="hidden lg:block mt-4 lg:(mt-0 ml-4) flex-shrink-0" id="toc">
           <nav
             class="prose prose-neutral dark:prose-invert sticky top-20 text-sm card px-4 w-[15rem] max-h-[calc(100vh-6rem)] overflow-y-auto"
-            set:html={remarkPluginFrontmatter.toc}
+            set:html={toc}
           />
         </aside>
       )

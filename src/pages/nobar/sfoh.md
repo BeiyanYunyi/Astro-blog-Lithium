@@ -1,6 +1,7 @@
 ---
 title: 我是中国特色社会主义者
 date: 2021-01-29 18:02:46
+layout: '@layouts/BlogPost.astro'
 description: >
   我是中国特色社会主义者
 article: false
