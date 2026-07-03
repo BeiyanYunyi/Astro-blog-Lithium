@@ -22,4 +22,9 @@ export default defineConfig({
     syntaxHighlight: 'prism',
   },
   image: { domains: ['s3.penclub.club'] },
+  vite: {
+    build: {
+      sourcemap: true,
+    },
+  },
 })
