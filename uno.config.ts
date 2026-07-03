@@ -36,7 +36,7 @@ if (useMiSans)
   sansFont.unshift('MiSans')
 
 export default defineConfig({
-  content: { filesystem: ['src/**/*.md'] },
+  content: { filesystem: ['src/**/*.{md,mdx,astro}'] },
   presets: [
     presetWind3(),
     presetAttributify(),
