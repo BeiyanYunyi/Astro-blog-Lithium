@@ -7,6 +7,7 @@ import type { MarkdownHeading } from 'astro';
 import type { CollectionEntry } from 'astro:content';
 import svgPathToName from '@utils/svgPathToName';
 import headingsToToc from '@utils/headingsToToc';
+import TocHighlight from './TocHighlight';
 
 export type Props = {
   headings: MarkdownHeading[];
@@ -72,6 +73,7 @@ const toc = headingsToToc(headings);
         </aside>
       )
     }
+    {toc && <TocHighlight headings={headings} client:only="solid-js" />}
   </div>
   <script>
     import getWordCount from '@utils/getWordCount';
@@ -86,11 +88,6 @@ const toc = headingsToToc(headings);
     const pageAddress = document.getElementById('page_address');
     if (pageAddress) {
       pageAddress.innerHTML = location.href;
-    }
-  </script>
-  <script>
-    if (document.querySelector('aside#toc')) {
-      import('@components/tocHighlight');
     }
   </script>
 </BaseLayout>

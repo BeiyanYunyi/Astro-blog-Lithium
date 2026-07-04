@@ -5,6 +5,7 @@ import ArticleTime from '@components/ArticleTime.astro';
 import { SITE_DESCRIPTION, SITE_TITLE } from '@config';
 import type { MarkdownHeading } from 'astro';
 import headingsToToc from '@utils/headingsToToc';
+import TocHighlight from '@components/TocHighlight';
 import BaseLayout from './BaseLayout.astro';
 
 export type Props = MDInstance & { headings?: MarkdownHeading[]; image?: string };
@@ -52,10 +53,6 @@ const toc = headingsToToc(headings);
         </aside>
       )
     }
+    {toc && <TocHighlight headings={headings} client:only="solid-js" />}
   </div>
-  <script>
-    if (document.querySelector('aside#toc')) {
-      import('@components/tocHighlight');
-    }
-  </script>
 </BaseLayout>
