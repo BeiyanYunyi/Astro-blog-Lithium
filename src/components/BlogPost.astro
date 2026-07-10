@@ -20,13 +20,14 @@ export type Props = {
 };
 
 const { title, slug, headings, description, tag, date, image } = Astro.props;
+const remoteImage = typeof image === 'string' ? image : undefined;
 const toc = headingsToToc(headings);
 ---
 
 <BaseLayout
   title={title}
   description={description}
-  image={image?.src ? `/og-image/${svgPathToName(image?.src)}.png` : '/头像方.png'}
+  image={remoteImage || (image?.src ? `/og-image/${svgPathToName(image?.src)}.png` : '/头像方.png')}
 >
   <div class="flex">
     <div class="flex-grow min-w-0">
