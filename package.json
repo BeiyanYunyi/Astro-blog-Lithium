@@ -2,7 +2,7 @@
   "name": "code-of-my-blog",
   "type": "module",
   "version": "3.0.0",
-  "packageManager": "pnpm@10.30.3+sha512.c961d1e0a2d8e354ecaa5166b822516668b7f44cb5bd95122d590dd81922f606f5473b6d23ec4a5be05e7fcd18e8488d47d978bbe981872f1145d06e9a740017",
+  "packageManager": "pnpm@11.18.0+sha512.33d83c77da82f49fba836925c6f1b841181ec3132b670639bd012f7075f5c7cf634c5f870147c19aae7478fac01df09d8892e880454896edd23ee9b33757563c",
   "description": "拿去吧！",
   "license": "AGPL-3.0-or-later",
   "engines": {
@@ -56,33 +56,5 @@
     "rollup": "^4.62.2",
     "typescript": "^6.0.3",
     "wrangler": "^4.107.0"
-  },
-  "pnpm": {
-    "overrides": {
-      "array-includes": "npm:@nolyfill/array-includes@^1",
-      "array.prototype.findlastindex": "npm:@nolyfill/array.prototype.findlastindex@^1",
-      "array.prototype.flat": "npm:@nolyfill/array.prototype.flat@^1",
-      "array.prototype.flatmap": "npm:@nolyfill/array.prototype.flatmap@^1",
-      "deep-equal": "npm:@nolyfill/deep-equal@^1",
-      "has": "npm:@nolyfill/has@^1",
-      "hasown": "npm:@nolyfill/hasown@^1",
-      "is-core-module": "npm:@nolyfill/is-core-module@^1",
-      "object.assign": "npm:@nolyfill/object.assign@^1",
-      "object.entries": "npm:@nolyfill/object.entries@^1",
-      "object.fromentries": "npm:@nolyfill/object.fromentries@^1",
-      "object.groupby": "npm:@nolyfill/object.groupby@^1",
-      "object.values": "npm:@nolyfill/object.values@^1",
-      "safe-buffer": "npm:@nolyfill/safe-buffer@^1",
-      "safe-regex-test": "npm:@nolyfill/safe-regex-test@^1",
-      "side-channel": "npm:@nolyfill/side-channel@^1",
-      "string.prototype.includes": "npm:@nolyfill/string.prototype.includes@^1",
-      "string.prototype.trimend": "npm:@nolyfill/string.prototype.trimend@^1",
-      "typedarray": "npm:@nolyfill/typedarray@^1"
-    },
-    "onlyBuiltDependencies": [
-      "esbuild",
-      "sharp",
-      "workerd"
-    ]
   }
 }
