@@ -1,0 +1,30 @@
+---
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+
+interface Props {
+  src: ImageMetadata | string;
+  alt: string;
+  class?: string;
+}
+
+const { src, alt, class: className } = Astro.props;
+// Cloudflare's image transform endpoint cannot output SVG; serve vector covers directly.
+const svg = typeof src !== 'string' && src.format === 'svg' ? src : undefined;
+---
+
+{
+  svg ? (
+    <img
+      src={svg.src}
+      width={svg.width}
+      height={svg.height}
+      alt={alt}
+      class={className}
+      loading="lazy"
+      decoding="async"
+    />
+  ) : (
+    <Image src={src} alt={alt} class={className} inferSize />
+  )
+}

@@ -2,7 +2,7 @@
 import type { CollectionEntry } from 'astro:content';
 import ArticleTime from './ArticleTime.astro';
 import idToSlug, { filePathToSlug } from '@utils/idToSlug';
-import { Image } from 'astro:assets';
+import CoverImage from './CoverImage.astro';
 
 export interface Props {
   post: CollectionEntry<'posts'>;
@@ -14,11 +14,10 @@ const isForward = post.data.tag?.includes('转载');
 <li class="flex flex-col items-start card overflow-clip">
   {
     post.data.image && (
-      <Image
+      <CoverImage
         class="object-contain w-full mb-2"
         src={post.data.image}
         alt="Article cover"
-        inferSize
       />
     )
   }
