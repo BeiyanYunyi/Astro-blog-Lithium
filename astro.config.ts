@@ -9,6 +9,7 @@ import katexPlugin from './src/utils/katexPlugin'
 // https://astro.build/config
 export default defineConfig({
   site: 'https://stblog.penclub.club',
+  output: 'static',
   integrations: [mdx(), sitemap(), solidJs(), UnoCSS()],
   markdown: {
     processor: satteri({

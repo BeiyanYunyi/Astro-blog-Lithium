@@ -1,9 +1,4 @@
-/.well-known/webfinger
-  Content-Type: application/jrd+json
-
-/api/activitypub/actor
-  Content-Type: application/activity+json
-
+# Static ActivityPub documents; dynamic responses set headers in the Worker.
 /api/activitypub/note/*
   Content-Type: application/activity+json
 

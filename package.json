@@ -6,7 +6,7 @@
   "description": "拿去吧！",
   "license": "AGPL-3.0-or-later",
   "engines": {
-    "node": ">=25.0.0"
+    "node": ">=26.0.0"
   },
   "scripts": {
     "dev": "cross-env DEV=true astro dev --host",
@@ -14,7 +14,11 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "page:preview": "wrangler pages dev ./dist/"
+    "worker:dev": "pnpm build && wrangler dev",
+    "worker:check": "tsc --project functions/tsconfig.json --noEmit",
+    "worker:dry-run": "wrangler deploy --dry-run --outdir .wrangler/dry-run",
+    "deploy": "pnpm build && wrangler deploy",
+    "test:worker": "pnpm worker:dry-run && node --test tests/worker.test.ts"
   },
   "dependencies": {
     "@astrojs/markdown-satteri": "^0.3.8",

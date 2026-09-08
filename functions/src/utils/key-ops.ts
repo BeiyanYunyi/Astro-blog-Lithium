@@ -1,4 +1,4 @@
-export function arrayBufferToBase64(buffer: ArrayBuffer): string {
+export function arrayBufferToBase64(buffer: ArrayBuffer | Uint8Array): string {
   let binary = '';
   const bytes = new Uint8Array(buffer);
   const len = bytes.byteLength;
@@ -34,7 +34,7 @@ function getKeyMaterial(password: string): Promise<CryptoKey> {
 Given some key material and some random salt
 derive an AES-KW key using PBKDF2.
 */
-function getKey(keyMaterial: CryptoKey, salt: ArrayBuffer): Promise<CryptoKey> {
+function getKey(keyMaterial: CryptoKey, salt: BufferSource): Promise<CryptoKey> {
   return crypto.subtle.deriveKey(
     {
       name: 'PBKDF2',

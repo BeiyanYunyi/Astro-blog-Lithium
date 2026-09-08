@@ -1,9 +1,9 @@
 /* eslint-disable import/prefer-default-export */
 
 import actorURL from '../../src/const/actorURL';
-import { Env } from '../../src/types';
+import type { WorkerHandler } from '../../src/types';
 
-export const onRequestGet: PagesFunction<Env> = (ctx) =>
+export const onRequestGet: WorkerHandler = (ctx) =>
   new Response(
     JSON.stringify({
       '@context': ['https://www.w3.org/ns/activitystreams', 'https://w3id.org/security/v1'],

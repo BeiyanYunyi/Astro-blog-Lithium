@@ -12,7 +12,7 @@ class AppRequest extends Request {
     requestInit?: Omit<RequestInit<CfProperties<unknown>>, 'body'> & { body: string },
   ) {
     super(requestInfo, { ...requestInit, method: 'post' });
-    this.privBody = requestInit?.body;
+    this.privBody = requestInit?.body ?? '';
     this.headers.set('Content-Type', 'application/activity+json');
     this.headers.set('Accept', 'application/activity+json');
   }
