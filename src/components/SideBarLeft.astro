@@ -2,7 +2,7 @@
 import { SITE_TITLE } from '@config';
 import { getCollection } from 'astro:content';
 
-const allPosts = await getCollection('posts');
+const allPosts = await getCollection('posts', ({ data }) => !data.draft);
 const tags = new Set<string>();
 allPosts.forEach((post) => {
   if (!post.data.tag) return;

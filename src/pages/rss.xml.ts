@@ -1,9 +1,9 @@
+import { getCollection } from 'astro:content';
 import rss from '@astrojs/rss';
 import { SITE_DESCRIPTION, SITE_TITLE } from '@config';
 import { filePathToSlug } from '@utils/idToSlug';
-import { getCollection } from 'astro:content';
 
-const importResults = await getCollection('posts');
+const importResults = await getCollection('posts', ({ data }) => !data.draft);
 const posts = importResults.map((item) => ({
   link: `posts/${filePathToSlug(item.filePath)}`,
   title: item.data.title,

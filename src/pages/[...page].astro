@@ -6,7 +6,7 @@ import type { CollectionEntry } from 'astro:content';
 import { getCollection } from 'astro:content';
 
 export async function getStaticPaths({ paginate }: { paginate: any }) {
-  const allPosts = await getCollection('posts');
+  const allPosts = await getCollection('posts', ({ data }) => !data.draft);
   const sortedPosts = allPosts.sort(
     (a, b) => Number(b.data.date) - Number(a.data.date),
   );

@@ -10,6 +10,9 @@ const entry = entries.find(
   (post) => filePathToSlug(post.filePath) === Astro.params.slug,
 );
 if (!entry) return new Response('Not Found', { status: 404 });
+if (entry.data.draft) {
+  Astro.response.headers.set('X-Robots-Tag', 'noindex');
+}
 const { Content, headings } = await render(entry);
 ---
 
