@@ -5,16 +5,35 @@ import { test } from 'node:test';
 import { convertV4MiniflareOptions, Miniflare } from 'miniflare';
 
 const worker = {
-  fetch(request, env) {
-    return env.runtime.dispatchFetch(request.url, {
+  async fetch(request, env) {
+    const response = await env.runtime.dispatchFetch(request.url, {
       method: request.method,
       headers: request.headers,
       body: request.body,
       duplex: 'half',
       redirect: 'manual',
     });
+    await drain(env);
+    return response;
   },
 };
+
+// Real Miniflare producers deliver to a capture handler; tests drive the built
+// consumer explicitly so retries and crashes can be tested without wall-clock backoff.
+async function drain(env) {
+  const runtimeWorker = await env.runtime.getWorker();
+  for (let i = 0; i < 200; i++) {
+    await new Promise((resolve) => setTimeout(resolve, 30));
+    if (!env.queued.length) return;
+    const message = env.queued.shift();
+    const result = await runtimeWorker.queue('test-drain', [
+      { ...message, timestamp: new Date(message.timestamp) },
+    ]);
+    assert.equal(result.outcome, 'ok');
+    assert.equal(result.retryMessages.length, 0, JSON.stringify(result));
+  }
+  assert.fail('Queue did not drain');
+}
 
 const origin = 'https://blog.yunyi.beiyan.us';
 const actorId = `${origin}/api/activitypub/actor`;
@@ -38,6 +57,7 @@ async function environment(
   { realAssets = false, deliveryToken = 'local-test-token' } = {},
 ) {
   const env = {
+    queued: [],
     PUBLIC_KEY: JSON.stringify(publicKey),
     PRIV_KEY: JSON.stringify(privateKey),
     remoteFetch: async () =>
@@ -52,7 +72,15 @@ async function environment(
           // Miniflare's localhost transport rewrites Host even through getWorker().
           // Restore the HTTP invariant at the test boundary, before Astro/Fedify.
           contents: `import app from './entry.mjs';
-          export default { ...app, fetch(request, env, ctx) {
+          export default { ...app, async queue(batch, env, ctx) {
+            if (batch.queue === 'blog-federation') {
+              await env.QUEUE_CAPTURE.fetch('https://capture.test/', {
+                method: 'POST', body: JSON.stringify(batch.messages.map(m => ({
+                  id: m.id, timestamp: m.timestamp, attempts: m.attempts, body: m.body
+                })))
+              });
+            } else { await app.queue(batch, env, ctx); }
+          }, fetch(request, env, ctx) {
             const headers = new Headers(request.headers);
             headers.set('Host', new URL(request.url).host);
             return app.fetch(new Request(request, { headers }), env, ctx);
@@ -85,6 +113,19 @@ async function environment(
         ...(deliveryToken ? { DELIVERY_TOKEN: deliveryToken } : {}),
       },
       d1Databases: ['ap'],
+      queueProducers: { FEDERATION_QUEUE: 'blog-federation' },
+      queueConsumers: {
+        'blog-federation': { maxBatchSize: 1, maxBatchTimeout: 0 },
+      },
+      serviceBindings: {
+        QUEUE_CAPTURE: async (request) => {
+          env.queued.push(...(await request.json()));
+          return new Response('Captured');
+        },
+        ...(!realAssets
+          ? { ASSETS: async () => new Response('Not Found', { status: 404 }) }
+          : {}),
+      },
       outboundService: (request) => env.remoteFetch(request),
       ...(realAssets
         ? {
@@ -101,13 +142,7 @@ async function environment(
               assetConfig: { not_found_handling: '404-page' },
             },
           }
-        : {
-            serviceBindings: {
-              ASSETS: async () => {
-                return new Response('Not Found', { status: 404 });
-              },
-            },
-          }),
+        : {}),
     }),
   );
   t.after(() => runtime.dispose());
@@ -353,6 +388,110 @@ const followActivity = (suffix = 'follow') => ({
   object: actorId,
 });
 
+test('signed comments persist once, enforce ownership, apply newer edits and retain deletion tombstones', async (t) => {
+  const env = await environment(t);
+  mockRemote(t, env);
+  const note = {
+    id: `${remote}/notes/reply`,
+    type: 'Note',
+    attributedTo: remote,
+    inReplyTo: `${origin}/api/activitypub/note/CornerOfTheWorld`,
+    content: '<p>First reply</p>',
+    published: '2026-09-01T00:00:00Z',
+  };
+  let sequence = 0;
+  const receive = async (type, object) => {
+    const response = await worker.fetch(
+      await signedActivity({
+        id: `${remote}/comments/${sequence++}`,
+        type,
+        actor: remote,
+        object,
+      }),
+      env,
+    );
+    assert.equal(response.status, 202, await response.text());
+  };
+  const stored = () =>
+    env.database
+      .prepare('SELECT * FROM ap_comment WHERE id = ?')
+      .bind(note.id)
+      .first();
+  await receive('Create', note);
+  const original = await stored();
+  assert.equal(original.post_id, 'CornerOfTheWorld');
+  assert.equal(original.author_id, remote);
+  assert.equal(original.content, '<p>First reply</p>');
+  await receive('Create', { ...note, content: 'Duplicate must not overwrite' });
+  assert.deepEqual(await stored(), original);
+  for (const object of [
+    {
+      ...note,
+      id: `${remote}/notes/unknown`,
+      inReplyTo: `${origin}/api/activitypub/note/missing`,
+    },
+    {
+      ...note,
+      id: `${remote}/notes/external`,
+      inReplyTo: 'https://9.9.9.9/note',
+    },
+    { ...note, id: 'https://9.9.9.9/forged', attributedTo: remote },
+    {
+      ...note,
+      id: `${remote}/notes/forged`,
+      attributedTo: 'https://9.9.9.9/actor',
+    },
+  ])
+    await receive('Create', object);
+  assert.equal(
+    (
+      await env.database
+        .prepare('SELECT count(*) AS count FROM ap_comment')
+        .first()
+    ).count,
+    1,
+  );
+  // A valid signature is insufficient to edit or delete a different author's stored object.
+  await env.database
+    .prepare('UPDATE ap_comment SET author_id = ? WHERE id = ?')
+    .bind(`${remote}/bob`, note.id)
+    .run();
+  await receive('Update', {
+    ...note,
+    content: 'Forged edit',
+    updated: '2026-09-03T00:00:00Z',
+  });
+  await receive('Delete', note.id);
+  assert.equal((await stored()).content, original.content);
+  assert.equal((await stored()).deleted_at, null);
+  await env.database
+    .prepare('UPDATE ap_comment SET author_id = ? WHERE id = ?')
+    .bind(remote, note.id)
+    .run();
+  await receive('Update', {
+    ...note,
+    content: '<p>Edited</p>',
+    updated: '2026-09-03T00:00:00Z',
+  });
+  await receive('Update', {
+    ...note,
+    content: 'Stale edit',
+    updated: '2026-09-02T00:00:00Z',
+  });
+  assert.equal((await stored()).content, '<p>Edited</p>');
+  await receive('Delete', { id: note.id, type: 'Tombstone' });
+  assert.ok((await stored()).deleted_at);
+  assert.equal((await stored()).content, '');
+  await receive('Create', note);
+  await receive('Update', {
+    ...note,
+    content: 'Resurrected',
+    updated: '2026-09-04T00:00:00Z',
+  });
+  assert.equal((await stored()).content, '');
+  assert.ok((await stored()).deleted_at);
+});
+
 test('signed Follow, Accept, persistent deduplication, follower storage and Undo', async (t) => {
   const env = await environment(t);
   const deliveries = mockRemote(t, env);
@@ -481,31 +620,55 @@ test('verified activities cannot follow another target or undo another actor fol
   assert.equal(deliveries.length, 0);
 });
 
-test('failed Accept can be retried and does not persist a follower prematurely', async (t) => {
+test('Accept is queued and a failed delivery requests retry without losing the follower', async (t) => {
   const env = await environment(t);
   const deliveries = mockRemote(t, env);
-  const remoteFetch = env.remoteFetch;
-  let fail = true;
-  t.mock.method(env, 'remoteFetch', (input) =>
-    fail && input.method === 'POST'
-      ? new Response('Unavailable', { status: 503 })
-      : remoteFetch(input),
-  );
-  const follow = followActivity();
-  const failure = await worker.fetch(await signedActivity(follow), env);
-  assert.equal(failure.status, 500, await failure.text());
+  const input = await signedActivity(followActivity());
+  const response = await env.runtime.dispatchFetch(input.url, {
+    method: input.method,
+    headers: input.headers,
+    body: input.body,
+    duplex: 'half',
+  });
+  assert.equal(response.status, 202);
   assert.equal(
-    await env.database.prepare('SELECT * FROM follower').first(),
-    null,
+    deliveries.length,
+    0,
+    'HTTP inbox response does not wait for outbound delivery',
   );
-  fail = false;
-  const retry = await worker.fetch(await signedActivity(follow), env);
-  assert.equal(retry.status, 202, await retry.text());
-  assert.equal(deliveries.length, 1);
+  await new Promise((resolve) => setTimeout(resolve, 100));
+  const runtimeWorker = await env.runtime.getWorker();
+  const incoming = env.queued.shift();
+  assert.ok(incoming);
+  const received = await runtimeWorker.queue('test-drain', [
+    { ...incoming, timestamp: new Date(incoming.timestamp) },
+  ]);
+  assert.equal(received.retryMessages.length, 0);
+  await new Promise((resolve) => setTimeout(resolve, 100));
+  const outgoing = env.queued.shift();
+  assert.ok(outgoing);
   assert.equal(
     (await env.database.prepare('SELECT * FROM follower').first()).actorId,
     remote,
   );
+  const remoteFetch = env.remoteFetch;
+  t.mock.method(
+    env,
+    'remoteFetch',
+    async () => new Response('Unavailable', { status: 503 }),
+  );
+  const failed = await runtimeWorker.queue('test-drain', [
+    { ...outgoing, timestamp: new Date(outgoing.timestamp) },
+  ]);
+  assert.equal(failed.retryMessages.length, 1);
+  assert.equal(failed.explicitAcks.length, 0);
+  t.mock.method(env, 'remoteFetch', remoteFetch);
+  const retried = await runtimeWorker.queue('test-drain', [
+    { ...outgoing, attempts: 2, timestamp: new Date(outgoing.timestamp) },
+  ]);
+  assert.equal(retried.retryMessages.length, 0);
+  assert.equal(deliveries.length, 1);
+  assert.equal(deliveries[0].body.type, 'Accept');
 });
 
 test('additive migration is repeatable and retains existing follower rows', async (t) => {
@@ -516,10 +679,13 @@ test('additive migration is repeatable and retains existing follower rows', asyn
     .run();
   const before = await env.database.prepare('SELECT * FROM follower').first();
   await env.database.exec('DROP TABLE fedify_kv');
-  const sql = await readFile(
-    new URL('../migrations/0001_fedify_kv.sql', import.meta.url),
-    'utf8',
-  );
+  const sql = (
+    await Promise.all(
+      ['0001_fedify_kv.sql', '0002_comments_publications.sql'].map((name) =>
+        readFile(new URL(`../migrations/${name}`, import.meta.url), 'utf8'),
+      ),
+    )
+  ).join('\n');
   for (let pass = 0; pass < 2; pass++) {
     for (const statement of sql.split(';').filter((sql) => sql.trim()))
       await env.database.prepare(statement).run();
@@ -538,41 +704,150 @@ test('additive migration is repeatable and retains existing follower rows', asyn
   );
 });
 
-test('manual delivery sends the real outbox oldest first and deduplicates inboxes', async (t) => {
+const scan = async (env) => {
+  const result = await (await env.runtime.getWorker()).scheduled({
+    cron: '*/5 * * * *',
+  });
+  assert.equal(result.outcome, 'ok');
+};
+
+test('cron baselines history, discovers new posts, pages distinct inboxes and does not resend completed posts', async (t) => {
   const env = await environment(t);
   const deliveries = mockRemote(t, env);
-  for (const [actor, inbox] of [
-    [remote, remoteInbox],
-    ['https://1.1.1.1/users/bob', remoteInbox],
-    ['https://8.8.8.8/actor', 'https://8.8.8.8/inbox'],
-  ]) {
+  await scan(env);
+  await drain(env);
+  const baseline = await env.database
+    .prepare('SELECT * FROM ap_publication')
+    .all();
+  assert.ok(baseline.results.length > 25);
+  assert.ok(baseline.results.every((row) => row.status === 'baseline'));
+  assert.equal(deliveries.length, 0);
+  // Simulate a newly deployed post by removing it from the initial snapshot.
+  await env.database
+    .prepare('DELETE FROM ap_publication WHERE post_id = ?')
+    .bind('CornerOfTheWorld')
+    .run();
+  for (let i = 0; i < 28; i++) {
     await env.database
       .prepare('INSERT INTO follower(actorId, inbox) VALUES (?, ?)')
-      .bind(actor, inbox)
+      .bind(
+        `https://1.1.1.1/users/${i}`,
+        `https://1.1.1.1/inbox/${String(i).padStart(2, '0')}`,
+      )
       .run();
   }
-  const outbox = await (
-    await worker.fetch(request('/api/activitypub/outbox'), env)
-  ).json();
-  const sent = await worker.fetch(
-    request('/api/sendToInbox', {
-      method: 'POST',
-      headers: { Authorization: 'Bearer local-test-token' },
-    }),
-    env,
+  await env.database
+    .prepare('INSERT INTO follower(actorId, inbox) VALUES (?, ?)')
+    .bind('https://1.1.1.1/users/duplicate', 'https://1.1.1.1/inbox/00')
+    .run();
+  await scan(env);
+  await new Promise((resolve) => setTimeout(resolve, 100));
+  assert.equal(deliveries.length, 0);
+  const task = env.queued.shift();
+  assert.equal(task.body.type, 'blog-publish');
+  const result = await (await env.runtime.getWorker()).queue('test-drain', [
+    { ...task, timestamp: new Date(task.timestamp) },
+  ]);
+  assert.equal(result.retryMessages.length, 0);
+  const partial = await env.database
+    .prepare("SELECT * FROM ap_publication WHERE post_id = 'CornerOfTheWorld'")
+    .first();
+  assert.equal(partial.status, 'pending');
+  assert.equal(partial.cursor, 'https://1.1.1.1/inbox/24');
+  assert.equal(
+    deliveries.length,
+    0,
+    'fan-out enqueues deliveries without performing HTTP requests',
   );
-  assert.equal(sent.status, 200, await sent.clone().text());
-  const expected = outbox.orderedItems.map((item) => item.id).reverse();
-  assert.ok(expected.length > 0);
-  for (const inbox of [remoteInbox, 'https://8.8.8.8/inbox']) {
-    assert.deepEqual(
-      deliveries
-        .filter((item) => item.url === inbox)
-        .map((item) => item.body.id),
-      expected,
-    );
-  }
-  assert.equal(deliveries.length, expected.length * 2);
+  await new Promise((resolve) => setTimeout(resolve, 100));
+  const continuation = env.queued.find(
+    (message) => message.body.type === 'blog-publish',
+  );
+  assert.ok(continuation);
+  // Simulate losing the continuation after committing the first page's cursor.
+  env.queued = env.queued.filter((message) => message !== continuation);
+  await drain(env);
+  assert.equal(deliveries.length, 25);
+  await scan(env);
+  await drain(env);
+  assert.equal(deliveries.length, 28);
+  assert.equal(new Set(deliveries.map((item) => item.url)).size, 28);
+  assert.ok(
+    deliveries.every(
+      (item) =>
+        item.body.id === `${origin}/api/activitypub/create/CornerOfTheWorld`,
+    ),
+  );
+  assert.ok(deliveries.every((item) => item.headers.get('Signature')));
+  assert.equal(
+    (
+      await env.database
+        .prepare(
+          "SELECT status FROM ap_publication WHERE post_id = 'CornerOfTheWorld'",
+        )
+        .first()
+    ).status,
+    'complete',
+  );
+  await scan(env);
+  await drain(env);
+  // Cloudflare can redeliver an already completed job.
+  await (await env.runtime.getWorker()).queue('test-drain', [
+    { ...task, timestamp: new Date(task.timestamp), attempts: 2 },
+  ]);
+  await drain(env);
+  assert.equal(deliveries.length, 28);
+});
+
+test('scans cap publication jobs at five and removed source posts do not block later work', async (t) => {
+  const env = await environment(t);
+  await scan(env);
+  await env.database
+    .prepare(
+      "UPDATE ap_publication SET status = 'pending' WHERE post_id IN (SELECT post_id FROM ap_publication LIMIT 6)",
+    )
+    .run();
+  await env.database
+    .prepare(
+      "INSERT INTO ap_publication(post_id, status, created_at) VALUES ('missing-source', 'pending', '0000')",
+    )
+    .run();
+  await scan(env);
+  await new Promise((resolve) => setTimeout(resolve, 100));
+  assert.equal(env.queued.length, 5);
+  await drain(env);
+  assert.equal(
+    (
+      await env.database
+        .prepare(
+          "SELECT status FROM ap_publication WHERE post_id = 'missing-source'",
+        )
+        .first()
+    ).status,
+    'cancelled',
+  );
+  assert.equal(
+    (
+      await env.database
+        .prepare(
+          "SELECT count(*) AS count FROM ap_publication WHERE status = 'pending'",
+        )
+        .first()
+    ).count,
+    2,
+  );
+  await scan(env);
+  await drain(env);
+  assert.equal(
+    (
+      await env.database
+        .prepare(
+          "SELECT count(*) AS count FROM ap_publication WHERE status = 'pending'",
+        )
+        .first()
+    ).count,
+    0,
+  );
 });
 
 test('key generation returns a usable key pair without changing actor secrets', async (t) => {
@@ -589,37 +864,35 @@ test('key generation returns a usable key pair without changing actor secrets', 
   assert.equal(env.PUBLIC_KEY, JSON.stringify(publicKey));
 });
 
-test('manual delivery handles empty followers and reports remote failures', async (t) => {
+test('manual wake-up returns 202 and does not resend history, including with no followers', async (t) => {
   const env = await environment(t);
-  const send = () =>
-    worker.fetch(
-      request('/api/sendToInbox', {
-        method: 'POST',
-        headers: { Authorization: 'Bearer local-test-token' },
-      }),
-      env,
-    );
-  const remoteFetch = t.mock.method(
+  const deliveries = mockRemote(t, env);
+  const response = await worker.fetch(
+    request('/api/sendToInbox', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer local-test-token' },
+    }),
     env,
-    'remoteFetch',
-    async () => new Response('Failed', { status: 503 }),
   );
-  const empty = await send();
-  assert.equal(empty.status, 200);
-  await empty.text();
-  assert.equal(remoteFetch.mock.callCount(), 0);
-  await env.database.exec(
-    "INSERT INTO follower(actorId, inbox) VALUES ('https://1.1.1.1/actor', 'https://1.1.1.1/inbox')",
+  assert.equal(response.status, 202);
+  assert.deepEqual(await response.json(), { queued: 0 });
+  assert.equal(deliveries.length, 0);
+  await env.database
+    .prepare("DELETE FROM ap_publication WHERE post_id = 'CornerOfTheWorld'")
+    .run();
+  await scan(env);
+  await drain(env);
+  assert.equal(
+    (
+      await env.database
+        .prepare(
+          "SELECT status FROM ap_publication WHERE post_id = 'CornerOfTheWorld'",
+        )
+        .first()
+    ).status,
+    'complete',
   );
-  const failure = await send();
-  assert.equal(failure.status, 502);
-  await failure.text();
-  // Fedify tries the alternate HTTP signature format before reporting failure.
-  assert.equal(remoteFetch.mock.callCount(), 2);
-  const attempts = await Promise.all(
-    remoteFetch.mock.calls.map((call) => call.arguments[0].clone().json()),
-  );
-  assert.equal(attempts[0].id, attempts[1].id);
+  assert.equal(deliveries.length, 0);
 });
 
 test('static pages, RSS, sitemap, OG images and Markdown/MDX remain available', async (t) => {

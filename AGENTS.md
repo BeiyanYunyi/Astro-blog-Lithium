@@ -1,7 +1,7 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-`src/` contains the Astro app. Page routes live in `src/pages/`, shared layouts in `src/layouts/`, reusable UI in `src/components/`, content helpers in `src/utils/`, and site data in `src/data/` plus `src/config.ts`. Blog posts are stored as Markdown or MDX in `src/content/posts/` and validated by `src/content.config.ts`. Static files go in `public/`. The Cloudflare Worker uses the standard Astro Cloudflare adapter entrypoint. ActivityPub endpoints live in `src/pages/api/`, WebFinger in `src/pages/.well-known/`, and Fedify dispatchers and storage adapters in `src/server/activitypub/`. Database migrations live in `migrations/`.
+`src/` contains the Astro app. Page routes live in `src/pages/`, shared layouts in `src/layouts/`, reusable UI in `src/components/`, content helpers in `src/utils/`, and site data in `src/data/` plus `src/config.ts`. Blog posts are stored as Markdown or MDX in `src/content/posts/` and validated by `src/content.config.ts`. Static files go in `public/`. The Cloudflare Worker entrypoint is `src/server/worker.ts`; it delegates HTTP to the Astro adapter and handles scheduled publication scans and queue consumption. ActivityPub endpoints live in `src/pages/api/`, WebFinger in `src/pages/.well-known/`, and Fedify dispatchers and storage adapters in `src/server/activitypub/`. Database migrations live in `migrations/`.
 
 ## Build, Test, and Development Commands
 Use `pnpm` with Node `>=26`.

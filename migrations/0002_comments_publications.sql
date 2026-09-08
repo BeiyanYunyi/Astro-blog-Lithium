@@ -1,20 +1,3 @@
-CREATE TABLE follower(
-  id INTEGER PRIMARY KEY,
-  actorId TEXT NOT NULL,
-  inbox TEXT NOT NULL,
-  constraint actorId_unique UNIQUE (actorId)
-);
-
-CREATE index follower_inbox on follower(actorId);
-
--- Additive: preserve the existing follower table and its rows.
-CREATE TABLE IF NOT EXISTS fedify_kv (
-  key TEXT PRIMARY KEY NOT NULL,
-  value TEXT NOT NULL,
-  expires INTEGER
-);
-CREATE INDEX IF NOT EXISTS fedify_kv_expires ON fedify_kv(expires);
-
 CREATE TABLE IF NOT EXISTS ap_comment (
   id TEXT PRIMARY KEY NOT NULL,
   post_id TEXT NOT NULL,

@@ -30,6 +30,7 @@
     "@astrojs/rss": "^4.0.19",
     "@astrojs/sitemap": "^3.7.3",
     "@astrojs/solid-js": "^7.0.2",
+    "@fedify/cfworkers": "^2.3.6",
     "@fedify/fedify": "^2.3.6",
     "@fedify/vocab": "^2.3.6",
     "@iconify-json/ion": "^1.2.7",

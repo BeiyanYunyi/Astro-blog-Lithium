@@ -21,14 +21,19 @@ Currently, there's no i18n support, but since there's few text, you can easily t
 
 ## Cloudflare Workers and Fedify
 
-Use Node >=26 and pnpm. Astro's Cloudflare adapter owns page and API routing.
-`src/server/activitypub/federation.ts` defines Fedify actor/object/collection
-dispatchers and inbox listeners; the dynamic Astro endpoints forward requests to
-`Federation.fetch()`. `src/middleware.ts` retains article HTML/ActivityPub content
-negotiation, including quality values, `Vary: Accept` and `Cache-Control: no-store`.
-Home, tags and RSS remain prerendered. Article URLs remain in the sitemap.
-The build produces `dist/client/` and `dist/server/`; deployment uses the
-adapter-generated Wrangler configuration.
+Use Node >=26 and pnpm. `src/server/worker.ts` delegates HTTP requests to Astro's
+Cloudflare adapter and implements Cloudflare `scheduled()` and `queue()` handlers.
+`src/server/activitypub/federation.ts` registers dispatchers and listeners once
+with `createFederationBuilder<Env>()`, then builds a federation per invocation
+with `D1KvStore` and `@fedify/cfworkers`'s `WorkersMessageQueue`. No Workers KV
+namespace is required. `manuallyStartQueue: true` disables polling; the consumer
+unwraps each message with `processMessage()` before `processQueuedTask()`.
+
+`src/middleware.ts` retains article HTML/ActivityPub content negotiation,
+including quality values, `Vary: Accept` and `Cache-Control: no-store`. Home,
+tags and RSS remain prerendered. Article URLs remain in the sitemap. The build
+produces `dist/client/` and `dist/server/`; deployment uses the adapter-generated
+Wrangler configuration.
 
 ```sh
 pnpm install
@@ -37,41 +42,51 @@ pnpm build
 pnpm test:worker
 pnpm check
 pnpm worker:dry-run
-pnpm worker:dev
 ```
 
-`pnpm dev` and `worker:dev` use Astro's Cloudflare runtime; `pnpm preview` previews
-the production build. Worker regression tests run the built application in
-Miniflare with local D1 and mocked remote federation servers. They cover signed
-Follow/Accept/Undo, invalid signatures, inbox replay suppression, existing follower
-rows, delivery, WebFinger, article negotiation and static pages.
+`pnpm dev` and `worker:dev` use Astro's Cloudflare runtime. `pnpm preview` previews
+the production build. Worker tests use the built application, real Miniflare D1
+and queue producers, and mocked remote HTTP servers. A test capture handler lets
+tests drive the production consumer and inspect acknowledgements/retries without
+waiting for production backoff intervals.
 
-### Migrate an existing federation deployment
+### Upgrade an existing deployment
 
-1. Keep the `ap` binding and database ID in `wrangler.jsonc`. Keep the existing
-   `follower` table and all rows. Apply only the additive Fedify migration:
+1. Keep the existing `ap` binding/database, `follower` rows, and `PUBLIC_KEY` and
+   `PRIV_KEY` secrets. Keys retain their JSON-string encoding: PEM public key and
+   base64 PKCS#8 private key. The public `#main-key` ID stays unchanged. Apply the
+   additive migrations (the first is only needed if not already applied):
 
    ```sh
    pnpm exec wrangler d1 execute ap --remote --file migrations/0001_fedify_kv.sql
+   pnpm exec wrangler d1 execute ap --remote --file migrations/0002_comments_publications.sql
    ```
 
-   This creates `fedify_kv` for protocol caching and inbox deduplication; it does
-   not alter followers or keys. For a fresh local database, use
-   `pnpm exec wrangler d1 execute ap --local --file setup.sql`. For an existing
-   local database apply only the migration with `--local`. Do **not** rerun
-   `setup.sql` against an existing production database.
-2. Reuse the existing `PUBLIC_KEY` and `PRIV_KEY` Worker secrets without changing
-   their JSON-string encoding: a PEM public key and a base64 PKCS#8 private key,
-   respectively. Fedify imports this RSA pair and retains the `#main-key` ID.
-   Moving from Pages still requires copying these secrets with
-   `pnpm exec wrangler secret put PUBLIC_KEY` and
-   `pnpm exec wrangler secret put PRIV_KEY`. Local bindings belong in ignored
-   `.dev.vars`. Never regenerate keys during this migration.
-3. Retain `blog.yunyi.beiyan.us` for federation and `stblog.penclub.club` as the
-   site URL/lookup alias. The actor URL, `BeiyanYunyi` handle, inbox, followers,
-   outbox and every Note/Create ID stay the same. Existing followers do not need
-   to follow again. Posts retain their existing Note summary representation.
-4. Keep a separate `DELIVERY_TOKEN` secret for manual publication:
+   For a fresh local database use `pnpm exec wrangler d1 execute ap --local
+   --file setup.sql`. For an existing local database use the migrations with
+   `--local`. Do not rerun `setup.sql` against an existing database.
+2. Create the main queue and dead-letter queue before deploying the consumer:
+
+   ```sh
+   pnpm exec wrangler queues create blog-federation
+   pnpm exec wrangler queues create blog-federation-dlq
+   ```
+
+   `wrangler.jsonc` binds `FEDERATION_QUEUE`, connects the same Worker as consumer,
+   and configures a cron every five minutes. Queue messages are processed one at
+   a time (`max_batch_size: 1`, `max_concurrency: 1`). Keep concurrency at one:
+   publication cursor advancement assumes a single consumer. Failed tasks request
+   exponential delays from 30 seconds to one hour, with 12 retries before the
+   dead-letter queue. Inspect the main queue, dead-letter queue and Worker logs
+   in Cloudflare when diagnosing failures. After fixing a failed task, replay it
+   from the dead-letter queue; replaying a completed publication task is a no-op.
+3. Run `pnpm deploy`. With Workers Builds use build command `pnpm build` and deploy
+   command `pnpm exec wrangler deploy`. The first scan atomically registers all
+   currently published articles as `baseline`, so historical articles are not
+   broadcast. Confirm `ap_publication_state` contains its initialization row
+   before deploying the first new article you want broadcast. Posts dated in the
+   future are discovered after their publication date.
+4. An optional `DELIVERY_TOKEN` secret permits an immediate scan:
 
    ```sh
    curl -X POST https://blog.yunyi.beiyan.us/api/sendToInbox \
@@ -79,41 +94,65 @@ rows, delivery, WebFinger, article negotiation and static pages.
      -H 'Content-Type: application/json'
    ```
 
-   Fedify sends the current content collection oldest first to distinct follower
-   inboxes, signing requests with the existing RSA key. Each invocation resends
-   the complete outbox with stable activity IDs. Missing token configuration
-   returns 503, bad authorization 401, and remote delivery failures 502.
-5. After applying the database migration, run `pnpm deploy`. If using Workers
-   Builds, use build command `pnpm build` and deploy command
-   `pnpm exec wrangler deploy`. Validate a real remote Follow/Undo, actor lookup,
-   delivery, article HTML/JSON, tags and RSS after deployment.
+   This endpoint now returns HTTP 202 with `{ "queued": N }`, where N is the
+   number of pending publication tasks enqueued (at most five). It uses the same
+   discovery and repair logic as cron and no longer resends the entire archive.
+   Missing token configuration returns 503; bad authorization returns 401. Cron
+   does not require this token.
+5. Validate a real remote Follow/Undo, a reply/edit/delete, actor lookup, article
+   HTML/JSON, tags and RSS after deployment. Local tests do not contact real
+   federation servers or provision remote resources.
 
-### Federation behavior
+### Automatic publication
 
-Fedify handles JSON-LD, actor/object serialization, WebFinger responses, inbound
-HTTP signature verification and outbound signing. Incoming Follow must target
-this actor; Undo must embed/reference a Follow by the same actor for this blog.
-Repeated successful activities are suppressed using persistent D1 storage.
-Unsigned, forged, tampered or stale signed requests cannot change followers.
-A failed Accept is not marked processed, allowing the remote server to retry.
+Every scan inserts previously unseen published post slugs into `ap_publication`
+with status `pending`. It enqueues at most five pending articles per scan. Each
+publication task pages at most 25 distinct follower inboxes using an indexed D1
+cursor and asks Fedify to enqueue their signed Create deliveries. A continuation
+handles the next page. The cursor advances only after the page is durably queued;
+cron also re-enqueues pending publications, recovering a lost continuation.
 
-Delivery is deliberately awaited inside the request, with no in-process message
-queue that could be lost when a Worker stops. There is no background retry queue
-or incremental publication tracking: retry a failed manual delivery explicitly.
-A large outbox/follower list is still subject to Worker request limits. This
-migration does not add tutorial features such as replies, likes, automatic
-Create/Update/Delete synchronization, or replace the existing comment system.
+`complete` means every inbox page has been queued, not that every remote server
+has acknowledged delivery. Individual HTTP delivery retries are independent of
+the publication cursor. Transient delivery failures use Cloudflare retries;
+Fedify classifies permanent HTTP failures itself. Stable Create IDs are retained.
+Delivery is at least once: a crash between enqueueing and saving the cursor can
+repeat a page, so remote servers may see the same activity ID again. Inbox
+membership is read per page; newly following accounts do not receive an automatic
+archive replay.
 
-Astro's default Origin protection remains enabled. Federation requests must use
-`application/activity+json` or JSON Content-Type; headerless/form-like cross-origin
-POST requests return 403. WebFinger accepts only the existing supported resources,
-including `acct:BeiyanYunyi@blog.yunyi.beiyan.us` and its site-domain alias.
-The legacy `/api/genKeyPair/:key` utility remains available and does not modify
-configured secrets or database rows.
+Subsequent scans do not resend baseline or completed posts. This implements
+publication of new slugs; edits and deletions of local blog posts do not produce
+outgoing Update/Delete activities. Reusing an already recorded slug does not
+trigger a new Create. A queued publication whose source post was removed by a
+later deployment is marked `cancelled`, allowing other pending posts to progress.
 
-Local tests use mock remote servers; deployment and live federation must be
-verified separately. The cache migration is additive, so the previous Worker
-can be restored without deleting the new table or modifying follower data.
+### Comments and inbox handling
+
+Incoming activities are signature-verified by Fedify before being durably queued.
+Queue consumers run the inbox listeners. A Follow must target this blog; its
+Accept is queued before the follower is stored. Undo must refer to a Follow by
+the same actor for this blog. D1 retains protocol cache and successful-activity
+deduplication across Worker invocations.
+
+`ap_comment` stores direct replies to existing local Note IDs: remote object ID,
+local post slug, author ID/name, reply target, HTML content and timestamps.
+Create requires attribution to match the activity actor and the Note ID to share
+that actor's HTTPS origin. Duplicate object IDs do not overwrite existing rows.
+Update requires the stored author and a newer `updated` timestamp (or the
+activity's `published` timestamp). Delete requires the stored author, clears
+content/name and retains a tombstone so a late duplicate Create or Update cannot
+resurrect a deleted stored comment. Replies to other servers, missing posts and
+replies to comments are ignored.
+
+This adds storage only. It does not change the existing Sodesu UI. Remote HTML
+remains untrusted and must be sanitized before any future rendering.
+
+The canonical identity remains `blog.yunyi.beiyan.us` with `BeiyanYunyi` as handle
+and `stblog.penclub.club` as site/lookup alias. Actor, Note and Create URLs remain
+unchanged. Astro's default Origin protection remains enabled: federation POSTs
+must use ActivityPub/JSON Content-Type. The legacy `/api/genKeyPair/:key` utility
+does not modify configured secrets or database rows.
 
 References: [Fedify Astro blog tutorial](https://fedify.dev/tutorial/astro-blog),
 [Fedify deployment guidance](https://fedify.dev/manual/deploy),

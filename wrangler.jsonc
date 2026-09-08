@@ -1,7 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "astro-blog-lithium",
-  "main": "@astrojs/cloudflare/entrypoints/server",
+  "main": "./src/server/worker.ts",
   "compatibility_date": "2026-08-27",
   "compatibility_flags": ["nodejs_compat"],
   "assets": {
@@ -22,6 +22,22 @@
       "database_id": "007ff8f3-681b-47e1-9f6e-e9ded6295b43"
     }
   ],
+  "triggers": { "crons": ["*/5 * * * *"] },
+  "queues": {
+    "producers": [
+      { "binding": "FEDERATION_QUEUE", "queue": "blog-federation" }
+    ],
+    "consumers": [
+      {
+        "queue": "blog-federation",
+        "max_batch_size": 1,
+        "max_batch_timeout": 1,
+        "max_concurrency": 1,
+        "max_retries": 12,
+        "dead_letter_queue": "blog-federation-dlq"
+      }
+    ]
+  },
   "observability": {
     "logs": {
       "enabled": true,

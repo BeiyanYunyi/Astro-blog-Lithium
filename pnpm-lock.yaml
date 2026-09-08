@@ -148,6 +148,9 @@ importers:
       '@astrojs/solid-js':
         specifier: ^7.0.2
         version: 7.0.2(@types/node@24.12.0)(esbuild@0.28.2)(jiti@2.7.0)(solid-js@1.9.15)(supports-color@10.2.2)(tsx@4.19.2)(yaml@2.9.0)
+      '@fedify/cfworkers':
+        specifier: ^2.3.6
+        version: 2.3.6(@cloudflare/workers-types@5.20260825.1)(@fedify/fedify@2.3.6)
       '@fedify/fedify':
         specifier: ^2.3.6
         version: 2.3.6
@@ -1155,6 +1158,12 @@ packages:
     engines: {node: '>=18'}
     cpu: [x64]
     os: [win32]
+
+  '@fedify/cfworkers@2.3.6':
+    resolution: {integrity: sha512-YKPC5entz3aUMam3JDXX+4/bjQjadGXNlaH6NNOI74eAQ4p5pyx1CY1yztspoUsVITOM2G+glw3MWn/q3Ulkzg==}
+    peerDependencies:
+      '@cloudflare/workers-types': ^4.20260511.1
+      '@fedify/fedify': ^2.3.6
 
   '@fedify/fedify@2.3.6':
     resolution: {integrity: sha512-0teiORAV+r+ejxw42EoPsy7GmUqK7VH312YylmPAuiMPGlbJkj2k5vbjsZ2U4VCpPJr5uV4VBZRM6FTBVbkVPw==}
@@ -4865,6 +4874,11 @@ snapshots:
 
   '@esbuild/win32-x64@0.28.2':
     optional: true
+
+  '@fedify/cfworkers@2.3.6(@cloudflare/workers-types@5.20260825.1)(@fedify/fedify@2.3.6)':
+    dependencies:
+      '@cloudflare/workers-types': 5.20260825.1
+      '@fedify/fedify': 2.3.6
 
   '@fedify/fedify@2.3.6':
     dependencies:

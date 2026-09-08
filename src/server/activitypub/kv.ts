@@ -1,17 +1,26 @@
 import type { D1Database } from '@cloudflare/workers-types';
 import type { KvKey, KvStore, KvStoreSetOptions } from '@fedify/fedify';
+import { and, asc, eq, gt, isNull, lte, or, sql } from 'drizzle-orm';
+import createDatabase, { type Database } from './database';
+import { fedifyKv } from './schema';
+
+const unexpired = (now: number) =>
+  or(isNull(fedifyKv.expires), gt(fedifyKv.expires, now));
 
 /** Fedify cache and inbox deduplication, shared across Worker isolates. */
 export class D1KvStore implements KvStore {
-  constructor(private readonly database: D1Database) {}
+  private readonly database: Database;
+
+  constructor(database: D1Database) {
+    this.database = createDatabase(database);
+  }
 
   async get<T>(key: KvKey): Promise<T | undefined> {
     const row = await this.database
-      .prepare(
-        'SELECT value FROM fedify_kv WHERE key = ? AND (expires IS NULL OR expires > ?)',
-      )
-      .bind(JSON.stringify(key), Date.now())
-      .first<{ value: string }>();
+      .select({ value: fedifyKv.value })
+      .from(fedifyKv)
+      .where(and(eq(fedifyKv.key, JSON.stringify(key)), unexpired(Date.now())))
+      .get();
     return row ? JSON.parse(row.value) : undefined;
   }
 
@@ -21,36 +30,45 @@ export class D1KvStore implements KvStore {
       ? now + options.ttl.total('milliseconds')
       : null;
     await this.database.batch([
+      this.database.delete(fedifyKv).where(lte(fedifyKv.expires, now)),
       this.database
-        .prepare('DELETE FROM fedify_kv WHERE expires <= ?')
-        .bind(now),
-      this.database
-        .prepare(
-          'INSERT INTO fedify_kv(key, value, expires) VALUES (?, ?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value, expires = excluded.expires',
-        )
-        .bind(JSON.stringify(key), JSON.stringify(value), expires),
+        .insert(fedifyKv)
+        .values({
+          key: JSON.stringify(key),
+          value: JSON.stringify(value),
+          expires,
+        })
+        .onConflictDoUpdate({
+          target: fedifyKv.key,
+          set: { value: JSON.stringify(value), expires },
+        }),
     ]);
   }
 
   async delete(key: KvKey) {
     await this.database
-      .prepare('DELETE FROM fedify_kv WHERE key = ?')
-      .bind(JSON.stringify(key))
+      .delete(fedifyKv)
+      .where(eq(fedifyKv.key, JSON.stringify(key)))
       .run();
   }
 
   async *list(prefix?: KvKey) {
+    const encodedPrefix = prefix ? JSON.stringify(prefix).slice(0, -1) : '';
     const rows = await this.database
-      .prepare(
-        'SELECT key, value FROM fedify_kv WHERE (expires IS NULL OR expires > ?) AND substr(key, 1, length(?)) = ? ORDER BY key',
+      .select({ key: fedifyKv.key, value: fedifyKv.value })
+      .from(fedifyKv)
+      .where(
+        and(
+          unexpired(Date.now()),
+          eq(
+            sql<string>`substr(${fedifyKv.key}, 1, length(${encodedPrefix}))`,
+            encodedPrefix,
+          ),
+        ),
       )
-      .bind(
-        Date.now(),
-        prefix ? JSON.stringify(prefix).slice(0, -1) : '',
-        prefix ? JSON.stringify(prefix).slice(0, -1) : '',
-      )
-      .all<{ key: string; value: string }>();
-    for (const row of rows.results) {
+      .orderBy(asc(fedifyKv.key))
+      .all();
+    for (const row of rows) {
       const key: KvKey = JSON.parse(row.key);
       if (!prefix || prefix.every((part, index) => key[index] === part))
         yield { key, value: JSON.parse(row.value) };
