@@ -21,27 +21,42 @@ Currently, there's no i18n support, but since there's few text, you can easily t
 
 ## Cloudflare Workers deployment
 
-Use Node >=25 and pnpm. Astro continues to generate the whole site, including
-ActivityPub Note, Create and Outbox documents, into `dist/`. `functions/index.ts`
-is the Worker entrypoint; the files in `functions/api/` are explicitly imported
-handlers, not filesystem routes. No Astro SSR adapter is needed.
+Use Node >=26 and pnpm. Astro owns all page and API routing through the
+Cloudflare adapter's standard entrypoint. Dynamic endpoints live in
+`src/pages/api/` and `src/pages/.well-known/`; shared protocol helpers remain in
+`src/server/activitypub/`. There is no separate Worker route table.
+
+The default output remains static. Article HTML and ActivityPub Note routes opt
+into on-demand rendering so `src/middleware.ts` can negotiate their representation
+at request time. Home, tags, RSS, Create and Outbox documents remain prerendered.
+Article URLs are explicitly included in the sitemap because they are now dynamic.
+The build produces `dist/client/` assets and `dist/server/` Worker output; deploy
+using the adapter-generated Wrangler configuration selected by the build.
 
 ```sh
 pnpm install
 pnpm build
 pnpm worker:check
 pnpm test:worker
+pnpm worker:dry-run
 pnpm worker:dev
 ```
 
-`worker:dev` rebuilds the site before starting Wrangler. Rebuild after editing blog
-content; `pnpm dev` remains useful for Astro UI work but does not run the Worker.
+`pnpm dev` and `worker:dev` both use Astro's Cloudflare development runtime,
+including dynamic APIs. `pnpm preview` previews the production build locally.
+Regression tests load the built Astro Worker in Miniflare, exercise a local D1
+database, and mock remote federation requests. Run `pnpm build` before testing.
+
 `public/_headers` supplies MIME types for static ActivityPub documents. Dynamic
-Actor, Followers and WebFinger responses supply their own headers. `/posts/*`
-and `/api/*` run through the Worker before assets so content negotiation works
-with existing static files. Negotiated responses use `Vary: Accept` and
-`Cache-Control: no-store` to keep HTML and ActivityPub JSON separate. The
-compatibility date matches the runtime bundled with the locked Wrangler version.
+Actor, Note, Followers and WebFinger responses supply their own headers.
+`/posts/*` and `/api/*` run through the Worker before assets. Negotiated responses
+use `Vary: Accept` and `Cache-Control: no-store` to keep HTML and ActivityPub JSON
+separate. Actor/object URLs, signing keys and the D1 schema are unchanged.
+
+Astro's default Origin protection remains enabled. Federation clients should send
+`Content-Type: application/activity+json` (or `application/json`); manual delivery
+clients must also send a JSON Content-Type, even for an empty POST body. Form-like
+or headerless cross-origin POST requests return 403 before reaching the endpoint.
 
 ### Move an existing Pages deployment
 
@@ -65,7 +80,7 @@ compatibility date matches the runtime bundled with the locked Wrangler version.
    authorization returns 401, and a failed remote delivery returns 502.
 4. Run `pnpm deploy`, or configure Workers Builds with build command `pnpm build`
    and deploy command `pnpm exec wrangler deploy`. This deploys both the Worker
-   and `dist/`. Pages deployments and Pages secrets do not transfer automatically.
+   and the assets in `dist/client/`. Pages deployments and Pages secrets do not transfer automatically.
 5. Check the new Worker before moving the existing domains from Pages to Workers
    Custom Domains. Retain `blog.yunyi.beiyan.us` for federation and
    `stblog.penclub.club` for the existing site URL. Actor IDs, published object

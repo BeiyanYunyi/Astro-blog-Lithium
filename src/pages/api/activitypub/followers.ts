@@ -1,11 +1,13 @@
+import { env } from 'cloudflare:workers';
+import type { APIRoute } from 'astro';
 /* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable import/prefer-default-export */
 import { Kysely } from 'kysely';
 import { D1Dialect } from 'kysely-d1';
-import type { Database, WorkerHandler } from '../../src/types';
+import type { Database } from '@server/activitypub/types';
 
-export const onRequestGet: WorkerHandler = async (ctx) => {
-  const db = new Kysely<Database>({ dialect: new D1Dialect({ database: ctx.env.ap }) });
+export const GET: APIRoute = async () => {
+  const db = new Kysely<Database>({ dialect: new D1Dialect({ database: env.ap }) });
   // await db.insertInto('follower').values({ actorId: '114514', inbox: '1919810' }).execute();
 
   // try {
@@ -29,3 +31,12 @@ export const onRequestGet: WorkerHandler = async (ctx) => {
   //   return new Response('Bad Request', { status: 400 });
   // }
 };
+
+export const prerender = false;
+export const ALL: APIRoute = () =>
+  new Response('Method Not Allowed', {
+    status: 405,
+    headers: { Allow: 'GET, HEAD' },
+  });
+
+export const HEAD = GET;

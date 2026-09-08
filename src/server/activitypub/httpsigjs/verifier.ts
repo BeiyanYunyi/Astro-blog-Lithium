@@ -1,5 +1,5 @@
 import { importPublicKey, str2ab } from '../key-ops';
-import { ParsedSignature } from './parser';
+import type { ParsedSignature } from './parser';
 
 interface Profile {
   publicKey: {

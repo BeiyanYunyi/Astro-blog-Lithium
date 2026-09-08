@@ -15,7 +15,7 @@ export const getStaticPaths = (async () => {
 }) satisfies GetStaticPaths;
 
 export const GET: APIRoute<CollectionEntry<"posts">> = async ({ props }) => {
-  const image = await sharp(`./dist${props.data.image!.src}`)
+  const image = await sharp(`./dist/server${props.data.image!.src}`)
     .resize(1200, 630, { fit: "contain" })
     .png()
     .toBuffer();

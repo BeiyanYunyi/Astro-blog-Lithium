@@ -1,9 +1,10 @@
+import { env } from 'cloudflare:workers';
 /* eslint-disable import/prefer-default-export */
 
-import actorURL from '../../src/const/actorURL';
-import type { WorkerHandler } from '../../src/types';
+import actorURL from '@server/activitypub/actorURL';
+import type { APIRoute } from 'astro';
 
-export const onRequestGet: WorkerHandler = (ctx) =>
+export const GET: APIRoute = () =>
   new Response(
     JSON.stringify({
       '@context': ['https://www.w3.org/ns/activitystreams', 'https://w3id.org/security/v1'],
@@ -40,8 +41,17 @@ export const onRequestGet: WorkerHandler = (ctx) =>
       publicKey: {
         id: `${actorURL}#main-key`,
         owner: actorURL,
-        publicKeyPem: JSON.parse(ctx.env.PUBLIC_KEY),
+        publicKeyPem: JSON.parse(env.PUBLIC_KEY),
       },
     }),
     { headers: { 'Content-Type': 'application/activity+json' } },
   );
+
+export const prerender = false;
+export const ALL: APIRoute = () =>
+  new Response('Method Not Allowed', {
+    status: 405,
+    headers: { Allow: 'GET, HEAD' },
+  });
+
+export const HEAD = GET;

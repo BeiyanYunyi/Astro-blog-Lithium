@@ -1,6 +1,6 @@
-import type { WorkerHandler } from '../src/types';
+import type { APIRoute } from 'astro';
 
-export const webfinger: WorkerHandler = ({ request }) => {
+export const GET: APIRoute = ({ request }) => {
   const resource = new URL(request.url).searchParams.get('resource');
   const resources = new Set([
     'acct:BeiyanYunyi@blog.yunyi.beiyan.us',
@@ -40,3 +40,12 @@ export const webfinger: WorkerHandler = ({ request }) => {
     { headers: { 'Content-Type': 'application/jrd+json' } },
   );
 };
+
+export const prerender = false;
+export const ALL: APIRoute = () =>
+  new Response('Method Not Allowed', {
+    status: 405,
+    headers: { Allow: 'GET, HEAD' },
+  });
+
+export const HEAD = GET;

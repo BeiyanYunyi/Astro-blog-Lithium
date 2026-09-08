@@ -1,13 +1,13 @@
 /* eslint-disable import/prefer-default-export */
-import type { WorkerHandler } from '../../src/types';
+import type { APIRoute } from 'astro';
 import {
   arrayBufferToBase64,
   generateUserKey,
   importPrivKey,
   unwrapPrivateKey,
-} from '../../src/utils/key-ops';
+} from '@server/activitypub/key-ops';
 
-export const onRequestGet: WorkerHandler = async (ctx) => {
+export const GET: APIRoute = async (ctx) => {
   const res = await generateUserKey(ctx.params.key as string);
   const unwrapped = await unwrapPrivateKey(ctx.params.key as string, res.wrappedPrivKey, res.salt);
   const priv = arrayBufferToBase64(
@@ -26,3 +26,12 @@ export const onRequestGet: WorkerHandler = async (ctx) => {
     { headers: { 'content-type': 'application/json' } },
   );
 };
+
+export const prerender = false;
+export const ALL: APIRoute = () =>
+  new Response('Method Not Allowed', {
+    status: 405,
+    headers: { Allow: 'GET, HEAD' },
+  });
+
+export const HEAD = GET;

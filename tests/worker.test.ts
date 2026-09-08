@@ -1,8 +1,20 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
-import { DatabaseSync } from 'node:sqlite';
+import { readFile, readdir } from 'node:fs/promises';
 import { test } from 'node:test';
-import worker from '../.wrangler/dry-run/index.js';
+import { resolve } from 'node:path';
+import { Miniflare, convertV4MiniflareOptions } from 'miniflare';
+
+const worker = {
+  fetch(request, env) {
+    return env.runtime.dispatchFetch(request.url, {
+      method: request.method,
+      headers: request.headers,
+      body: request.body,
+      duplex: 'half',
+      redirect: 'manual',
+    });
+  },
+};
 
 const origin = 'https://blog.yunyi.beiyan.us';
 const actorId = `${origin}/api/activitypub/actor`;
@@ -21,58 +33,79 @@ const privateKey = Buffer.from(await crypto.subtle.exportKey('pkcs8', keys.priva
 );
 const publicKey = `-----BEGIN PUBLIC KEY-----\n${Buffer.from(await crypto.subtle.exportKey('spki', keys.publicKey)).toString('base64')}\n-----END PUBLIC KEY-----`;
 
-async function environment() {
-  const database = new DatabaseSync(':memory:');
-  database.exec(await readFile(new URL('../setup.sql', import.meta.url), 'utf8'));
-  return {
-    database,
+async function environment(t, { realAssets = false, deliveryToken = 'local-test-token' } = {}) {
+  const env = {
     PUBLIC_KEY: JSON.stringify(publicKey),
     PRIV_KEY: JSON.stringify(privateKey),
-    DELIVERY_TOKEN: 'local-test-token',
-    ap: {
-      prepare(sql) {
-        return {
-          bind: (...params) => ({
-            async all() {
-              const statement = database.prepare(sql);
-              if (/^select/i.test(sql))
-                return { results: statement.all(...params), meta: { changes: 0 } };
-              const result = statement.run(...params);
-              return {
-                results: [],
-                meta: {
-                  changes: Number(result.changes),
-                  last_row_id: Number(result.lastInsertRowid),
-                },
-              };
+    remoteFetch: async () => new Response('Unexpected remote request', { status: 502 }),
+  };
+  const runtime = new Miniflare(
+    convertV4MiniflareOptions({
+      modules: await Promise.all(
+        [
+          'entry.mjs',
+          ...(await readdir('dist/server', { recursive: true })).filter(
+            (path) => path.endsWith('.mjs') && path !== 'entry.mjs' && !path.startsWith('.'),
+          ),
+        ].map(async (path) => ({
+          type: 'ESModule',
+          path: resolve('dist/server', path),
+          contents: await readFile(resolve('dist/server', path), 'utf8'),
+        })),
+      ),
+      modulesRoot: resolve('dist/server'),
+      compatibilityDate: '2026-08-27',
+      compatibilityFlags: ['nodejs_compat'],
+      bindings: {
+        PUBLIC_KEY: env.PUBLIC_KEY,
+        PRIV_KEY: env.PRIV_KEY,
+        ...(deliveryToken ? { DELIVERY_TOKEN: deliveryToken } : {}),
+      },
+      d1Databases: ['ap'],
+      outboundService: (request) => env.remoteFetch(request),
+      ...(realAssets
+        ? {
+            assets: {
+              directory: resolve('dist/client'),
+              binding: 'ASSETS',
+              routerConfig: { has_user_worker: true },
+              run_worker_first: [
+                '/.well-known/webfinger',
+                '/.well-known/webfinger/',
+                '/api/*',
+                '/posts/*',
+              ],
+              assetConfig: { not_found_handling: '404-page' },
+            },
+          }
+        : {
+            serviceBindings: {
+              ASSETS: async (request) => {
+                const path = new URL(request.url).pathname;
+                if (path === '/api/activitypub/outbox')
+                  return Response.json({ orderedItems: [{ id: 'new' }, { id: 'old' }] });
+                return new Response('Not Found', { status: 404 });
+              },
             },
           }),
-        };
-      },
-    },
-    ASSETS: {
-      async fetch(input) {
-        const request = input instanceof Request ? input : new Request(input);
-        const path = new URL(request.url).pathname;
-        if (path === '/api/activitypub/outbox')
-          return Response.json({ orderedItems: [{ id: 'new' }, { id: 'old' }] });
-        if (path.includes('missing')) return new Response('Not Found', { status: 404 });
-        if (path.startsWith('/api/activitypub/note/'))
-          return Response.json(
-            { id: `${origin}${path}`, type: 'Note' },
-            { headers: { 'Content-Type': 'application/activity+json' } },
-          );
-        return new Response('<html>blog</html>', {
-          headers: { 'Content-Type': 'text/html', Vary: 'Accept-Encoding' },
-        });
-      },
-    },
-  };
+    }),
+  );
+  t.after(() => runtime.dispose());
+  const database = await runtime.getD1Database('ap');
+  const schema = await readFile(new URL('../setup.sql', import.meta.url), 'utf8');
+  for (const sql of schema.split(';').filter((sql) => sql.trim()))
+    await database.prepare(sql).run();
+  return Object.assign(env, { runtime, database });
 }
-const request = (path, init) => new Request(`${origin}${path}`, init);
+const request = (path, init = {}) => {
+  const headers = new Headers(init.headers);
+  if (init.method === 'POST' && !headers.has('Content-Type'))
+    headers.set('Content-Type', 'application/activity+json');
+  return new Request(`${origin}${path}`, { ...init, headers });
+};
 
-test('WebFinger validates resources and retains the existing identity', async () => {
-  const env = await environment();
+test('WebFinger validates resources and retains the existing identity', async (t) => {
+  const env = await environment(t);
   for (const domain of ['blog.yunyi.beiyan.us', 'stblog.penclub.club']) {
     const response = await worker.fetch(
       request(`/.well-known/webfinger?resource=acct:BeiyanYunyi@${domain}`),
@@ -93,18 +126,19 @@ test('WebFinger validates resources and retains the existing identity', async ()
   assert.equal((await actor.json()).publicKey.publicKeyPem, publicKey);
 });
 
-test('content negotiation preserves slugs, quality values, HEAD and cache isolation', async () => {
-  const env = await environment();
+test('content negotiation preserves slugs, quality values, HEAD and cache isolation', async (t) => {
+  const env = await environment(t, { realAssets: true });
   for (const accept of [
     'application/activity+json',
     'application/ld+json; profile="https://www.w3.org/ns/activitystreams"',
     'application/json',
   ]) {
     const response = await worker.fetch(
-      request('/posts/an_under_score', { headers: { Accept: accept } }),
+      request('/posts/CornerOfTheWorld', { headers: { Accept: accept } }),
       env,
     );
-    assert.equal((await response.json()).id, `${origin}/api/activitypub/note/an_under_score`);
+    assert.equal(response.status, 200, await response.clone().text());
+    assert.equal((await response.json()).id, `${origin}/api/activitypub/note/CornerOfTheWorld`);
     assert.equal(response.headers.get('Vary'), 'Accept');
     assert.equal(response.headers.get('Cache-Control'), 'no-store');
   }
@@ -115,20 +149,23 @@ test('content negotiation preserves slugs, quality values, HEAD and cache isolat
     'text/html, application/activity+json;q=0.5',
   ]) {
     const response = await worker.fetch(
-      request('/posts/an_under_score', { headers: { Accept: accept } }),
+      request('/posts/CornerOfTheWorld', { headers: { Accept: accept } }),
       env,
     );
     assert.match(response.headers.get('Content-Type'), /text\/html/);
-    assert.equal(response.headers.get('Vary'), 'Accept-Encoding, Accept');
+    assert.equal(response.headers.get('Vary'), 'Accept');
   }
   const redirect = await worker.fetch(
-    request('/api/activitypub/note/an_under_score?from=fedi'),
+    request('/api/activitypub/note/CornerOfTheWorld?from=fedi'),
     env,
   );
   assert.equal(redirect.status, 302);
-  assert.equal(redirect.headers.get('Location'), '/posts/an_under_score?from=fedi');
+  assert.equal(redirect.headers.get('Location'), '/posts/CornerOfTheWorld?from=fedi');
   const head = await worker.fetch(
-    request('/posts/test', { method: 'HEAD', headers: { Accept: 'application/activity+json' } }),
+    request('/posts/CornerOfTheWorld', {
+      method: 'HEAD',
+      headers: { Accept: 'application/activity+json' },
+    }),
     env,
   );
   assert.equal(await head.text(), '');
@@ -144,8 +181,8 @@ test('content negotiation preserves slugs, quality values, HEAD and cache isolat
   );
 });
 
-test('dynamic endpoints reject wrong methods and delivery requires its own token', async () => {
-  const env = await environment();
+test('dynamic endpoints reject wrong methods and delivery requires its own token', async (t) => {
+  const env = await environment(t);
   for (const [path, method] of [
     ['/api/activitypub/inbox', 'GET'],
     ['/api/activitypub/actor', 'POST'],
@@ -160,10 +197,10 @@ test('dynamic endpoints reject wrong methods and delivery requires its own token
   );
   assert.equal(
     (
-      await worker.fetch(request('/api/sendToInbox', { method: 'POST' }), {
-        ...env,
-        DELIVERY_TOKEN: undefined,
-      })
+      await worker.fetch(
+        request('/api/sendToInbox', { method: 'POST' }),
+        await environment(t, { deliveryToken: null }),
+      )
     ).status,
     503,
   );
@@ -173,11 +210,11 @@ test('dynamic endpoints reject wrong methods and delivery requires its own token
 });
 
 test('Follow, Accept, follower listing, Undo and delivery retain D1 behavior', async (t) => {
-  const env = await environment();
+  const env = await environment(t);
   const remote = 'https://remote.test/users/alice';
   const deliveries = [];
-  t.mock.method(globalThis, 'fetch', async (input) => {
-    if (typeof input === 'string')
+  t.mock.method(env, 'remoteFetch', async (input) => {
+    if (input.method === 'GET')
       return Response.json({ id: remote, inbox: 'https://remote.test/inbox' });
     deliveries.push({ body: await input.clone().json(), headers: input.headers });
     return new Response('Accepted', { status: 202 });
@@ -191,7 +228,7 @@ test('Follow, Accept, follower listing, Undo and delivery retain D1 behavior', a
   assert.ok(deliveries[0].headers.get('Digest'));
   const followers = await (await worker.fetch(request('/api/activitypub/followers'), env)).json();
   assert.deepEqual(followers.orderedItems, [remote]);
-  env.database.exec(
+  await env.database.exec(
     "INSERT INTO follower(actorId, inbox) VALUES ('https://second.test/actor', 'https://second.test/inbox')",
   );
   deliveries.length = 0;
@@ -211,11 +248,14 @@ test('Follow, Accept, follower listing, Undo and delivery retain D1 behavior', a
     (await worker.fetch(post({ type: 'Undo', actor: remote, object: follow }), env)).status,
     200,
   );
-  assert.equal(env.database.prepare('SELECT count(*) AS count FROM follower').get().count, 1);
+  assert.equal(
+    (await env.database.prepare('SELECT count(*) AS count FROM follower').first()).count,
+    1,
+  );
 });
 
-test('key generation returns a usable key pair without changing actor secrets', async () => {
-  const env = await environment();
+test('key generation returns a usable key pair without changing actor secrets', async (t) => {
+  const env = await environment(t);
   const response = await worker.fetch(request('/api/genKeyPair/local-test'), env);
   assert.equal(response.status, 200);
   const result = await response.json();
@@ -226,7 +266,7 @@ test('key generation returns a usable key pair without changing actor secrets', 
 });
 
 test('manual delivery handles empty followers and reports remote failures', async (t) => {
-  const env = await environment();
+  const env = await environment(t);
   const send = () =>
     worker.fetch(
       request('/api/sendToInbox', {
@@ -236,15 +276,75 @@ test('manual delivery handles empty followers and reports remote failures', asyn
       env,
     );
   const remoteFetch = t.mock.method(
-    globalThis,
-    'fetch',
+    env,
+    'remoteFetch',
     async () => new Response('Failed', { status: 503 }),
   );
   assert.equal((await send()).status, 200);
   assert.equal(remoteFetch.mock.callCount(), 0);
-  env.database.exec(
+  await env.database.exec(
     "INSERT INTO follower(actorId, inbox) VALUES ('https://remote.test/actor', 'https://remote.test/inbox')",
   );
   assert.equal((await send()).status, 502);
   assert.equal(remoteFetch.mock.callCount(), 1);
+});
+
+test('static pages, RSS, sitemap, OG images and Markdown/MDX remain available', async (t) => {
+  const env = await environment(t, { realAssets: true });
+  for (const path of [
+    '/',
+    '/tags/',
+    '/tags/杂谈/',
+    '/posts/CornerOfTheWorld',
+    '/posts/removeHexo',
+  ]) {
+    const response = await worker.fetch(request(path), env);
+    assert.equal(response.status, 200, path);
+    const html = await response.text();
+    assert.match(html, /<html/);
+    if (path.startsWith('/posts/')) {
+      assert.match(html, /<article/);
+      assert.ok(html.includes(path), 'article keeps its public URL');
+    }
+  }
+  const rss = await worker.fetch(request('/rss.xml'), env);
+  assert.equal(rss.status, 200);
+  assert.match(await rss.text(), /<rss/);
+  const sitemap = await worker.fetch(request('/sitemap-0.xml'), env);
+  assert.equal(sitemap.status, 200);
+  assert.match(await sitemap.text(), /https:\/\/stblog.penclub.club\/posts\/CornerOfTheWorld\//);
+  const ogImage = (await readdir('dist/client/og-image')).find((path) =>
+    path.startsWith('CornerOfTheWorld.'),
+  );
+  const image = await worker.fetch(request(`/og-image/${ogImage}`), env);
+  assert.equal(image.status, 200);
+  assert.equal(image.headers.get('Content-Type'), 'image/png');
+  const outbox = await worker.fetch(request('/api/activitypub/outbox'), env);
+  assert.equal(outbox.headers.get('Content-Type'), 'application/activity+json');
+  assert.ok((await outbox.json()).orderedItems.length > 0);
+  const create = await worker.fetch(request('/api/activitypub/create/CornerOfTheWorld'), env);
+  assert.equal((await create.json()).type, 'Create');
+  const missing = await worker.fetch(request('/posts/missing_under_score'), env);
+  assert.equal(missing.status, 404);
+  const encoded = await worker.fetch(
+    request('/posts/%43ornerOfTheWorld/', {
+      headers: { Accept: 'application/activity+json' },
+    }),
+    env,
+  );
+  assert.equal((await encoded.json()).id, `${origin}/api/activitypub/note/CornerOfTheWorld`);
+});
+
+test('Astro retains Origin protection for form-like and headerless POST requests', async (t) => {
+  const env = await environment(t);
+  for (const headers of [{}, { 'Content-Type': 'text/plain' }]) {
+    const response = await worker.fetch(
+      new Request(`${origin}/api/sendToInbox`, {
+        method: 'POST',
+        headers: { ...headers, Authorization: 'Bearer local-test-token' },
+      }),
+      env,
+    );
+    assert.equal(response.status, 403);
+  }
 });

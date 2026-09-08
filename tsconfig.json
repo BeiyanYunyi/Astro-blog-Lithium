@@ -4,20 +4,19 @@
     "rootDir": ".",
     "jsx": "preserve",
     "jsxImportSource": "solid-js",
-    "baseUrl": ".",
     "paths": {
-      "@layouts/*": ["src/layouts/*"],
-      "@components/*": ["src/components/*"],
-      "@pages/*": ["src/pages/*"],
-      "@utils/*": ["src/utils/*"],
-      "@app-types/*": ["src/types/*"],
-      "@styles/*": ["src/styles/*"],
-      "@data/*": ["src/data/*"],
-      "@config": ["src/config.ts"],
-      "@assets/*": ["src/assets/*"]
+      "@server/*": ["./src/server/*"],
+      "@layouts/*": ["./src/layouts/*"],
+      "@components/*": ["./src/components/*"],
+      "@pages/*": ["./src/pages/*"],
+      "@utils/*": ["./src/utils/*"],
+      "@app-types/*": ["./src/types/*"],
+      "@styles/*": ["./src/styles/*"],
+      "@data/*": ["./src/data/*"],
+      "@config": ["./src/config.ts"],
+      "@assets/*": ["./src/assets/*"]
     }
   },
   "mdx": { "checkMdx": true },
   "include": ["src/**/*.astro", "src/**/*.ts", "src/**/*.tsx", "uno.config.ts", "astro.config.ts"]
-  // "references": [{ "path": "./functions/tsconfig.json" }]
 }
