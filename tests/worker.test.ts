@@ -212,11 +212,11 @@ test('dynamic endpoints reject wrong methods and delivery requires its own token
 test('Follow, Accept, follower listing, Undo and delivery retain D1 behavior', async (t) => {
   const env = await environment(t);
   const remote = 'https://remote.test/users/alice';
+  let remoteInbox = 'https://remote.test/inbox';
   const deliveries = [];
   t.mock.method(env, 'remoteFetch', async (input) => {
-    if (input.method === 'GET')
-      return Response.json({ id: remote, inbox: 'https://remote.test/inbox' });
-    deliveries.push({ body: await input.clone().json(), headers: input.headers });
+    if (input.method === 'GET') return Response.json({ id: remote, inbox: remoteInbox });
+    deliveries.push({ url: input.url, body: await input.clone().json(), headers: input.headers });
     return new Response('Accepted', { status: 202 });
   });
   const follow = { id: `${remote}/follow`, type: 'Follow', actor: remote, object: actorId };
@@ -228,9 +228,32 @@ test('Follow, Accept, follower listing, Undo and delivery retain D1 behavior', a
   assert.ok(deliveries[0].headers.get('Digest'));
   const followers = await (await worker.fetch(request('/api/activitypub/followers'), env)).json();
   assert.deepEqual(followers.orderedItems, [remote]);
+  const originalFollower = await env.database.prepare('SELECT * FROM follower').first();
+  remoteInbox = 'https://remote.test/updated-inbox';
+  assert.equal((await worker.fetch(post(follow), env)).status, 200);
+  assert.deepEqual(
+    await env.database
+      .prepare('SELECT * FROM follower')
+      .all()
+      .then((r) => r.results),
+    [{ ...originalFollower, inbox: remoteInbox }],
+  );
   await env.database.exec(
     "INSERT INTO follower(actorId, inbox) VALUES ('https://second.test/actor', 'https://second.test/inbox')",
   );
+  await env.database
+    .prepare('INSERT INTO follower(actorId, inbox) VALUES (?, ?)')
+    .bind('https://remote.test/users/bob', remoteInbox)
+    .run();
+  const updatedFollowers = await (
+    await worker.fetch(request('/api/activitypub/followers'), env)
+  ).json();
+  assert.equal(updatedFollowers.totalItems, 3);
+  assert.deepEqual(updatedFollowers.orderedItems, [
+    'https://second.test/actor',
+    'https://remote.test/users/bob',
+    remote,
+  ]);
   deliveries.length = 0;
   const sent = await worker.fetch(
     request('/api/sendToInbox', {
@@ -244,13 +267,21 @@ test('Follow, Accept, follower listing, Undo and delivery retain D1 behavior', a
     deliveries.map((item) => item.body.id),
     ['old', 'new', 'old', 'new'],
   );
+  assert.deepEqual(
+    deliveries.map((item) => item.url),
+    ['https://second.test/inbox', 'https://second.test/inbox', remoteInbox, remoteInbox],
+  );
   assert.equal(
     (await worker.fetch(post({ type: 'Undo', actor: remote, object: follow }), env)).status,
     200,
   );
   assert.equal(
     (await env.database.prepare('SELECT count(*) AS count FROM follower').first()).count,
-    1,
+    2,
+  );
+  assert.equal(
+    await env.database.prepare('SELECT * FROM follower WHERE actorId = ?').bind(remote).first(),
+    null,
   );
 });
 

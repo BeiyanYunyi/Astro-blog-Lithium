@@ -1,21 +1,20 @@
-import { env } from 'cloudflare:workers';
 import type { APIRoute } from 'astro';
-/* eslint-disable import/prefer-default-export */
-import { Kysely } from 'kysely';
-import { D1Dialect } from 'kysely-d1';
-import type { Database } from '@server/activitypub/types';
 import AppRequest from '@server/activitypub/AppRequest';
+import createDatabase from '@server/activitypub/database';
+import follower from '@server/activitypub/schema';
+import { env } from 'cloudflare:workers';
+import { desc } from 'drizzle-orm';
 
 export const POST: APIRoute = async (ctx) => {
   if (!env.DELIVERY_TOKEN) return new Response('Delivery is not configured', { status: 503 });
   if (ctx.request.headers.get('Authorization') !== `Bearer ${env.DELIVERY_TOKEN}`)
     return new Response('Unauthorized', { status: 401 });
-  const db = new Kysely<Database>({ dialect: new D1Dialect({ database: env.ap }) });
+  const db = createDatabase(env.ap);
   const followers = await db
-    .selectFrom('follower')
-    .select('inbox')
-    .orderBy('actorId desc')
-    .execute();
+    .select({ inbox: follower.inbox })
+    .from(follower)
+    .orderBy(desc(follower.actorId))
+    .all();
   const outbox = new URL('/api/activitypub/outbox', ctx.request.url);
   const res = await env.ASSETS.fetch(outbox.toString());
   if (!res.ok) return new Response('Outbox unavailable', { status: 502 });

@@ -1,21 +1,18 @@
-import { env } from 'cloudflare:workers';
 import type { APIRoute } from 'astro';
-/* eslint-disable import/no-extraneous-dependencies */
-/* eslint-disable import/prefer-default-export */
-import { Kysely } from 'kysely';
-import { D1Dialect } from 'kysely-d1';
-import type { Database } from '@server/activitypub/types';
+import createDatabase from '@server/activitypub/database';
+import follower from '@server/activitypub/schema';
+import { env } from 'cloudflare:workers';
+import { desc } from 'drizzle-orm';
 
 export const GET: APIRoute = async () => {
-  const db = new Kysely<Database>({ dialect: new D1Dialect({ database: env.ap }) });
-  // await db.insertInto('follower').values({ actorId: '114514', inbox: '1919810' }).execute();
+  const db = createDatabase(env.ap);
 
   // try {
   const followers = await db
-    .selectFrom('follower')
-    .select('actorId')
-    .orderBy('actorId desc')
-    .execute();
+    .select({ actorId: follower.actorId })
+    .from(follower)
+    .orderBy(desc(follower.actorId))
+    .all();
   const followersArray = followers.map((follower) => follower.actorId);
   return new Response(
     JSON.stringify({

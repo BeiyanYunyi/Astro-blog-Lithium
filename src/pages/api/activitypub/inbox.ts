@@ -1,14 +1,15 @@
-import { env } from 'cloudflare:workers';
-import type { APIRoute } from 'astro';
-/* eslint-disable import/prefer-default-export */
+import type { Database } from '@server/activitypub/database';
+import type { Env } from '@server/activitypub/types';
 import type { AP } from 'activitypub-core-types';
-import { Kysely } from 'kysely';
-import { D1Dialect } from 'kysely-d1';
+import type { APIRoute } from 'astro';
 import actorURL from '@server/activitypub/actorURL';
-import type { Database, Env } from '@server/activitypub/types';
 import AppRequest from '@server/activitypub/AppRequest';
+import createDatabase from '@server/activitypub/database';
+import follower from '@server/activitypub/schema';
+import { env } from 'cloudflare:workers';
+import { eq } from 'drizzle-orm';
 
-const handleFollow = async (body: AP.Follow, db: Kysely<Database>, env: Env) => {
+async function handleFollow(body: AP.Follow, db: Database, env: Env) {
   if (Array.isArray(body.actor)) throw new Error('Not Implemented');
   let aid = '';
   if (typeof body.actor === 'string') aid = body.actor;
@@ -17,12 +18,13 @@ const handleFollow = async (body: AP.Follow, db: Kysely<Database>, env: Env) => 
     await fetch(aid, { headers: { Accept: 'application/activity+json' } })
   ).json();
   await db
-    .insertInto('follower')
+    .insert(follower)
     .values({ actorId: aid, inbox: info.inbox as unknown as string })
-    .onConflict((oc) =>
-      oc.column('actorId').doUpdateSet({ inbox: info.inbox as unknown as string }),
-    )
-    .execute();
+    .onConflictDoUpdate({
+      target: follower.actorId,
+      set: { inbox: info.inbox as unknown as string },
+    })
+    .run();
   const reqBody = JSON.stringify({
     '@context': 'https://www.w3.org/ns/activitystreams',
     id: `https://blog.yunyi.beiyan.us/api/activitypub/accepts/follows/${Math.floor(
@@ -43,20 +45,19 @@ const handleFollow = async (body: AP.Follow, db: Kysely<Database>, env: Env) => 
   await acceptReq.digestAndSign(env);
   await fetch(acceptReq);
   return new Response('Ok');
-};
+}
 
-const handleUnfollow = async (body: AP.Undo, db: Kysely<Database>) => {
+async function handleUnfollow(body: AP.Undo, db: Database) {
   if ((body.object as { type: string })?.type !== 'Follow') throw new Error('Not Implemented');
   let aid = '';
   if (typeof body.actor === 'string') aid = body.actor;
   if (typeof body.actor === 'object') aid = (body.actor as unknown as { id: string }).id;
-  await db.deleteFrom('follower').where('actorId', '=', aid).execute();
+  await db.delete(follower).where(eq(follower.actorId, aid)).run();
   return new Response('Ok');
-};
+}
 
 export const POST: APIRoute = async (ctx) => {
-  const db = new Kysely<Database>({ dialect: new D1Dialect({ database: env.ap }) });
-  // await db.insertInto('follower').values({ actorId: '114514', inbox: '1919810' }).execute();
+  const db = createDatabase(env.ap);
 
   // try {
   const body: AP.Follow | AP.Undo = await ctx.request.json();

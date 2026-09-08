@@ -1,4 +1,3 @@
-import type { Generated } from 'kysely';
 import type { D1Database } from '@cloudflare/workers-types';
 
 // https://www.w3.org/TR/activitystreams-vocabulary/#object-types
@@ -56,16 +55,6 @@ export interface Note extends APObject {
   cc: Array<string>;
   tag: Array<Link>;
   spoiler_text?: string;
-}
-
-interface FollowerTable {
-  id: Generated<number>;
-  actorId: string;
-  inbox: string;
-}
-
-export interface Database {
-  follower: FollowerTable;
 }
 
 /* eslint-disable import/prefer-default-export */
