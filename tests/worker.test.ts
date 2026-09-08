@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
-import { readFile, readdir } from 'node:fs/promises';
-import { test } from 'node:test';
+import { readdir, readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import { Miniflare, convertV4MiniflareOptions } from 'miniflare';
+import { test } from 'node:test';
+import { convertV4MiniflareOptions, Miniflare } from 'miniflare';
 
 const worker = {
   fetch(request, env) {
@@ -45,21 +45,37 @@ async function environment(
   };
   const runtime = new Miniflare(
     convertV4MiniflareOptions({
-      modules: await Promise.all(
-        [
-          'entry.mjs',
-          ...(await readdir('dist/server', { recursive: true })).filter(
-            (path) =>
-              path.endsWith('.mjs') &&
-              path !== 'entry.mjs' &&
-              !path.startsWith('.'),
-          ),
-        ].map(async (path) => ({
+      modules: [
+        {
           type: 'ESModule',
-          path: resolve('dist/server', path),
-          contents: await readFile(resolve('dist/server', path), 'utf8'),
-        })),
-      ),
+          path: resolve('dist/server/test-entry.mjs'),
+          // Miniflare's localhost transport rewrites Host even through getWorker().
+          // Restore the HTTP invariant at the test boundary, before Astro/Fedify.
+          contents: `import app from './entry.mjs';
+          export default { ...app, fetch(request, env, ctx) {
+            const headers = new Headers(request.headers);
+            headers.set('Host', new URL(request.url).host);
+            return app.fetch(new Request(request, { headers }), env, ctx);
+          } };`,
+        },
+        ...(await Promise.all(
+          [
+            'entry.mjs',
+            ...(
+              await readdir('dist/server', { recursive: true })
+            ).filter(
+              (path) =>
+                path.endsWith('.mjs') &&
+                path !== 'entry.mjs' &&
+                !path.startsWith('.'),
+            ),
+          ].map(async (path) => ({
+            type: 'ESModule',
+            path: resolve('dist/server', path),
+            contents: await readFile(resolve('dist/server', path), 'utf8'),
+          })),
+        )),
+      ],
       modulesRoot: resolve('dist/server'),
       compatibilityDate: '2026-08-27',
       compatibilityFlags: ['nodejs_compat'],
@@ -87,12 +103,7 @@ async function environment(
           }
         : {
             serviceBindings: {
-              ASSETS: async (request) => {
-                const path = new URL(request.url).pathname;
-                if (path === '/api/activitypub/outbox')
-                  return Response.json({
-                    orderedItems: [{ id: 'new' }, { id: 'old' }],
-                  });
+              ASSETS: async () => {
                 return new Response('Not Found', { status: 404 });
               },
             },
@@ -125,10 +136,10 @@ test('WebFinger validates resources and retains the existing identity', async (t
     );
     assert.equal(response.status, 200);
     assert.equal(response.headers.get('Content-Type'), 'application/jrd+json');
-    assert.equal(
-      (await response.json()).subject,
-      'acct:BeiyanYunyi@blog.yunyi.beiyan.us',
-    );
+    const document = await response.json();
+    assert.equal(document.subject, 'acct:BeiyanYunyi@blog.yunyi.beiyan.us');
+    assert.ok(document.aliases.includes('https://blog.yunyi.beiyan.us'));
+    assert.ok(document.aliases.includes('https://stblog.penclub.club'));
   }
   assert.equal(
     (await worker.fetch(request('/.well-known/webfinger'), env)).status,
@@ -145,7 +156,14 @@ test('WebFinger validates resources and retains the existing identity', async (t
   );
   const actor = await worker.fetch(request('/api/activitypub/actor'), env);
   assert.equal(actor.headers.get('Content-Type'), 'application/activity+json');
-  assert.equal((await actor.json()).publicKey.publicKeyPem, publicKey);
+  const profile = await actor.json();
+  assert.equal(profile.id, actorId);
+  assert.equal(profile.publicKey.id, `${actorId}#main-key`);
+  assert.equal(profile.publicKey.owner, actorId);
+  assert.equal(
+    profile.publicKey.publicKeyPem.replace(/\s/g, ''),
+    publicKey.replace(/\s/g, ''),
+  );
 });
 
 test('content negotiation preserves slugs, quality values, HEAD and cache isolation', async (t) => {
@@ -246,14 +264,42 @@ test('dynamic endpoints reject wrong methods and delivery requires its own token
   assert.equal(await head.text(), '');
 });
 
-test('Follow, Accept, follower listing, Undo and delivery retain D1 behavior', async (t) => {
-  const env = await environment(t);
-  const remote = 'https://remote.test/users/alice';
-  let remoteInbox = 'https://remote.test/inbox';
+// Public literal IPs avoid DNS in Fedify's SSRF checks; outboundService intercepts all HTTP.
+const remote = 'https://1.1.1.1/users/alice';
+const remoteInbox = 'https://1.1.1.1/inbox';
+const remoteKeys = await crypto.subtle.generateKey(
+  {
+    name: 'RSASSA-PKCS1-v1_5',
+    modulusLength: 2048,
+    publicExponent: new Uint8Array([1, 0, 1]),
+    hash: 'SHA-256',
+  },
+  true,
+  ['sign', 'verify'],
+);
+const remotePublicKey = `-----BEGIN PUBLIC KEY-----\n${Buffer.from(await crypto.subtle.exportKey('spki', remoteKeys.publicKey)).toString('base64')}\n-----END PUBLIC KEY-----`;
+
+function mockRemote(t, env) {
   const deliveries = [];
   t.mock.method(env, 'remoteFetch', async (input) => {
     if (input.method === 'GET')
-      return Response.json({ id: remote, inbox: remoteInbox });
+      return Response.json(
+        {
+          '@context': [
+            'https://www.w3.org/ns/activitystreams',
+            'https://w3id.org/security/v1',
+          ],
+          type: 'Person',
+          id: remote,
+          inbox: remoteInbox,
+          publicKey: {
+            id: `${remote}#main-key`,
+            owner: remote,
+            publicKeyPem: remotePublicKey,
+          },
+        },
+        { headers: { 'Content-Type': 'application/activity+json' } },
+      );
     deliveries.push({
       url: input.url,
       body: await input.clone().json(),
@@ -261,83 +307,168 @@ test('Follow, Accept, follower listing, Undo and delivery retain D1 behavior', a
     });
     return new Response('Accepted', { status: 202 });
   });
-  const follow = {
-    id: `${remote}/follow`,
-    type: 'Follow',
-    actor: remote,
-    object: actorId,
-  };
-  const post = (body) =>
-    request('/api/activitypub/inbox', {
-      method: 'POST',
-      body: JSON.stringify(body),
-    });
-  assert.equal((await worker.fetch(post(follow), env)).status, 200);
+  return deliveries;
+}
+
+// Construct a Cavage signature independently of Fedify's signing implementation.
+async function signedActivity(
+  body,
+  {
+    signer = remote,
+    signingKey = remoteKeys.privateKey,
+    path = '/api/activitypub/inbox',
+    date = new Date().toUTCString(),
+  } = {},
+) {
+  const json = JSON.stringify({
+    '@context': 'https://www.w3.org/ns/activitystreams',
+    ...body,
+  });
+  const digest = `SHA-256=${Buffer.from(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(json))).toString('base64')}`;
+  const target = new URL(path, origin);
+  const signed = `(request-target): post ${target.pathname}${target.search}\nhost: ${target.host}\ndate: ${date}\ndigest: ${digest}`;
+  const signature = Buffer.from(
+    await crypto.subtle.sign(
+      'RSASSA-PKCS1-v1_5',
+      signingKey,
+      new TextEncoder().encode(signed),
+    ),
+  ).toString('base64');
+  return request(path, {
+    method: 'POST',
+    body: json,
+    headers: {
+      Host: target.host,
+      Date: date,
+      Digest: digest,
+      Signature: `keyId="${signer}#main-key",algorithm="rsa-sha256",headers="(request-target) host date digest",signature="${signature}"`,
+    },
+  });
+}
+
+const followActivity = (suffix = 'follow') => ({
+  id: `${remote}/${suffix}`,
+  type: 'Follow',
+  actor: remote,
+  object: actorId,
+});
+
+test('signed Follow, Accept, persistent deduplication, follower storage and Undo', async (t) => {
+  const env = await environment(t);
+  const deliveries = mockRemote(t, env);
+  await env.database
+    .prepare('INSERT INTO follower(actorId, inbox) VALUES (?, ?)')
+    .bind(remote, 'https://1.1.1.1/old-inbox')
+    .run();
+  const original = await env.database.prepare('SELECT * FROM follower').first();
+  const follow = followActivity();
+  const response = await worker.fetch(await signedActivity(follow), env);
+  assert.equal(response.status, 202, await response.text());
   assert.equal(deliveries[0].body.type, 'Accept');
+  assert.equal(deliveries[0].body.object.id, follow.id);
+  assert.equal(deliveries[0].body.actor, actorId);
   assert.ok(deliveries[0].headers.get('Signature'));
-  assert.ok(deliveries[0].headers.get('Digest'));
+  assert.ok(
+    deliveries[0].headers.get('Content-Digest') ??
+      deliveries[0].headers.get('Digest'),
+  );
+  assert.deepEqual(
+    await env.database.prepare('SELECT * FROM follower').first(),
+    { ...original, inbox: remoteInbox },
+  );
   const followers = await (
     await worker.fetch(request('/api/activitypub/followers'), env)
   ).json();
   assert.deepEqual(followers.orderedItems, [remote]);
-  const originalFollower = await env.database
-    .prepare('SELECT * FROM follower')
-    .first();
-  remoteInbox = 'https://remote.test/updated-inbox';
-  assert.equal((await worker.fetch(post(follow), env)).status, 200);
-  assert.deepEqual(
-    await env.database
-      .prepare('SELECT * FROM follower')
-      .all()
-      .then((r) => r.results),
-    [{ ...originalFollower, inbox: remoteInbox }],
+  assert.equal(followers.totalItems, 1);
+  assert.equal(
+    (await worker.fetch(await signedActivity(follow), env)).status,
+    202,
   );
-  await env.database.exec(
-    "INSERT INTO follower(actorId, inbox) VALUES ('https://second.test/actor', 'https://second.test/inbox')",
+  assert.equal(
+    deliveries.length,
+    1,
+    'a repeated activity is not accepted twice',
   );
+  assert.ok(
+    (
+      await env.database
+        .prepare('SELECT count(*) AS count FROM fedify_kv')
+        .first()
+    ).count > 0,
+  );
+  const undo = {
+    id: `${remote}/undo`,
+    type: 'Undo',
+    actor: remote,
+    object: follow,
+  };
+  assert.equal(
+    (await worker.fetch(await signedActivity(undo), env)).status,
+    202,
+  );
+  assert.equal(
+    await env.database.prepare('SELECT * FROM follower').first(),
+    null,
+  );
+});
+
+test('inbox rejects unsigned, forged, tampered and stale signatures', async (t) => {
+  const env = await environment(t);
+  const deliveries = mockRemote(t, env);
+  const follow = followActivity();
+  const unsigned = request('/api/activitypub/inbox', {
+    method: 'POST',
+    body: JSON.stringify(follow),
+  });
+  const forged = await signedActivity(follow, { signingKey: keys.privateKey });
+  const original = await signedActivity(follow);
+  const tampered = new Request(original, {
+    body: JSON.stringify({ ...follow, id: `${remote}/tampered` }),
+  });
+  const stale = await signedActivity(follow, {
+    date: 'Sat, 01 Jan 2000 00:00:00 GMT',
+  });
+  const impersonated = await signedActivity({
+    ...follow,
+    actor: 'https://9.9.9.9/actor',
+  });
+  for (const input of [unsigned, forged, tampered, stale, impersonated]) {
+    const response = await worker.fetch(input, env);
+    assert.ok(
+      response.status >= 400 && response.status < 500,
+      `${response.status}: ${await response.text()}`,
+    );
+  }
+  assert.equal(
+    await env.database.prepare('SELECT * FROM follower').first(),
+    null,
+  );
+  assert.equal(deliveries.length, 0);
+});
+
+test('verified activities cannot follow another target or undo another actor follow', async (t) => {
+  const env = await environment(t);
+  const deliveries = mockRemote(t, env);
   await env.database
     .prepare('INSERT INTO follower(actorId, inbox) VALUES (?, ?)')
-    .bind('https://remote.test/users/bob', remoteInbox)
+    .bind(remote, remoteInbox)
     .run();
-  const updatedFollowers = await (
-    await worker.fetch(request('/api/activitypub/followers'), env)
-  ).json();
-  assert.equal(updatedFollowers.totalItems, 3);
-  assert.deepEqual(updatedFollowers.orderedItems, [
-    'https://second.test/actor',
-    'https://remote.test/users/bob',
-    remote,
-  ]);
-  deliveries.length = 0;
-  const sent = await worker.fetch(
-    request('/api/sendToInbox', {
-      method: 'POST',
-      headers: { Authorization: 'Bearer local-test-token' },
+  await worker.fetch(
+    await signedActivity({
+      ...followActivity('wrong-target'),
+      object: 'https://9.9.9.9/actor',
     }),
     env,
   );
-  assert.equal(sent.status, 200);
-  assert.deepEqual(
-    deliveries.map((item) => item.body.id),
-    ['old', 'new', 'old', 'new'],
-  );
-  assert.deepEqual(
-    deliveries.map((item) => item.url),
-    [
-      'https://second.test/inbox',
-      'https://second.test/inbox',
-      remoteInbox,
-      remoteInbox,
-    ],
-  );
-  assert.equal(
-    (
-      await worker.fetch(
-        post({ type: 'Undo', actor: remote, object: follow }),
-        env,
-      )
-    ).status,
-    200,
+  await worker.fetch(
+    await signedActivity({
+      id: `${remote}/bad-undo`,
+      type: 'Undo',
+      actor: remote,
+      object: { ...followActivity(), actor: 'https://9.9.9.9/actor' },
+    }),
+    env,
   );
   assert.equal(
     (
@@ -345,15 +476,103 @@ test('Follow, Accept, follower listing, Undo and delivery retain D1 behavior', a
         .prepare('SELECT count(*) AS count FROM follower')
         .first()
     ).count,
-    2,
+    1,
   );
+  assert.equal(deliveries.length, 0);
+});
+
+test('failed Accept can be retried and does not persist a follower prematurely', async (t) => {
+  const env = await environment(t);
+  const deliveries = mockRemote(t, env);
+  const remoteFetch = env.remoteFetch;
+  let fail = true;
+  t.mock.method(env, 'remoteFetch', (input) =>
+    fail && input.method === 'POST'
+      ? new Response('Unavailable', { status: 503 })
+      : remoteFetch(input),
+  );
+  const follow = followActivity();
+  const failure = await worker.fetch(await signedActivity(follow), env);
+  assert.equal(failure.status, 500, await failure.text());
   assert.equal(
-    await env.database
-      .prepare('SELECT * FROM follower WHERE actorId = ?')
-      .bind(remote)
-      .first(),
+    await env.database.prepare('SELECT * FROM follower').first(),
     null,
   );
+  fail = false;
+  const retry = await worker.fetch(await signedActivity(follow), env);
+  assert.equal(retry.status, 202, await retry.text());
+  assert.equal(deliveries.length, 1);
+  assert.equal(
+    (await env.database.prepare('SELECT * FROM follower').first()).actorId,
+    remote,
+  );
+});
+
+test('additive migration is repeatable and retains existing follower rows', async (t) => {
+  const env = await environment(t);
+  await env.database
+    .prepare('INSERT INTO follower(actorId, inbox) VALUES (?, ?)')
+    .bind(remote, remoteInbox)
+    .run();
+  const before = await env.database.prepare('SELECT * FROM follower').first();
+  await env.database.exec('DROP TABLE fedify_kv');
+  const sql = await readFile(
+    new URL('../migrations/0001_fedify_kv.sql', import.meta.url),
+    'utf8',
+  );
+  for (let pass = 0; pass < 2; pass++) {
+    for (const statement of sql.split(';').filter((sql) => sql.trim()))
+      await env.database.prepare(statement).run();
+  }
+  assert.deepEqual(
+    await env.database.prepare('SELECT * FROM follower').first(),
+    before,
+  );
+  assert.equal(
+    (
+      await env.database
+        .prepare('SELECT count(*) AS count FROM fedify_kv')
+        .first()
+    ).count,
+    0,
+  );
+});
+
+test('manual delivery sends the real outbox oldest first and deduplicates inboxes', async (t) => {
+  const env = await environment(t);
+  const deliveries = mockRemote(t, env);
+  for (const [actor, inbox] of [
+    [remote, remoteInbox],
+    ['https://1.1.1.1/users/bob', remoteInbox],
+    ['https://8.8.8.8/actor', 'https://8.8.8.8/inbox'],
+  ]) {
+    await env.database
+      .prepare('INSERT INTO follower(actorId, inbox) VALUES (?, ?)')
+      .bind(actor, inbox)
+      .run();
+  }
+  const outbox = await (
+    await worker.fetch(request('/api/activitypub/outbox'), env)
+  ).json();
+  const sent = await worker.fetch(
+    request('/api/sendToInbox', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer local-test-token' },
+    }),
+    env,
+  );
+  assert.equal(sent.status, 200, await sent.clone().text());
+  const expected = outbox.orderedItems.map((item) => item.id).reverse();
+  assert.ok(expected.length > 0);
+  for (const inbox of [remoteInbox, 'https://8.8.8.8/inbox']) {
+    assert.deepEqual(
+      deliveries
+        .filter((item) => item.url === inbox)
+        .map((item) => item.body.id),
+      expected,
+    );
+  }
+  assert.equal(deliveries.length, expected.length * 2);
 });
 
 test('key generation returns a usable key pair without changing actor secrets', async (t) => {
@@ -385,13 +604,22 @@ test('manual delivery handles empty followers and reports remote failures', asyn
     'remoteFetch',
     async () => new Response('Failed', { status: 503 }),
   );
-  assert.equal((await send()).status, 200);
+  const empty = await send();
+  assert.equal(empty.status, 200);
+  await empty.text();
   assert.equal(remoteFetch.mock.callCount(), 0);
   await env.database.exec(
-    "INSERT INTO follower(actorId, inbox) VALUES ('https://remote.test/actor', 'https://remote.test/inbox')",
+    "INSERT INTO follower(actorId, inbox) VALUES ('https://1.1.1.1/actor', 'https://1.1.1.1/inbox')",
   );
-  assert.equal((await send()).status, 502);
-  assert.equal(remoteFetch.mock.callCount(), 1);
+  const failure = await send();
+  assert.equal(failure.status, 502);
+  await failure.text();
+  // Fedify tries the alternate HTTP signature format before reporting failure.
+  assert.equal(remoteFetch.mock.callCount(), 2);
+  const attempts = await Promise.all(
+    remoteFetch.mock.calls.map((call) => call.arguments[0].clone().json()),
+  );
+  assert.equal(attempts[0].id, attempts[1].id);
 });
 
 test('static pages, RSS, sitemap, OG images and Markdown/MDX remain available', async (t) => {

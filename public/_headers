@@ -1,6 +1,1 @@
-# Static ActivityPub documents; dynamic Astro endpoints set their own headers.
-/api/activitypub/outbox
-  Content-Type: application/activity+json
-
-/api/activitypub/create/*
-  Content-Type: application/activity+json
+# ActivityPub endpoints are served dynamically by Fedify.

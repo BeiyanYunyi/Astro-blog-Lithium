@@ -1,25 +1,30 @@
 import type { CollectionEntry } from 'astro:content';
+import { Note, PUBLIC_COLLECTION } from '@fedify/vocab';
+import actorURL from '@server/activitypub/actorURL';
+import { Temporal } from 'temporal-polyfill';
 import { filePathToSlug } from './idToSlug';
 
+const escapeHtml = (value: string) =>
+  value.replace(
+    /[&<>"']/g,
+    (char) =>
+      ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[
+        char
+      ] ?? char,
+  );
+
 function postToNote(post: CollectionEntry<'posts'>) {
-  return {
-    '@context': [
-      'https://www.w3.org/ns/activitystreams',
-      {
-        HashTag: 'as:HashTag',
-      },
-    ],
-    id: `https://blog.yunyi.beiyan.us/api/activitypub/note/${filePathToSlug(post.filePath)}`,
-    type: 'Note',
-    attributedTo: 'https://blog.yunyi.beiyan.us/api/activitypub/actor',
-    cc: ['https://blog.yunyi.beiyan.us/api/activitypub/followers'],
-    content: `<p><a href="https://blog.yunyi.beiyan.us/posts/${filePathToSlug(post.filePath)}">${
-      post.data.title
-    }</a></p><p>${post.data.description || ''}</p>`,
-    published: post.data.date.toISOString(),
-    to: ['https://www.w3.org/ns/activitystreams#Public'],
-    url: `https://blog.yunyi.beiyan.us/posts/${filePathToSlug(post.filePath)}`,
-  };
+  const slug = filePathToSlug(post.filePath);
+  const url = new URL(`https://blog.yunyi.beiyan.us/posts/${slug}`);
+  return new Note({
+    id: new URL(`https://blog.yunyi.beiyan.us/api/activitypub/note/${slug}`),
+    attribution: new URL(actorURL),
+    ccs: [new URL('https://blog.yunyi.beiyan.us/api/activitypub/followers')],
+    content: `<p><a href="${escapeHtml(url.href)}">${escapeHtml(post.data.title)}</a></p><p>${escapeHtml(post.data.description || '')}</p>`,
+    published: Temporal.Instant.from(post.data.date.toISOString()),
+    tos: [PUBLIC_COLLECTION],
+    url,
+  });
 }
 
 export default postToNote;

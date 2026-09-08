@@ -1,7 +1,7 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-`src/` contains the Astro app. Page routes live in `src/pages/`, shared layouts in `src/layouts/`, reusable UI in `src/components/`, content helpers in `src/utils/`, and site data in `src/data/` plus `src/config.ts`. Blog posts are stored as Markdown or MDX in `src/content/posts/` and validated by `src/content.config.ts`. Static files go in `public/`. The Cloudflare Worker uses the standard Astro Cloudflare adapter entrypoint. ActivityPub endpoints live in `src/pages/api/`, WebFinger in `src/pages/.well-known/`, and protocol helpers in `src/server/activitypub/`.
+`src/` contains the Astro app. Page routes live in `src/pages/`, shared layouts in `src/layouts/`, reusable UI in `src/components/`, content helpers in `src/utils/`, and site data in `src/data/` plus `src/config.ts`. Blog posts are stored as Markdown or MDX in `src/content/posts/` and validated by `src/content.config.ts`. Static files go in `public/`. The Cloudflare Worker uses the standard Astro Cloudflare adapter entrypoint. ActivityPub endpoints live in `src/pages/api/`, WebFinger in `src/pages/.well-known/`, and Fedify dispatchers and storage adapters in `src/server/activitypub/`. Database migrations live in `migrations/`.
 
 ## Build, Test, and Development Commands
 Use `pnpm` with Node `>=26`.
@@ -28,4 +28,4 @@ Worker regression tests live in `tests/worker.test.ts`. Run `pnpm worker:check` 
 Recent history uses Conventional Commit prefixes with gitmoji, such as `fix: 🐛 use filePath instead of id` and `docs(posts): 📝 add StopPanguing.md`. Follow that pattern and keep each commit focused. PRs should include a short description, linked issue when relevant, screenshots for visible UI changes, and notes for content, config, or Cloudflare behavior changes.
 
 ## Content & Deployment Notes
-Post frontmatter must satisfy the content schema: `title`, `date`, `description`, optional `tag`, and optional `image`. When editing deployment-related code, review `astro.config.ts`, `wrangler.toml`, and `setup.sql` together so Astro output, Cloudflare bindings, and database expectations stay aligned.
+Post frontmatter must satisfy the content schema: `title`, `date`, `description`, optional `tag`, and optional `image`. When editing deployment-related code, review `astro.config.ts`, `wrangler.jsonc`, and `setup.sql` together so Astro output, Cloudflare bindings, and database expectations stay aligned.
