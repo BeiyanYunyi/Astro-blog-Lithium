@@ -2,7 +2,7 @@
 import ArticleTags from '@components/ArticleTags.astro';
 import ArticleTime from '@components/ArticleTime.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { Image } from 'astro:assets';
+import CoverImage from './CoverImage.astro';
 import type { MarkdownHeading } from 'astro';
 import type { CollectionEntry } from 'astro:content';
 import svgPathToName from '@utils/svgPathToName';
@@ -36,7 +36,7 @@ const toc = headingsToToc(headings);
           <slot name="before-article" />
           {
             image && (
-              <Image class="w-full object-contain my-0" src={image} alt="Article cover" inferSize />
+              <CoverImage class="w-full object-contain my-0" src={image} alt="Article cover" />
             )
           }
           <div class="p-6 pb-0">
