@@ -1,5 +1,5 @@
 /* eslint-disable import/prefer-default-export */
-import { Algorithm, sign } from './http-signing-cavage';
+import { type Algorithm, sign } from './http-signing-cavage';
 import { str2ab } from './key-ops';
 
 export async function signRequest(request: Request, key: CryptoKey, keyId: URL): Promise<void> {

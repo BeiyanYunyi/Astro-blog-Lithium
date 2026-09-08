@@ -14,13 +14,14 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "worker:dev": "pnpm build && wrangler dev",
-    "worker:check": "tsc --project functions/tsconfig.json --noEmit",
+    "worker:dev": "astro dev --host",
+    "worker:check": "tsc --project tsconfig.worker.json --noEmit",
     "worker:dry-run": "wrangler deploy --dry-run --outdir .wrangler/dry-run",
     "deploy": "pnpm build && wrangler deploy",
-    "test:worker": "pnpm worker:dry-run && node --test tests/worker.test.ts"
+    "test:worker": "node --test tests/worker.test.ts"
   },
   "dependencies": {
+    "@astrojs/cloudflare": "^14.3.0",
     "@astrojs/markdown-satteri": "^0.3.8",
     "@astrojs/mdx": "^7.0.8",
     "@astrojs/rss": "^4.0.19",
@@ -29,7 +30,7 @@
     "@iconify-json/ion": "^1.2.7",
     "@solid-primitives/storage": "^4.4.0",
     "@unocss/reset": "^66.8.1",
-    "astro": "^7.2.6",
+    "astro": "^7.3.1",
     "cross-env": "^10.1.0",
     "dayjs": "^1.11.23",
     "eslint-plugin-solid": "^0.16.0",
@@ -55,10 +56,11 @@
     "eslint-plugin-astro": "^3.1.0",
     "eslint-plugin-format": "^2.0.1",
     "eslint-plugin-solid": "^0.14.5",
+    "miniflare": "5.20260903.0-alpha",
     "prettier": "^3.9.6",
     "prettier-plugin-astro": "^0.14.1",
     "rollup": "^4.62.5",
-    "typescript": "^7.0.2",
-    "wrangler": "^4.125.0"
+    "typescript": "^6.0.3",
+    "wrangler": "^4.129.0"
   }
 }

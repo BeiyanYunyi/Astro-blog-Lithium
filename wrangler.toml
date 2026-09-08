@@ -1,6 +1,7 @@
 name = "astro-blog-lithium"
-main = "functions/index.ts"
+main = "@astrojs/cloudflare/entrypoints/server"
 compatibility_date = "2026-08-27"
+compatibility_flags = ["nodejs_compat"]
 
 [assets]
 directory = "./dist"

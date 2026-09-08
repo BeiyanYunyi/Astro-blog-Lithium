@@ -1,16 +1,26 @@
-import { satteri } from '@astrojs/markdown-satteri'
-import mdx from '@astrojs/mdx'
-import sitemap from '@astrojs/sitemap'
-import solidJs from '@astrojs/solid-js'
-import { defineConfig } from 'astro/config'
-import UnoCSS from 'unocss/astro'
-import katexPlugin from './src/utils/katexPlugin'
+import { readdirSync } from 'node:fs';
+import { filePathToSlug } from './src/utils/idToSlug';
+import cloudflare from '@astrojs/cloudflare';
+import { satteri } from '@astrojs/markdown-satteri';
+import mdx from '@astrojs/mdx';
+import sitemap from '@astrojs/sitemap';
+import solidJs from '@astrojs/solid-js';
+import { defineConfig } from 'astro/config';
+import UnoCSS from 'unocss/astro';
+import katexPlugin from './src/utils/katexPlugin';
+
+const site = 'https://stblog.penclub.club';
+const postPages = readdirSync(new URL('./src/content/posts/', import.meta.url))
+  .filter((file) => /\.mdx?$/.test(file))
+  .map((file) => new URL(`/posts/${filePathToSlug(file)}/`, site).href);
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://stblog.penclub.club',
+  site,
   output: 'static',
-  integrations: [mdx(), sitemap(), solidJs(), UnoCSS()],
+  session: false,
+  adapter: cloudflare({ prerenderEnvironment: 'node', imageService: 'compile' }),
+  integrations: [mdx(), sitemap({ customPages: postPages }), solidJs(), UnoCSS()],
   markdown: {
     processor: satteri({
       features: {
@@ -28,4 +38,4 @@ export default defineConfig({
       sourcemap: true,
     },
   },
-})
+});

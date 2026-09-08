@@ -77,9 +77,3 @@ export interface Env {
   ASSETS: Fetcher;
   DELIVERY_TOKEN?: string;
 }
-
-export type WorkerHandler = (context: {
-  request: Request;
-  env: Env;
-  params: Record<string, string>;
-}) => Response | Promise<Response>;

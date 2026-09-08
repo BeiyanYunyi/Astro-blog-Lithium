@@ -1,5 +1,5 @@
-import actorURL from '../const/actorURL';
-import type { Env } from '../types';
+import actorURL from './actorURL';
+import type { Env } from './types';
 import { getPrivateKey } from './getKey';
 import { signRequest } from './http-signing';
 import { generateDigestHeader } from './http-signing-cavage';
@@ -8,7 +8,7 @@ class AppRequest extends Request {
   private privBody: string;
 
   constructor(
-    requestInfo: RequestInfo<CfProperties<unknown>>,
+    requestInfo: RequestInfo,
     requestInit?: Omit<RequestInit<CfProperties<unknown>>, 'body'> & { body: string },
   ) {
     super(requestInfo, { ...requestInit, method: 'post' });

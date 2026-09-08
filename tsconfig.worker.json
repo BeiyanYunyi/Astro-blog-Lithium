@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "moduleResolution": "Bundler",
+    "lib": ["esnext"],
+    "types": [
+      "@cloudflare/workers-types",
+      "@astrojs/cloudflare",
+      "astro/client"
+    ],
+    "paths": {
+      "@utils/*": ["./src/utils/*"],
+      "@server/*": ["./src/server/*"]
+    },
+    "noEmit": true,
+    "verbatimModuleSyntax": true,
+    "skipLibCheck": true
+  },
+  "include": [
+    "./src/server/**/*.ts",
+    "./src/pages/api/**/*.ts",
+    "./src/pages/.well-known/**/*.ts",
+    "./src/middleware.ts",
+    "./src/cloudflare.d.ts",
+    "./.astro/types.d.ts"
+  ]
+}

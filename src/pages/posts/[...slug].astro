@@ -1,18 +1,13 @@
 ---
 import BlogPost from '@components/BlogPost.astro';
 import { filePathToSlug } from '@utils/idToSlug';
-import type { GetStaticPaths } from 'astro';
 import { getCollection, render } from 'astro:content';
 
-export const getStaticPaths = (async () => {
-  const blogEntries = await getCollection('posts');
-  return blogEntries.map((entry) => ({
-    params: { slug: filePathToSlug(entry.filePath) },
-    props: { entry },
-  }));
-}) satisfies GetStaticPaths;
+export const prerender = false;
 
-const { entry } = Astro.props;
+const entries = await getCollection('posts');
+const entry = entries.find((post) => filePathToSlug(post.filePath) === Astro.params.slug);
+if (!entry) return new Response('Not Found', { status: 404 });
 const { Content, headings } = await render(entry);
 ---
 
