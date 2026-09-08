@@ -1,16 +1,19 @@
-import { htmlToHast, type HastNode, type HastPluginDefinition } from 'satteri'
-import katex from 'katex'
+import { htmlToHast, type HastNode, type HastPluginDefinition } from 'satteri';
+import katex from 'katex';
 
-const whitespaceRegex = /\s+/
+const whitespaceRegex = /\s+/;
 
 function normalizeXmlnsProperty(node: HastNode) {
-  if (node.type === 'element' && typeof node.properties[':xmlns'] === 'string') {
-    node.properties.xmlns = node.properties[':xmlns']
-    delete node.properties[':xmlns']
+  if (
+    node.type === 'element' &&
+    typeof node.properties[':xmlns'] === 'string'
+  ) {
+    node.properties.xmlns = node.properties[':xmlns'];
+    delete node.properties[':xmlns'];
   }
 
   if ('children' in node) {
-    node.children.forEach(normalizeXmlnsProperty)
+    node.children.forEach(normalizeXmlnsProperty);
   }
 }
 
@@ -21,31 +24,31 @@ function renderMath(value: string, displayMode: boolean) {
       throwOnError: false,
     }),
     { fragment: true },
-  )
+  );
 
   if (tree.type !== 'root' || tree.children[0]?.type !== 'element') {
-    throw new Error('Expected KaTeX to render an HTML element')
+    throw new Error('Expected KaTeX to render an HTML element');
   }
 
-  normalizeXmlnsProperty(tree.children[0])
-  return tree.children[0]
+  normalizeXmlnsProperty(tree.children[0]);
+  return tree.children[0];
 }
 
 function getClassNames(node: HastNode) {
   if (node.type !== 'element') {
-    return []
+    return [];
   }
 
-  const className = node.properties.className
+  const className = node.properties.className;
   if (Array.isArray(className)) {
-    return className
+    return className;
   }
 
   if (typeof className === 'string') {
-    return className.split(whitespaceRegex)
+    return className.split(whitespaceRegex);
   }
 
-  return []
+  return [];
 }
 
 const katexPlugin: HastPluginDefinition = {
@@ -53,25 +56,25 @@ const katexPlugin: HastPluginDefinition = {
   element: {
     filter: ['code'],
     visit(node, ctx) {
-      const classNames = getClassNames(node)
+      const classNames = getClassNames(node);
       if (!classNames.includes('language-math')) {
-        return
+        return;
       }
 
-      const value = ctx.textContent(node)
+      const value = ctx.textContent(node);
       if (classNames.includes('math-display')) {
-        const parent = ctx.parent(node)
+        const parent = ctx.parent(node);
         if (parent?.type === 'element' && parent.tagName === 'pre') {
-          ctx.replaceNode(parent, renderMath(value, true))
+          ctx.replaceNode(parent, renderMath(value, true));
         }
-        return
+        return;
       }
 
       if (classNames.includes('math-inline')) {
-        return renderMath(value, false)
+        return renderMath(value, false);
       }
     },
   },
-}
+};
 
-export default katexPlugin
+export default katexPlugin;

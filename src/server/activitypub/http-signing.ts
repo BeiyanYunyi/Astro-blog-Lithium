@@ -1,8 +1,11 @@
-/* eslint-disable import/prefer-default-export */
 import { type Algorithm, sign } from './http-signing-cavage';
 import { str2ab } from './key-ops';
 
-export async function signRequest(request: Request, key: CryptoKey, keyId: URL): Promise<void> {
+export async function signRequest(
+  request: Request,
+  key: CryptoKey,
+  keyId: URL,
+): Promise<void> {
   const mySigner = async (data: string) =>
     new Uint8Array(
       await crypto.subtle.sign(

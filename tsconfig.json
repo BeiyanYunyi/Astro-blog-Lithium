@@ -18,5 +18,11 @@
     }
   },
   "mdx": { "checkMdx": true },
-  "include": ["src/**/*.astro", "src/**/*.ts", "src/**/*.tsx", "uno.config.ts", "astro.config.ts"]
+  "include": [
+    "src/**/*.astro",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "uno.config.ts",
+    "astro.config.ts"
+  ]
 }

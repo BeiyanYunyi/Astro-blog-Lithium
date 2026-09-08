@@ -31,14 +31,14 @@ const toc = headingsToToc(headings);
 >
   <div class="flex">
     <div class="flex-grow min-w-0">
-      <article class="prose prose-neutral dark:prose-invert max-w-full card overflow-clip">
+      <article
+        class="prose prose-neutral dark:prose-invert max-w-full card overflow-clip"
+      >
         <header>
           <slot name="before-article" />
-          {
-            image && (
+          {image && (
               <CoverImage class="w-full object-contain my-0" src={image} alt="Article cover" />
-            )
-          }
+            )}
           <div class="p-6 pb-0">
             <ArticleTime slug={slug} date={date} class="mb-2" />
             <h1 class="mb-6">{title}</h1>
@@ -50,7 +50,9 @@ const toc = headingsToToc(headings);
           <ArticleTags tag={tag} />
         </div>
       </article>
-      <div class="prose prose-neutral min-w-0 dark:prose-invert max-w-none my-4">
+      <div
+        class="prose prose-neutral min-w-0 dark:prose-invert max-w-none my-4"
+      >
         <details class="rounded-md card py-5 px-6">
           <summary>分享</summary>
           <p>
@@ -64,16 +66,14 @@ const toc = headingsToToc(headings);
         </details>
       </div>
     </div>
-    {
-      toc && (
+    {toc && (
         <aside class="hidden lg:block mt-4 lg:(mt-0 ml-4) flex-shrink-0" id="toc">
           <nav
             class="prose prose-neutral dark:prose-invert sticky top-20 text-sm card px-4 w-[15rem] max-h-[calc(100vh-6rem)] overflow-y-auto"
             set:html={toc}
           />
         </aside>
-      )
-    }
+      )}
     {toc && <TocHighlight headings={headings} client:only="solid-js" />}
   </div>
   <script>

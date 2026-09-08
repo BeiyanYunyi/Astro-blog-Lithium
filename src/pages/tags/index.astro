@@ -17,15 +17,13 @@ const tagsAry = Array.from(tags);
       class="grid grid-flow-row-dense grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2 opacity-0"
       id="tags-list"
     >
-      {
-        tagsAry.map((tag) => (
+      {tagsAry.map((tag) => (
           <li class="hover:underline rounded-md transition-all no-underline hover:shadow-md outline-neutral-200 dark:outline-neutral-600 outline outline-1 p-2 flex tags">
             <a class="w-full" href={`/tags/${tag}`}>
               {tag}
             </a>
           </li>
-        ))
-      }
+        ))}
     </ul>
     <script>
       import shuffle from '@utils/shuffle';

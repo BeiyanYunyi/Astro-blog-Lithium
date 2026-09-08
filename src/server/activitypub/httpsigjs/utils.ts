@@ -11,7 +11,8 @@ export const HEADER = {
 export class HttpSignatureError extends Error {
   constructor(message: string, caller: any) {
     super(message);
-    if (Error.captureStackTrace) Error.captureStackTrace(this, caller || HttpSignatureError);
+    if (Error.captureStackTrace)
+      Error.captureStackTrace(this, caller || HttpSignatureError);
 
     this.message = message;
     this.name = caller.name;
@@ -30,7 +31,10 @@ export class InvalidAlgorithmError extends HttpSignatureError {
  *                                hs2019
  * @returns {[string, string]}
  */
-export function validateAlgorithm(algorithm: string, publicKeyType?: string): [string, string] {
+export function validateAlgorithm(
+  algorithm: string,
+  publicKeyType?: string,
+): [string, string] {
   const alg = algorithm.toLowerCase().split('-');
 
   if (alg[0] === 'hs2019') {
@@ -40,11 +44,15 @@ export function validateAlgorithm(algorithm: string, publicKeyType?: string): [s
   }
 
   if (alg.length !== 2) {
-    throw new InvalidAlgorithmError(alg[0].toUpperCase() + ' is not a ' + 'valid algorithm');
+    throw new InvalidAlgorithmError(
+      alg[0].toUpperCase() + ' is not a ' + 'valid algorithm',
+    );
   }
 
   if (alg[0] !== 'hmac' && !PK_ALGOS.has(alg[0])) {
-    throw new InvalidAlgorithmError(alg[0].toUpperCase() + ' type keys ' + 'are not supported');
+    throw new InvalidAlgorithmError(
+      alg[0].toUpperCase() + ' type keys ' + 'are not supported',
+    );
   }
 
   if (!HASH_ALGOS.has(alg[1])) {

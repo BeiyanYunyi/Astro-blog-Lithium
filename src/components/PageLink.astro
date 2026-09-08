@@ -8,8 +8,7 @@ export interface Props extends astroHTML.JSX.BaseHTMLAttributes {
 const { target, active, num, class: className, ...rest } = Astro.props;
 ---
 
-{
-  active ? (
+{active ? (
     <span
       class:list={[
         className,
@@ -28,5 +27,4 @@ const { target, active, num, class: className, ...rest } = Astro.props;
     <a href={target} class:list={[className]} {...rest}>
       {num}
     </a>
-  )
-}
+  )}

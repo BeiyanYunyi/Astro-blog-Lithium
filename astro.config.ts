@@ -19,8 +19,16 @@ export default defineConfig({
   site,
   output: 'static',
   session: false,
-  adapter: cloudflare({ prerenderEnvironment: 'node', imageService: 'compile' }),
-  integrations: [mdx(), sitemap({ customPages: postPages }), solidJs(), UnoCSS()],
+  adapter: cloudflare({
+    prerenderEnvironment: 'node',
+    imageService: 'compile',
+  }),
+  integrations: [
+    mdx(),
+    sitemap({ customPages: postPages }),
+    solidJs(),
+    UnoCSS(),
+  ],
   markdown: {
     processor: satteri({
       features: {

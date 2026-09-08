@@ -17,7 +17,9 @@ export const getStaticPaths = (async () => {
 export const GET: APIRoute<CollectionEntry<'posts'>> = async ({ props }) => {
   // Dev metadata points to the source file (sometimes through Vite's /@fs/ prefix).
   // Build metadata points to assets emitted in dist/server before prerendering finishes.
-  const pathname = decodeURIComponent(new URL(props.data.image!.src, 'http://astro.local').pathname);
+  const pathname = decodeURIComponent(
+    new URL(props.data.image!.src, 'http://astro.local').pathname,
+  );
   const source = import.meta.env.DEV
     ? pathname.replace(/^\/@fs(?=\/)/, '')
     : `./dist/server${pathname}`;

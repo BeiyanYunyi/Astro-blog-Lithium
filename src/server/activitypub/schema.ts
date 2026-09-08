@@ -1,4 +1,10 @@
-import { index, integer, sqliteTable, text, unique } from 'drizzle-orm/sqlite-core';
+import {
+  index,
+  integer,
+  sqliteTable,
+  text,
+  unique,
+} from 'drizzle-orm/sqlite-core';
 
 const follower = sqliteTable(
   'follower',

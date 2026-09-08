@@ -1,5 +1,11 @@
 // see https://datatracker.ietf.org/doc/html/draft-ietf-httpbis-message-signatures-06#section-2.3.1
-export type Parameter = 'created' | 'expires' | 'nonce' | 'alg' | 'keyid' | string;
+export type Parameter =
+  | 'created'
+  | 'expires'
+  | 'nonce'
+  | 'alg'
+  | 'keyid'
+  | string;
 
 export type Component =
   | '@method'
@@ -15,10 +21,18 @@ export type Component =
 export type ResponseComponent = '@status' | '@request-response' | Component;
 
 export type Parameters = {
-  [name: Parameter]: string | number | Date | { [Symbol.toStringTag]: () => string };
+  [name: Parameter]:
+    | string
+    | number
+    | Date
+    | { [Symbol.toStringTag]: () => string };
 };
 
-export type Algorithm = 'rsa-v1_5-sha256' | 'ecdsa-p256-sha256' | 'hmac-sha256' | 'rsa-pss-sha512';
+export type Algorithm =
+  | 'rsa-v1_5-sha256'
+  | 'ecdsa-p256-sha256'
+  | 'hmac-sha256'
+  | 'rsa-pss-sha512';
 
 export interface Signer {
   (data: string): Promise<Uint8Array>;
@@ -45,11 +59,13 @@ const ALG_MAP: { [name: string]: string } = {
 
 export function extractHeader({ headers }: Request, header: string): string {
   const lcHeader = header.toLowerCase();
-  const key = Array.from(headers.keys()).find((name) => name.toLowerCase() === lcHeader);
+  const key = Array.from(headers.keys()).find(
+    (name) => name.toLowerCase() === lcHeader,
+  );
   if (!key) {
     throw new Error(`Unable to extract header "${header}" from message`);
   }
-  let val = key ? headers.get(key) ?? '' : '';
+  let val = key ? (headers.get(key) ?? '') : '';
   if (Array.isArray(val)) {
     val = val.join(', ');
   }
@@ -111,22 +127,25 @@ export function buildSignatureInputString(
   componentNames: Component[],
   parameters: Parameters,
 ): string {
-  const params: Parameters = Object.entries(parameters).reduce((normalised, [name, value]) => {
-    switch (name.toLowerCase()) {
-      case 'keyid':
-        return Object.assign(normalised, {
-          keyId: value,
-        });
-      case 'alg':
-        return Object.assign(normalised, {
-          algorithm: ALG_MAP[value as string] ?? value,
-        });
-      default:
-        return Object.assign(normalised, {
-          [name]: value,
-        });
-    }
-  }, {});
+  const params: Parameters = Object.entries(parameters).reduce(
+    (normalised, [name, value]) => {
+      switch (name.toLowerCase()) {
+        case 'keyid':
+          return Object.assign(normalised, {
+            keyId: value,
+          });
+        case 'alg':
+          return Object.assign(normalised, {
+            algorithm: ALG_MAP[value as string] ?? value,
+          });
+        default:
+          return Object.assign(normalised, {
+            [name]: value,
+          });
+      }
+    },
+    {},
+  );
   const headers = [];
   const paramNames = Object.keys(params);
   if (componentNames.includes('@request-target')) {
@@ -157,27 +176,38 @@ export function buildSignatureInputString(
 }
 
 function uint8ArrayToBase64(a: Uint8Array): string {
-  const a_s = Array.prototype.map.call(a, (c) => String.fromCharCode(c)).join(String());
+  const a_s = Array.prototype.map
+    .call(a, (c) => String.fromCharCode(c))
+    .join(String());
   return btoa(a_s);
 }
 
 export async function generateDigestHeader(body: string): Promise<string> {
   const encoder = new TextEncoder();
   const data = encoder.encode(body);
-  const hash = uint8ArrayToBase64(new Uint8Array(await crypto.subtle.digest('SHA-256', data)));
+  const hash = uint8ArrayToBase64(
+    new Uint8Array(await crypto.subtle.digest('SHA-256', data)),
+  );
   return `SHA-256=${hash}`;
 }
 
 export async function sign(request: Request, opts: SignOptions): Promise<void> {
-  const signingComponents: Component[] = opts.components ?? defaultSigningComponents;
+  const signingComponents: Component[] =
+    opts.components ?? defaultSigningComponents;
   const signingParams: Parameters = {
     ...opts.parameters,
     keyid: opts.keyId,
     alg: opts.signer.alg,
   };
-  const signatureInputString = buildSignatureInputString(signingComponents, signingParams);
+  const signatureInputString = buildSignatureInputString(
+    signingComponents,
+    signingParams,
+  );
   const dataToSign = buildSignedData(request, signingComponents, signingParams);
   const signature = await opts.signer(dataToSign);
   const sigBase64 = uint8ArrayToBase64(signature);
-  request.headers.set('Signature', `${signatureInputString},signature="${sigBase64}"`);
+  request.headers.set(
+    'Signature',
+    `${signatureInputString},signature="${sigBase64}"`,
+  );
 }

@@ -4,8 +4,7 @@ const { tag: tags } = Astro.props;
 ---
 
 <>
-  {
-    tags && (
+  {tags && (
       <div class="flex gap-1 text-xs items-center">
         {tags.map((tag) => (
           <a
@@ -17,6 +16,5 @@ const { tag: tags } = Astro.props;
           </a>
         ))}
       </div>
-    )
-  }
+    )}
 </>

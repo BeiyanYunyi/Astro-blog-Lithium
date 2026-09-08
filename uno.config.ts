@@ -1,5 +1,5 @@
-import presetSodesu from 'sodesu-comment/preset'
-import safeList from 'sodesu-comment/safeList'
+import presetSodesu from 'sodesu-comment/preset';
+import safeList from 'sodesu-comment/safeList';
 import {
   defineConfig,
   presetAttributify,
@@ -8,8 +8,8 @@ import {
   presetWind3,
   transformerDirectives,
   transformerVariantGroup,
-} from 'unocss'
-import { useMiSans } from './src/config'
+} from 'unocss';
+import { useMiSans } from './src/config';
 
 const sansFont = [
   'Chinese Quotes',
@@ -30,10 +30,9 @@ const sansFont = [
   'Segoe UI Emoji',
   'Segoe UI Symbol',
   'Noto Color Emoji',
-]
+];
 
-if (useMiSans)
-  sansFont.unshift('MiSans')
+if (useMiSans) sansFont.unshift('MiSans');
 
 export default defineConfig({
   content: { filesystem: ['src/**/*.{md,mdx,astro,ts,tsx}'] },
@@ -45,7 +44,7 @@ export default defineConfig({
         'blockquote *::before, blockquote *::after': {
           content: 'none',
         },
-        'p': { 'white-space': 'pre-line' },
+        p: { 'white-space': 'pre-line' },
       },
     }),
     presetIcons(),
@@ -70,4 +69,4 @@ export default defineConfig({
       sans: sansFont,
     },
   },
-})
+});

@@ -8,20 +8,17 @@ const { slug, date, class: className } = Astro.props;
 
 <div class:list={[className, 'text-xs', 'flex', 'text-neutral-500']}>
   <time>
-    {
-      date.toLocaleDateString('zh-cn', {
+    {date.toLocaleDateString('zh-cn', {
         year: 'numeric',
         month: 'short',
         day: 'numeric',
-      })
-    }
+      })}
   </time>
   <span class="ml-2 hidden wordcount">·</span>
   <span class="ml-2 hidden wordcount" id="wordCount"></span>
   <span class="ml-2 hidden wordcount">·</span>
   <span class="ml-2 hidden wordcount" id="approxTime"></span>
-  {
-    // Disable pageview count in dev mode
+  {// Disable pageview count in dev mode
     !process.env.DEV && (
       <>
         <span class="ml-2">·</span>
@@ -29,6 +26,5 @@ const { slug, date, class: className } = Astro.props;
           <span class="waline-pageview-count" data-path={`/posts/${slug}/`} /> 浏览
         </span>
       </>
-    )
-  }
+    )}
 </div>

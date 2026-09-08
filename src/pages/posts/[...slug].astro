@@ -6,7 +6,9 @@ import { getCollection, render } from 'astro:content';
 export const prerender = false;
 
 const entries = await getCollection('posts');
-const entry = entries.find((post) => filePathToSlug(post.filePath) === Astro.params.slug);
+const entry = entries.find(
+  (post) => filePathToSlug(post.filePath) === Astro.params.slug,
+);
 if (!entry) return new Response('Not Found', { status: 404 });
 const { Content, headings } = await render(entry);
 ---

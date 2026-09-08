@@ -7,7 +7,9 @@ import { getCollection } from 'astro:content';
 
 export async function getStaticPaths({ paginate }: { paginate: any }) {
   const allPosts = await getCollection('posts');
-  const sortedPosts = allPosts.sort((a, b) => Number(b.data.date) - Number(a.data.date));
+  const sortedPosts = allPosts.sort(
+    (a, b) => Number(b.data.date) - Number(a.data.date),
+  );
   return paginate(sortedPosts, {
     pageSize: 10,
   });

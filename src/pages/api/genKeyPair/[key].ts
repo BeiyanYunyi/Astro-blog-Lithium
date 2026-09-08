@@ -1,4 +1,3 @@
-/* eslint-disable import/prefer-default-export */
 import type { APIRoute } from 'astro';
 import {
   arrayBufferToBase64,
@@ -9,9 +8,15 @@ import {
 
 export const GET: APIRoute = async (ctx) => {
   const res = await generateUserKey(ctx.params.key as string);
-  const unwrapped = await unwrapPrivateKey(ctx.params.key as string, res.wrappedPrivKey, res.salt);
+  const unwrapped = await unwrapPrivateKey(
+    ctx.params.key as string,
+    res.wrappedPrivKey,
+    res.salt,
+  );
   const priv = arrayBufferToBase64(
-    new Uint8Array((await crypto.subtle.exportKey('pkcs8', unwrapped)) as ArrayBuffer),
+    new Uint8Array(
+      (await crypto.subtle.exportKey('pkcs8', unwrapped)) as ArrayBuffer,
+    ),
   );
   const priv2 = await importPrivKey(priv);
   return new Response(
@@ -20,7 +25,9 @@ export const GET: APIRoute = async (ctx) => {
       salt: arrayBufferToBase64(res.salt),
       priv,
       priv2: arrayBufferToBase64(
-        new Uint8Array((await crypto.subtle.exportKey('pkcs8', priv2)) as ArrayBuffer),
+        new Uint8Array(
+          (await crypto.subtle.exportKey('pkcs8', priv2)) as ArrayBuffer,
+        ),
       ),
     }),
     { headers: { 'content-type': 'application/json' } },

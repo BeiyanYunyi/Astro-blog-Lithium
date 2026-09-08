@@ -12,26 +12,29 @@ const isForward = post.data.tag?.includes('转载');
 ---
 
 <li class="flex flex-col items-start card overflow-clip">
-  {
-    post.data.image && (
+  {post.data.image && (
       <CoverImage
         class="object-contain w-full mb-2"
         src={post.data.image}
         alt="Article cover"
       />
-    )
-  }
+    )}
   <div class="p-6">
-    <ArticleTime slug={filePathToSlug(post.filePath)} date={post.data.date} class="mb-1" />
-    <a href={`/posts/${filePathToSlug(post.filePath)}/`} class="text-[2rem] mb-6">
+    <ArticleTime
+      slug={filePathToSlug(post.filePath)}
+      date={post.data.date}
+      class="mb-1"
+    />
+    <a
+      href={`/posts/${filePathToSlug(post.filePath)}/`}
+      class="text-[2rem] mb-6"
+    >
       {post.data.title}
-      {
-        isForward && (
+      {isForward && (
           <span class="break-keep text-sm border-[#3273dc] border rounded-full text-[#3273dc] px-2 py-1 ml-2 v-mid">
             转载
           </span>
-        )
-      }
+        )}
     </a>
     <div class="text-neutral-500">{post.data.description}</div>
   </div>

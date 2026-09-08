@@ -13,7 +13,8 @@ async function handleFollow(body: AP.Follow, db: Database, env: Env) {
   if (Array.isArray(body.actor)) throw new Error('Not Implemented');
   let aid = '';
   if (typeof body.actor === 'string') aid = body.actor;
-  if (typeof body.actor === 'object') aid = (body.actor as unknown as { id: string }).id;
+  if (typeof body.actor === 'object')
+    aid = (body.actor as unknown as { id: string }).id;
   const info: AP.Actor = await (
     await fetch(aid, { headers: { Accept: 'application/activity+json' } })
   ).json();
@@ -48,10 +49,12 @@ async function handleFollow(body: AP.Follow, db: Database, env: Env) {
 }
 
 async function handleUnfollow(body: AP.Undo, db: Database) {
-  if ((body.object as { type: string })?.type !== 'Follow') throw new Error('Not Implemented');
+  if ((body.object as { type: string })?.type !== 'Follow')
+    throw new Error('Not Implemented');
   let aid = '';
   if (typeof body.actor === 'string') aid = body.actor;
-  if (typeof body.actor === 'object') aid = (body.actor as unknown as { id: string }).id;
+  if (typeof body.actor === 'object')
+    aid = (body.actor as unknown as { id: string }).id;
   await db.delete(follower).where(eq(follower.actorId, aid)).run();
   return new Response('Ok');
 }

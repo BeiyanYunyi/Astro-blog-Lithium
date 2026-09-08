@@ -13,8 +13,7 @@ const { src, alt, class: className } = Astro.props;
 const svg = typeof src !== 'string' && src.format === 'svg' ? src : undefined;
 ---
 
-{
-  svg ? (
+{svg ? (
     <img
       src={svg.src}
       width={svg.width}
@@ -26,5 +25,4 @@ const svg = typeof src !== 'string' && src.format === 'svg' ? src : undefined;
     />
   ) : (
     <Image src={src} alt={alt} class={className} inferSize />
-  )
-}
+  )}

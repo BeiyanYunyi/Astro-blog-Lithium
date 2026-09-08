@@ -24,17 +24,23 @@ The key material is a password not stored in the DB.
 */
 function getKeyMaterial(password: string): Promise<CryptoKey> {
   const enc = new TextEncoder();
-  return crypto.subtle.importKey('raw', enc.encode(password), { name: 'PBKDF2' }, false, [
-    'deriveBits',
-    'deriveKey',
-  ]);
+  return crypto.subtle.importKey(
+    'raw',
+    enc.encode(password),
+    { name: 'PBKDF2' },
+    false,
+    ['deriveBits', 'deriveKey'],
+  );
 }
 
 /*
 Given some key material and some random salt
 derive an AES-KW key using PBKDF2.
 */
-function getKey(keyMaterial: CryptoKey, salt: BufferSource): Promise<CryptoKey> {
+function getKey(
+  keyMaterial: CryptoKey,
+  salt: BufferSource,
+): Promise<CryptoKey> {
   return crypto.subtle.deriveKey(
     {
       name: 'PBKDF2',
@@ -76,9 +82,11 @@ async function wrapCryptoKey(
 /*
 Generate a new wrapped user key
 */
-export async function generateUserKey(
-  userKEK: string,
-): Promise<{ wrappedPrivKey: ArrayBuffer; salt: Uint8Array<ArrayBuffer>; pubKey: string }> {
+export async function generateUserKey(userKEK: string): Promise<{
+  wrappedPrivKey: ArrayBuffer;
+  salt: Uint8Array<ArrayBuffer>;
+  pubKey: string;
+}> {
   const keyPair = await crypto.subtle.generateKey(
     {
       name: 'RSASSA-PKCS1-v1_5',
@@ -142,7 +150,10 @@ export async function importPublicKey(exportedKey: string): Promise<CryptoKey> {
   const trimmed = exportedKey.trim();
   const pemHeader = '-----BEGIN PUBLIC KEY-----';
   const pemFooter = '-----END PUBLIC KEY-----';
-  const pemContents = trimmed.substring(pemHeader.length, trimmed.length - pemFooter.length);
+  const pemContents = trimmed.substring(
+    pemHeader.length,
+    trimmed.length - pemFooter.length,
+  );
 
   // base64 decode the string to get the binary data
   const binaryDerString = atob(pemContents);
@@ -164,7 +175,9 @@ export async function importPublicKey(exportedKey: string): Promise<CryptoKey> {
 
 export const exportPrivKey = async (privKey: CryptoKey) =>
   arrayBufferToBase64(
-    new Uint8Array((await crypto.subtle.exportKey('pkcs8', privKey)) as ArrayBuffer),
+    new Uint8Array(
+      (await crypto.subtle.exportKey('pkcs8', privKey)) as ArrayBuffer,
+    ),
   );
 
 export const importPrivKey = (privStr: string) =>

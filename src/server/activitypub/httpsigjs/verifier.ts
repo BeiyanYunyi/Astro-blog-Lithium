@@ -21,7 +21,9 @@ export async function verifySignature(
   );
 }
 
-export async function fetchKey(parsedSignature: ParsedSignature): Promise<CryptoKey | null> {
+export async function fetchKey(
+  parsedSignature: ParsedSignature,
+): Promise<CryptoKey | null> {
   const url = parsedSignature.keyId;
   const res = await fetch(url, {
     headers: { Accept: 'application/activity+json' },

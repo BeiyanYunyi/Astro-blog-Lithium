@@ -10,7 +10,8 @@ export const GET: APIRoute = ({ request }) => {
     'https://stblog.penclub.club',
   ]);
   if (!resource) return new Response('Missing resource', { status: 400 });
-  if (!resources.has(resource)) return new Response('Not Found', { status: 404 });
+  if (!resources.has(resource))
+    return new Response('Not Found', { status: 404 });
   return new Response(
     JSON.stringify({
       subject: 'acct:BeiyanYunyi@blog.yunyi.beiyan.us',

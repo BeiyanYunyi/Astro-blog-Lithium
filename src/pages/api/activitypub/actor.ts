@@ -1,5 +1,4 @@
 import { env } from 'cloudflare:workers';
-/* eslint-disable import/prefer-default-export */
 
 import actorURL from '@server/activitypub/actorURL';
 import type { APIRoute } from 'astro';
@@ -7,7 +6,10 @@ import type { APIRoute } from 'astro';
 export const GET: APIRoute = () =>
   new Response(
     JSON.stringify({
-      '@context': ['https://www.w3.org/ns/activitystreams', 'https://w3id.org/security/v1'],
+      '@context': [
+        'https://www.w3.org/ns/activitystreams',
+        'https://w3id.org/security/v1',
+      ],
       id: actorURL,
       type: 'Person',
       name: '北雁云依',
@@ -32,7 +34,11 @@ export const GET: APIRoute = () =>
         },
       ],
       icon: [
-        { type: 'Image', mediaType: 'image/png', url: 'https://blog.yunyi.beiyan.us/头像方.png' },
+        {
+          type: 'Image',
+          mediaType: 'image/png',
+          url: 'https://blog.yunyi.beiyan.us/头像方.png',
+        },
       ],
       manuallyApprovesFollowers: false,
       discoverable: true,

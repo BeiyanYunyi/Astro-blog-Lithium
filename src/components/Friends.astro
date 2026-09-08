@@ -19,8 +19,7 @@ const friendRenderList = [dustella!, ...shuffle(toshuffle)];
   class="grid grid-cols-1 lg:grid-cols-2 grid-flow-row-dense gap-2 opacity-0 not-prose"
   id="friend-list"
 >
-  {
-    friendRenderList.map((friend) => (
+  {friendRenderList.map((friend) => (
       <a
         href={friend.url}
         class="hover:underline rounded-md transition-all no-underline hover:shadow-md outline-neutral-200 dark:outline-neutral-600 outline outline-1 friend"
@@ -41,6 +40,5 @@ const friendRenderList = [dustella!, ...shuffle(toshuffle)];
           </div>
         </div>
       </a>
-    ))
-  }
+    ))}
 </div>

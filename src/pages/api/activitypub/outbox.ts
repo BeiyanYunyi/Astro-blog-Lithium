@@ -1,4 +1,3 @@
-/* eslint-disable import/prefer-default-export */
 import postToCreate from '@utils/noteToCreate';
 import type { APIRoute } from 'astro';
 import { getCollection } from 'astro:content';

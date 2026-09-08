@@ -57,8 +57,6 @@ export interface Note extends APObject {
   spoiler_text?: string;
 }
 
-/* eslint-disable import/prefer-default-export */
-
 export interface Env {
   ap: D1Database;
   PUBLIC_KEY: string;

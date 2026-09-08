@@ -1,6 +1,11 @@
 // Copyright 2012 Joyent, Inc.  All rights reserved.
 
-import { HEADER, HttpSignatureError, InvalidAlgorithmError, validateAlgorithm } from './utils';
+import {
+  HEADER,
+  HttpSignatureError,
+  InvalidAlgorithmError,
+  validateAlgorithm,
+} from './utils';
 
 ///--- Globals
 
@@ -109,7 +114,10 @@ export type ParsedSignature = {
  *                              mode.
  * @throws {ExpiredRequestError} if the value of date or x-date exceeds skew.
  */
-export function parseRequest(request: Request, options?: Options): ParsedSignature {
+export function parseRequest(
+  request: Request,
+  options?: Options,
+): ParsedSignature {
   if (options === undefined) {
     options = {
       clockSkew: 300,
@@ -127,18 +135,22 @@ export function parseRequest(request: Request, options?: Options): ParsedSignatu
     headers = options.headers;
   }
 
-  const authz = request.headers.get(HEADER.AUTH) || request.headers.get(HEADER.SIG);
+  const authz =
+    request.headers.get(HEADER.AUTH) || request.headers.get(HEADER.SIG);
 
   if (!authz) {
     const errHeader = HEADER.AUTH + ' or ' + HEADER.SIG;
 
-    throw new MissingHeaderError('no ' + errHeader + ' header ' + 'present in the request');
+    throw new MissingHeaderError(
+      'no ' + errHeader + ' header ' + 'present in the request',
+    );
   }
 
   options.clockSkew = options.clockSkew || 300;
 
   let i = 0;
-  let state = authz === request.headers.get(HEADER.SIG) ? State.Params : State.New;
+  let state =
+    authz === request.headers.get(HEADER.SIG) ? State.Params : State.New;
   let substate = ParamsState.Name;
   let tmpName = '';
   let tmpValue = '';
@@ -174,7 +186,8 @@ export function parseRequest(request: Request, options?: Options): ParsedSignatu
               // a-z
               tmpName += c;
             } else if (c === '=') {
-              if (tmpName.length === 0) throw new InvalidHeaderError('bad param format');
+              if (tmpName.length === 0)
+                throw new InvalidHeaderError('bad param format');
               substate = ParamsState.Quote;
             } else {
               throw new InvalidHeaderError('bad param format');
@@ -256,13 +269,20 @@ export function parseRequest(request: Request, options?: Options): ParsedSignatu
   if (!parsed.scheme || parsed.scheme !== 'Signature')
     throw new InvalidHeaderError('scheme was not "Signature"');
 
-  if (!parsed.params.keyId) throw new InvalidHeaderError('keyId was not specified');
+  if (!parsed.params.keyId)
+    throw new InvalidHeaderError('keyId was not specified');
 
-  if (!parsed.params.algorithm) throw new InvalidHeaderError('algorithm was not specified');
+  if (!parsed.params.algorithm)
+    throw new InvalidHeaderError('algorithm was not specified');
 
-  if (!parsed.params.signature) throw new InvalidHeaderError('signature was not specified');
+  if (!parsed.params.signature)
+    throw new InvalidHeaderError('signature was not specified');
 
-  if (['date', 'x-date', '(created)'].every((hdr) => parsedHeaders.indexOf(hdr) < 0)) {
+  if (
+    ['date', 'x-date', '(created)'].every(
+      (hdr) => parsedHeaders.indexOf(hdr) < 0,
+    )
+  ) {
     throw new MissingHeaderError('no signed date header');
   }
 
@@ -271,7 +291,9 @@ export function parseRequest(request: Request, options?: Options): ParsedSignatu
     validateAlgorithm(parsed.params.algorithm as string, 'rsa');
   } catch (e) {
     if (e instanceof InvalidAlgorithmError)
-      throw new InvalidParamsError(parsed.params.algorithm + ' is not ' + 'supported');
+      throw new InvalidParamsError(
+        parsed.params.algorithm + ' is not ' + 'supported',
+      );
     else throw e;
   }
 
@@ -287,17 +309,20 @@ export function parseRequest(request: Request, options?: Options): ParsedSignatu
          * We allow headers from the older spec drafts if strict parsing isn't
          * specified in options.
          */
-        parsed.signingString += request.method + ' ' + request.url + ' ' + cf?.httpProtocol;
+        parsed.signingString +=
+          request.method + ' ' + request.url + ' ' + cf?.httpProtocol;
       } else {
         /* Strict parsing doesn't allow older draft headers. */
         throw new StrictParsingError(
-          'request-line is not a valid header ' + 'with strict parsing enabled.',
+          'request-line is not a valid header ' +
+            'with strict parsing enabled.',
         );
       }
     } else if (h === '(request-target)') {
       const { pathname, search } = new URL(request.url);
       parsed.signingString +=
-        '(request-target): ' + `${request.method.toLowerCase()} ${pathname}${search}`;
+        '(request-target): ' +
+        `${request.method.toLowerCase()} ${pathname}${search}`;
     } else if (h === '(keyid)') {
       parsed.signingString += '(keyid): ' + parsed.params.keyId;
     } else if (h === '(algorithm)') {
@@ -306,7 +331,9 @@ export function parseRequest(request: Request, options?: Options): ParsedSignatu
       const opaque = parsed.params.opaque;
       if (opaque === undefined) {
         //@ts-expect-error -- authzHeaderName doesn't exist TOFIX
-        throw new MissingHeaderError('opaque param was not in the ' + authzHeaderName + ' header');
+        throw new MissingHeaderError(
+          'opaque param was not in the ' + authzHeaderName + ' header',
+        );
       }
       parsed.signingString += '(opaque): ' + opaque;
     } else if (h === '(created)') {
@@ -315,7 +342,8 @@ export function parseRequest(request: Request, options?: Options): ParsedSignatu
       parsed.signingString += '(expires): ' + parsed.params.expires;
     } else {
       const value = request.headers.get(h);
-      if (value === null) throw new MissingHeaderError(h + ' was not in the request');
+      if (value === null)
+        throw new MissingHeaderError(h + ' was not in the request');
       parsed.signingString += h + ': ' + value;
     }
 
@@ -336,7 +364,11 @@ export function parseRequest(request: Request, options?: Options): ParsedSignatu
 
     if (skew > options.clockSkew * 1000) {
       throw new ExpiredRequestError(
-        'clock skew of ' + skew / 1000 + 's was greater than ' + options.clockSkew + 's',
+        'clock skew of ' +
+          skew / 1000 +
+          's was greater than ' +
+          options.clockSkew +
+          's',
       );
     }
   }
@@ -356,7 +388,11 @@ export function parseRequest(request: Request, options?: Options): ParsedSignatu
 
     if (Math.abs(skew) > options.clockSkew) {
       throw new ExpiredRequestError(
-        'clock skew of ' + Math.abs(skew) + 's greater than allowed ' + options.clockSkew + 's',
+        'clock skew of ' +
+          Math.abs(skew) +
+          's greater than allowed ' +
+          options.clockSkew +
+          's',
       );
     }
   }

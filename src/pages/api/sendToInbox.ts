@@ -6,8 +6,11 @@ import { env } from 'cloudflare:workers';
 import { desc } from 'drizzle-orm';
 
 export const POST: APIRoute = async (ctx) => {
-  if (!env.DELIVERY_TOKEN) return new Response('Delivery is not configured', { status: 503 });
-  if (ctx.request.headers.get('Authorization') !== `Bearer ${env.DELIVERY_TOKEN}`)
+  if (!env.DELIVERY_TOKEN)
+    return new Response('Delivery is not configured', { status: 503 });
+  if (
+    ctx.request.headers.get('Authorization') !== `Bearer ${env.DELIVERY_TOKEN}`
+  )
     return new Response('Unauthorized', { status: 401 });
   const db = createDatabase(env.ap);
   const followers = await db

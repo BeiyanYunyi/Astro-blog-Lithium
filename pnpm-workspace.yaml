@@ -1,7 +1,6 @@
 shellEmulator: true
 
 # there're overrides, so we should turn off trustPolicy to avoid errors
-# eslint-disable-next-line pnpm/yaml-enforce-settings
 trustPolicy: off
 
 overrides:

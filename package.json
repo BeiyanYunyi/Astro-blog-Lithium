@@ -18,7 +18,10 @@
     "worker:check": "tsc --project tsconfig.worker.json --noEmit",
     "worker:dry-run": "wrangler deploy --dry-run --outdir .wrangler/dry-run",
     "deploy": "pnpm build && wrangler deploy",
-    "test:worker": "node --test tests/worker.test.ts"
+    "test:worker": "node --test tests/worker.test.ts",
+    "check": "biome check .",
+    "lint": "biome lint .",
+    "format": "biome format --write ."
   },
   "dependencies": {
     "@astrojs/cloudflare": "^14.3.0",
@@ -34,7 +37,6 @@
     "cross-env": "^10.1.0",
     "dayjs": "^1.11.23",
     "drizzle-orm": "1.0.0-rc.4",
-    "eslint-plugin-solid": "^0.16.0",
     "katex": "^0.18.4",
     "satteri": "^0.10.5",
     "sharp": "^0.35.3",
@@ -44,20 +46,12 @@
     "vite": "^8.2.2"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^9.3.0",
     "@babel/core": "^8.0.1",
+    "@biomejs/biome": "2.5.12",
     "@cloudflare/workers-types": "^5.20260825.1",
     "@unocss/astro": "^66.8.1",
-    "@unocss/eslint-plugin": "^66.8.1",
     "activitypub-core-types": "^0.3.2",
-    "astro-eslint-parser": "^3.1.0",
-    "eslint": "10.9.1",
-    "eslint-plugin-astro": "^3.1.0",
-    "eslint-plugin-format": "^2.0.1",
-    "eslint-plugin-solid": "^0.14.5",
     "miniflare": "5.20260903.0-alpha",
-    "prettier": "^3.9.6",
-    "prettier-plugin-astro": "^0.14.1",
     "rollup": "^4.62.5",
     "typescript": "^6.0.3",
     "wrangler": "^4.129.0"

@@ -9,7 +9,9 @@ class AppRequest extends Request {
 
   constructor(
     requestInfo: RequestInfo,
-    requestInit?: Omit<RequestInit<CfProperties<unknown>>, 'body'> & { body: string },
+    requestInit?: Omit<RequestInit<CfProperties<unknown>>, 'body'> & {
+      body: string;
+    },
   ) {
     super(requestInfo, { ...requestInit, method: 'post' });
     this.privBody = requestInit?.body ?? '';
