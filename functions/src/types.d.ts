@@ -1,3 +1,4 @@
+import type { Generated } from 'kysely';
 import type { D1Database } from '@cloudflare/workers-types';
 
 // https://www.w3.org/TR/activitystreams-vocabulary/#object-types
@@ -58,7 +59,7 @@ export interface Note extends APObject {
 }
 
 interface FollowerTable {
-  id: number;
+  id: Generated<number>;
   actorId: string;
   inbox: string;
 }
@@ -74,4 +75,11 @@ export interface Env {
   PUBLIC_KEY: string;
   PRIV_KEY: string;
   ASSETS: Fetcher;
+  DELIVERY_TOKEN?: string;
 }
+
+export type WorkerHandler = (context: {
+  request: Request;
+  env: Env;
+  params: Record<string, string>;
+}) => Response | Promise<Response>;

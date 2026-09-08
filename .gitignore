@@ -22,3 +22,7 @@ pnpm-debug.log*
 
 # ESLint cache
 .eslintcache
+
+# Local Worker secrets
+.dev.vars
+.dev.vars.*

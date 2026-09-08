@@ -1,13 +1,12 @@
 {
-  // "extends": "../tsconfig.json",
   "compilerOptions": {
-    "composite": true,
     "target": "esnext",
     "module": "esnext",
     "moduleResolution": "Bundler",
     "lib": ["esnext"],
     "types": ["@cloudflare/workers-types"],
-    "rootDir": "./"
+    "noEmit": true,
+    "skipLibCheck": true
   },
   "include": ["./**/*.ts"]
 }

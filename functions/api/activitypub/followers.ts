@@ -2,9 +2,9 @@
 /* eslint-disable import/prefer-default-export */
 import { Kysely } from 'kysely';
 import { D1Dialect } from 'kysely-d1';
-import { Database, Env } from '../../src/types';
+import type { Database, WorkerHandler } from '../../src/types';
 
-export const onRequestGet: PagesFunction<Env> = async (ctx) => {
+export const onRequestGet: WorkerHandler = async (ctx) => {
   const db = new Kysely<Database>({ dialect: new D1Dialect({ database: ctx.env.ap }) });
   // await db.insertInto('follower').values({ actorId: '114514', inbox: '1919810' }).execute();
 

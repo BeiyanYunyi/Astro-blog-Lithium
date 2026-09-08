@@ -3,7 +3,7 @@ import type { AP } from 'activitypub-core-types';
 import { Kysely } from 'kysely';
 import { D1Dialect } from 'kysely-d1';
 import actorURL from '../../src/const/actorURL';
-import type { Database, Env } from '../../src/types';
+import type { Database, Env, WorkerHandler } from '../../src/types';
 import AppRequest from '../../src/utils/AppRequest';
 
 const handleFollow = async (body: AP.Follow, db: Kysely<Database>, env: Env) => {
@@ -52,7 +52,7 @@ const handleUnfollow = async (body: AP.Undo, db: Kysely<Database>) => {
   return new Response('Ok');
 };
 
-export const onRequestPost: PagesFunction<Env> = async (ctx) => {
+export const onRequestPost: WorkerHandler = async (ctx) => {
   const db = new Kysely<Database>({ dialect: new D1Dialect({ database: ctx.env.ap }) });
   // await db.insertInto('follower').values({ actorId: '114514', inbox: '1919810' }).execute();
 

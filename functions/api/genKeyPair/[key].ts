@@ -1,5 +1,5 @@
 /* eslint-disable import/prefer-default-export */
-import { Env } from '../../src/types';
+import type { WorkerHandler } from '../../src/types';
 import {
   arrayBufferToBase64,
   generateUserKey,
@@ -7,7 +7,7 @@ import {
   unwrapPrivateKey,
 } from '../../src/utils/key-ops';
 
-export const onRequestGet: PagesFunction<Env> = async (ctx) => {
+export const onRequestGet: WorkerHandler = async (ctx) => {
   const res = await generateUserKey(ctx.params.key as string);
   const unwrapped = await unwrapPrivateKey(ctx.params.key as string, res.wrappedPrivKey, res.salt);
   const priv = arrayBufferToBase64(

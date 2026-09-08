@@ -1,7 +1,14 @@
-name = "ap"
-compatibility_date = "2023-10-26"
+name = "astro-blog-lithium"
+main = "functions/index.ts"
+compatibility_date = "2026-08-27"
+
+[assets]
+directory = "./dist"
+binding = "ASSETS"
+run_worker_first = ["/.well-known/webfinger", "/.well-known/webfinger/", "/api/*", "/posts/*"]
+not_found_handling = "404-page"
 
 [[d1_databases]]
-binding = "ap" # i.e. available in your Worker on env.DB
+binding = "ap"
 database_name = "ap"
 database_id = "007ff8f3-681b-47e1-9f6e-e9ded6295b43"
