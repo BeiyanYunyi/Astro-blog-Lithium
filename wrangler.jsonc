@@ -1,0 +1,36 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "astro-blog-lithium",
+  "main": "@astrojs/cloudflare/entrypoints/server",
+  "compatibility_date": "2026-08-27",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "run_worker_first": [
+      "/.well-known/webfinger",
+      "/.well-known/webfinger/",
+      "/api/*",
+      "/posts/*"
+    ],
+    "not_found_handling": "404-page"
+  },
+  "d1_databases": [
+    {
+      "binding": "ap",
+      "database_name": "ap",
+      "database_id": "007ff8f3-681b-47e1-9f6e-e9ded6295b43"
+    }
+  ],
+  "observability": {
+    "logs": {
+      "enabled": true,
+      "invocation_logs": true,
+      "persist": true
+    },
+    "traces": {
+      "enabled": true,
+      "persist": true
+    }
+  }
+}
