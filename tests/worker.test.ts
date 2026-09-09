@@ -492,6 +492,87 @@ test('signed comments persist once, enforce ownership, apply newer edits and ret
   assert.ok((await stored()).deleted_at);
 });
 
+test('comment Create and Update sanitize HTML before persisting in D1', async (t) => {
+  const env = await environment(t);
+  mockRemote(t, env);
+  const cases = [
+    [
+      '<p>Hello &amp; 你好<br><span class="h-card mention arbitrary invisible">@user</span></p>',
+      '<p>Hello &amp; 你好<br><span class="h-card mention invisible">@user</span></p>',
+    ],
+    [
+      '<p id="x" style="color:red" onclick="alert(1)">Hi<img src=x onerror=alert(1)></p>',
+      '<p>Hi</p>',
+    ],
+    [
+      '<a href="https://example.com/?a=1&amp;b=2" target="_blank" ping="https://evil.example" rel="opener">link</a>',
+      '<a href="https://example.com/?a=1&amp;b=2" rel="nofollow noopener noreferrer">link</a>',
+    ],
+    [
+      '<a href="mailto:hello@example.com">email</a>',
+      '<a href="mailto:hello@example.com" rel="nofollow noopener noreferrer">email</a>',
+    ],
+    [
+      '<a href="JaVaScRiPt:alert(1)">bad</a><a href="jav&#x61;script:alert(1)">entity</a><a href="java\nscript:alert(1)">newline</a>',
+      '<a>bad</a><a>entity</a><a>newline</a>',
+    ],
+    [
+      '<a href="data:text/html,bad">data</a><a href="//evil.example">relative</a><a href="/local">local</a>',
+      '<a>data</a><a>relative</a><a>local</a>',
+    ],
+    [
+      '<!-- hidden --><script><img src=x onerror=alert(1)></script><style>bad</style><iframe srcdoc="bad">bad</iframe><p>safe</p>',
+      '<p>safe</p>',
+    ],
+    [
+      '<svg><a href="javascript:alert(1)">bad</a></svg><math><mtext>bad</mtext></math><template>bad</template><p>safe</p>',
+      '<p>safe</p>',
+    ],
+    [
+      '<noscript><img src=x onerror=alert(1)></noscript><xmp><img src=x onerror=alert(1)></xmp><p>safe</p>',
+      '<p>safe</p>',
+    ],
+    ['<div><strong>Readable</strong> text</div>', 'Readable text'],
+    ['', ''],
+  ];
+  for (const [index, [content, expected]] of cases.entries()) {
+    const note = {
+      id: `${remote}/notes/sanitize-${index}`,
+      type: 'Note',
+      attributedTo: remote,
+      inReplyTo: `${origin}/api/activitypub/note/CornerOfTheWorld`,
+      published: '2026-09-01T00:00:00Z',
+      content,
+    };
+    for (const type of ['Create', 'Update']) {
+      if (type === 'Update') {
+        await env.database
+          .prepare('UPDATE ap_comment SET content = ? WHERE id = ?')
+          .bind('Before edit', note.id)
+          .run();
+      }
+      const response = await worker.fetch(
+        await signedActivity({
+          id: `${remote}/sanitize/${index}/${type}`,
+          type,
+          actor: remote,
+          object: {
+            ...note,
+            ...(type === 'Update' ? { updated: '2026-09-02T00:00:00Z' } : {}),
+          },
+        }),
+        env,
+      );
+      assert.equal(response.status, 202, await response.text());
+      const row = await env.database
+        .prepare('SELECT content FROM ap_comment WHERE id = ?')
+        .bind(note.id)
+        .first();
+      assert.equal(row?.content, expected, `${type} case ${index}`);
+    }
+  }
+});
+
 test('signed Follow, Accept, persistent deduplication, follower storage and Undo', async (t) => {
   const env = await environment(t);
   const deliveries = mockRemote(t, env);

@@ -4,10 +4,10 @@ import { Create, Delete, Note, Update } from '@fedify/vocab';
 import { filePathToSlug } from '@utils/idToSlug';
 import { and, eq, isNull, lt, sql } from 'drizzle-orm';
 import createDatabase from './database';
+import { sanitizeCommentContent } from './sanitize';
 import { comment } from './schema';
 import type { Env } from './types';
 
-// Store remote HTML as untrusted data. A future UI must sanitize before rendering.
 async function localPostId(ctx: InboxContext<Env>, target: URL) {
   const parsed = ctx.parseUri(target);
   if (parsed?.type !== 'object' || parsed.class !== Note) return null;
@@ -56,7 +56,7 @@ export function registerCommentListeners(listeners: InboxListenerSetters<Env>) {
             author.preferredUsername?.toString() ??
             author.id.host,
           inReplyTo: note.replyTargetId.href,
-          content: note.content?.toString() ?? '',
+          content: await sanitizeCommentContent(note.content?.toString() ?? ''),
           publishedAt: published,
           updatedAt: note.updated?.toString() ?? published,
         })
@@ -78,7 +78,10 @@ export function registerCommentListeners(listeners: InboxListenerSetters<Env>) {
       if (!updated) return;
       await createDatabase(ctx.data.ap)
         .update(comment)
-        .set({ content: note.content?.toString() ?? '', updatedAt: updated })
+        .set({
+          content: await sanitizeCommentContent(note.content?.toString() ?? ''),
+          updatedAt: updated,
+        })
         .where(
           and(
             eq(comment.id, note.id.href),
