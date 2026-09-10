@@ -2,6 +2,7 @@ import astro from '@astrojs/cloudflare/entrypoints/server';
 import type { MessageBatch } from '@cloudflare/workers-types';
 import { WorkersMessageQueue } from '@fedify/cfworkers';
 import type { Message } from '@fedify/fedify';
+import { isBlockedActivity } from './activitypub/blocklist';
 import { createBlogFederation } from './activitypub/federation';
 import {
   type PublicationTask,
@@ -20,6 +21,14 @@ export default {
     const queue = new WorkersMessageQueue(env.FEDERATION_QUEUE);
     for (const message of batch.messages) {
       try {
+        if (
+          message.body.type === 'inbox' &&
+          (isBlockedActivity(message.body.activity) ||
+            isBlockedActivity(message.body.normalizedActivity))
+        ) {
+          message.ack();
+          continue;
+        }
         if (message.body.type === 'blog-publish') {
           await publishBatch(env, federation, message.body);
         } else {

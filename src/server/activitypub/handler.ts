@@ -1,8 +1,23 @@
 import { env } from 'cloudflare:workers';
 import type { APIRoute } from 'astro';
+import { isBlockedFederationRequest } from './blocklist';
 import { createBlogFederation, webFingerResources } from './federation';
 
 export const handleFederation: APIRoute = async ({ request }) => {
+  if (await isBlockedFederationRequest(request)) {
+    return new Response(
+      request.method === 'HEAD'
+        ? null
+        : JSON.stringify({ error: 'Instance blocked' }),
+      {
+        status: 403,
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-store',
+        },
+      },
+    );
+  }
   const url = new URL(request.url);
   const webFinger =
     url.pathname.replace(/\/$/, '') === '/.well-known/webfinger';
