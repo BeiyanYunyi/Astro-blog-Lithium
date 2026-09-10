@@ -18,6 +18,7 @@ import postToNote from '@utils/postToNote';
 import { count, desc, eq } from 'drizzle-orm';
 import { Temporal } from 'temporal-polyfill';
 import actorURL from './actorURL';
+import { isBlockedInstance } from './blocklist';
 import { registerCommentListeners } from './comments';
 import createDatabase from './database';
 import { getPrivateKey, getPublicKey } from './getKey';
@@ -152,6 +153,7 @@ federation.setObjectDispatcher(
 const listeners = federation
   .setInboxListeners('/api/{identifier}/inbox')
   .on(Follow, async (ctx, activity) => {
+    if (activity.actorIds.some((id) => isBlockedInstance(id))) return;
     if (!activity.id || activity.objectId?.href !== actorURL) return;
     const actor = await activity.getActor(ctx);
     if (!actor?.id || !actor.inboxId) return;
@@ -178,6 +180,7 @@ const listeners = federation
       .run();
   })
   .on(Undo, async (ctx, activity) => {
+    if (activity.actorIds.some((id) => isBlockedInstance(id))) return;
     const follow = await activity.getObject(ctx);
     if (
       !(follow instanceof Follow) ||

@@ -3,6 +3,7 @@ import { readdir, readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { test } from 'node:test';
 import { convertV4MiniflareOptions, Miniflare } from 'miniflare';
+import { isBlockedInstance } from '../src/server/activitypub/blocklist.ts';
 
 const worker = {
   async fetch(request, env) {
@@ -54,7 +55,11 @@ const publicKey = `-----BEGIN PUBLIC KEY-----\n${Buffer.from(await crypto.subtle
 
 async function environment(
   t,
-  { realAssets = false, deliveryToken = 'local-test-token' } = {},
+  {
+    realAssets = false,
+    deliveryToken = 'local-test-token',
+    blockedDomains = null,
+  } = {},
 ) {
   const env = {
     queued: [],
@@ -63,6 +68,7 @@ async function environment(
     remoteFetch: async () =>
       new Response('Unexpected remote request', { status: 502 }),
   };
+  let blocklistReplacements = 0;
   const runtime = new Miniflare(
     convertV4MiniflareOptions({
       modules: [
@@ -100,7 +106,17 @@ async function environment(
           ].map(async (path) => ({
             type: 'ESModule',
             path: resolve('dist/server', path),
-            contents: await readFile(resolve('dist/server', path), 'utf8'),
+            contents: (
+              await readFile(resolve('dist/server', path), 'utf8')
+            ).replace(
+              /var blockedInstanceDomains = \[[\s\S]*?\];/,
+              (declaration) => {
+                blocklistReplacements++;
+                return blockedDomains === null
+                  ? declaration
+                  : `var blockedInstanceDomains = ${JSON.stringify(blockedDomains)};`;
+              },
+            ),
           })),
         )),
       ],
@@ -146,6 +162,11 @@ async function environment(
     }),
   );
   t.after(() => runtime.dispose());
+  assert.equal(
+    blocklistReplacements,
+    1,
+    'Test blocklist fixture must patch exactly one built declaration',
+  );
   const database = await runtime.getD1Database('ap');
   const schema = await readFile(
     new URL('../setup.sql', import.meta.url),
@@ -1046,4 +1067,104 @@ test('Astro retains Origin protection for form-like and headerless POST requests
     );
     assert.equal(response.status, 403);
   }
+});
+
+test('instance matching respects hostname boundaries and normalization', () => {
+  const domains = ['Blocked.Example.', '例子.测试'];
+  for (const url of [
+    'https://blocked.example/a',
+    'https://sub.blocked.example/a',
+    'https://BLOCKED.EXAMPLE.:8443/a',
+    'https://例子.测试/actor',
+  ]) {
+    assert.equal(isBlockedInstance(url, domains), true, url);
+  }
+  for (const url of [
+    'https://notblocked.example/a',
+    'https://blocked.example.evil/a',
+    'https://blocked.example@allowed.example/a',
+    'https://allowed.example/blocked.example',
+    'invalid',
+  ]) {
+    assert.equal(isBlockedInstance(url, domains), false, url);
+  }
+});
+
+test('blocked signatures and actors return 403 without fetches, queueing or writes', async (t) => {
+  const env = await environment(t, { blockedDomains: ['blocked.example'] });
+  let fetches = 0;
+  env.remoteFetch = async () => {
+    fetches++;
+    return new Response('Unexpected', { status: 502 });
+  };
+  const blocked = 'https://sub.blocked.example/users/spammer';
+  const requests = [
+    await signedActivity(followActivity(), { signer: blocked }),
+    ...['Follow', 'Create', 'Update', 'Delete', 'Undo'].map((type) =>
+      request('/api/activitypub/inbox', {
+        method: 'POST',
+        body: JSON.stringify({ ...followActivity(), type, actor: blocked }),
+      }),
+    ),
+    request('/api/activitypub/inbox', {
+      method: 'POST',
+      body: JSON.stringify({
+        'https://www.w3.org/ns/activitystreams#actor': [{ '@id': blocked }],
+      }),
+    }),
+    request('/api/activitypub/actor', {
+      headers: { Signature: `keyId="${blocked}#key",signature="invalid"` },
+    }),
+    request('/api/activitypub/actor', {
+      headers: { 'Signature-Input': `sig1=("@method");keyid="${blocked}#key"` },
+    }),
+    request('/api/activitypub/actor', {
+      method: 'HEAD',
+      headers: { Signature: `keyId="${blocked}#key"` },
+    }),
+  ];
+  for (const input of requests) {
+    const response = await worker.fetch(input, env);
+    assert.equal(response.status, 403);
+    assert.equal(response.headers.get('cache-control'), 'no-store');
+    if (input.method === 'HEAD') assert.equal(await response.text(), '');
+    else assert.deepEqual(await response.json(), { error: 'Instance blocked' });
+  }
+  assert.equal(fetches, 0);
+  assert.equal(env.queued.length, 0);
+  for (const table of ['follower', 'ap_comment', 'fedify_kv']) {
+    assert.equal(
+      (await env.database.prepare(`SELECT COUNT(*) AS n FROM ${table}`).first())
+        .n,
+      0,
+    );
+  }
+});
+
+test('inbox backlog from a blocked instance is acknowledged without processing', async (t) => {
+  const env = await environment(t, { blockedDomains: ['blocked.example'] });
+  let fetches = 0;
+  env.remoteFetch = async () => {
+    fetches++;
+    return new Response('Unexpected', { status: 502 });
+  };
+  const runtimeWorker = await env.runtime.getWorker();
+  const result = await runtimeWorker.queue('test-drain', [
+    {
+      id: crypto.randomUUID(),
+      timestamp: new Date(),
+      attempts: 1,
+      body: {
+        type: 'inbox',
+        activity: { actor: 'https://blocked.example/actor' },
+      },
+    },
+  ]);
+  assert.equal(result.outcome, 'ok');
+  assert.equal(result.retryMessages.length, 0);
+  assert.equal(fetches, 0);
+  assert.equal(
+    await env.database.prepare('SELECT * FROM follower').first(),
+    null,
+  );
 });

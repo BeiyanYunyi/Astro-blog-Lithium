@@ -127,6 +127,28 @@ outgoing Update/Delete activities. Reusing an already recorded slug does not
 trigger a new Create. A queued publication whose source post was removed by a
 later deployment is marked `cancelled`, allowing other pending posts to progress.
 
+### Incoming instance blocklist
+
+Edit `blockedInstanceDomains` in `src/server/activitypub/blocklist.ts` and redeploy.
+The list currently includes `qoto.org` and `cleverlibre.org`; entries are bare hostnames.
+Each entry also blocks subdomains. Matching ignores case, ports and a trailing dot.
+
+Federation routes reject blocked HTTP signature key IDs (Cavage or RFC 9421) and
+incoming activity actor IDs with HTTP 403 and `{"error":"Instance blocked"}`.
+These early checks do not fetch keys, write D1 state or enqueue activities.
+Unblocked requests still undergo normal Fedify signature verification. Existing
+inbox queue messages are checked against the current list and acknowledged when
+blocked; listeners also check parsed actor IDs before resolving objects or writing
+state, including actors expressed through custom JSON-LD aliases.
+
+This is an inbound filter: it does not purge existing followers/comments or stop
+outgoing publication to existing followers. Anonymous reads cannot reliably be
+attributed to a remote instance and remain public. Host, Origin and User-Agent
+headers are not treated as proof of a caller's instance.
+
+The 403 response follows [Mastodon's signature-domain rejection](https://github.com/mastodon/mastodon/blob/main/app/controllers/concerns/signature_verification.rb),
+not the full account/content cleanup performed by Mastodon's domain suspension.
+
 ### Comments and inbox handling
 
 Incoming activities are signature-verified by Fedify before being durably queued.

@@ -3,6 +3,7 @@ import type { InboxContext, InboxListenerSetters } from '@fedify/fedify';
 import { Create, Delete, Note, Update } from '@fedify/vocab';
 import { filePathToSlug } from '@utils/idToSlug';
 import { and, eq, isNull, lt, sql } from 'drizzle-orm';
+import { isBlockedInstance } from './blocklist';
 import createDatabase from './database';
 import { sanitizeCommentContent } from './sanitize';
 import { comment } from './schema';
@@ -31,6 +32,7 @@ function ownsNote(activity: Create | Update, note: Note) {
 export function registerCommentListeners(listeners: InboxListenerSetters<Env>) {
   listeners
     .on(Create, async (ctx, activity) => {
+      if (activity.actorIds.some((id) => isBlockedInstance(id))) return;
       const note = await activity.getObject(ctx);
       if (
         !(note instanceof Note) ||
@@ -64,6 +66,7 @@ export function registerCommentListeners(listeners: InboxListenerSetters<Env>) {
         .run();
     })
     .on(Update, async (ctx, activity) => {
+      if (activity.actorIds.some((id) => isBlockedInstance(id))) return;
       const note = await activity.getObject(ctx);
       if (
         !(note instanceof Note) ||
@@ -96,6 +99,7 @@ export function registerCommentListeners(listeners: InboxListenerSetters<Env>) {
         .run();
     })
     .on(Delete, async (ctx, activity) => {
+      if (activity.actorIds.some((id) => isBlockedInstance(id))) return;
       if (!activity.actorId || !activity.objectId) return;
       // Keep the ID and author as a tombstone so late Create/Update retries cannot resurrect it.
       await createDatabase(ctx.data.ap)
