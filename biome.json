@@ -6,12 +6,7 @@
     "useIgnoreFile": true
   },
   "files": {
-    "includes": [
-      "**",
-      "!public",
-      "!src/assets",
-      "!src/styles/prism-tomorrow.min.css"
-    ]
+    "includes": ["**", "!public", "!src/assets", "!**/*.css"]
   },
   "formatter": {
     "enabled": true,
