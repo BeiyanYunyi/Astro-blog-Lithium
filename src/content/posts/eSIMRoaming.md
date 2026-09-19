@@ -26,13 +26,13 @@ tag:
 
 这就需要一个“转接器”（下称“eSIM容器”）：它是一张物理的SIM卡，能插在SIM卡槽上；但它又能作为eSIM容器，写入外部的eSIM数据。
 
-存在这样的设备吗？答案是存在。例如[ESTKme](https://store.estk.me/products?code=EASYEUICC)（可以用这个[邀请链接](https://store.estk.me/products?code=EASYEUICC)）和[9eSIM](https://www.9esim.com/zh/%E8%B4%AD%E7%89%A9)（[邀请链接](https://www.9esim.com/zh/%E8%B4%AD%E7%89%A9/?coupon_code=EASYEUICC)）。我购买了ESTKme的eSIM容器，它支持Visa、MasterCard，也支持支付宝和微信。需要注意的是，如果你没有Android设备，那么你还需要额外购买一个读卡器。下单后，eSIM容器从深圳发货，寄到我家中。
+存在这样的设备吗？答案是存在。例如[ESTKme](https://store.estk.me/products?code=EASYEUICC)（可以用这个[邀请链接](https://store.estk.me/products?code=EASYEUICC)）和[9eSIM](https://www.9esim.com/zh/%E8%B4%AD%E7%89%A9)（[邀请链接](https://www.9esim.com/en/shop?coupon=EASYEUICC)）。我购买了ESTKme的eSIM容器，它支持Visa、MasterCard，也支持支付宝和微信。需要注意的是，如果你没有Android设备，那么你还需要额外购买一个读卡器。下单后，eSIM容器从深圳发货，寄到我家中。
 
 有了容器和写入工具，剩下的就是eSIM卡了。可用的运营商包括但不限于[RedteaGO](https://esim.redteago.com/)（纯数据流量，无手机号，不支持短信收发）、[esim.gg](https://esim.gg)（可带爱沙尼亚手机号收发短信）和[giffgaff](https://www.giffgaff.com)（带英国手机号收发短信，但需要先购入实体SIM后转移）。最近运营商们（例如RedteaGO）普遍受到压力，不再对中国IP提供eSIM服务，你可能需要先翻墙才能购买。[^3]
 
 购买eSIM卡后，运营商可能会给你一个二维码，也可能直接给你里面含有“LPA”字样的一串代码。无论是哪一种，都需要写入eSIM容器中。
 
-要想写入，我们还需要对应的软件。你可以使用[ESTKme](https://store.estk.me/downloads)出品的软件（实际上能写别的eSIM容器）、[EasyLPAC](https://github.com/creamlike1024/EasyLPAC)或者[EasyEUICC](https://easyeuicc.org/zh-hant/)。我没有Android设备，就没法直接用手机的SIM卡槽写入，而只能插在读卡器上，用EasyLPAC进行写入。写入之后，启用对应的Profile，再切换手机流量卡（可能还要启用数据漫游），就能使用eSIM上网了。
+要想写入，我们还需要对应的软件。你可以使用[ESTKme](https://store.estk.me/downloads)出品的软件（实际上能写别的eSIM容器）、[EasyLPAC](https://github.com/creamlike1024/EasyLPAC)或者[EasyEUICC](https://easyeuicc.org/zh-hans/)。我没有Android设备，就没法直接用手机的SIM卡槽写入，而只能插在读卡器上，用EasyLPAC进行写入。写入之后，启用对应的Profile，再切换手机流量卡（可能还要启用数据漫游），就能使用eSIM上网了。
 
 <span class="text-xs">本文应EasyEUICC开发者的邀请写就。本文作者接受了其赞助。</span>
 
