@@ -1,0 +1,26 @@
+---
+import FootnotePopovers from '../utils/footnotePopovers';
+---
+
+<FootnotePopovers client:only="solid-js" />
+
+<style is:global>
+  .footnote-popover.prose {
+    inset: auto;
+    width: min(24rem, calc(100vw - 2rem));
+    max-height: min(24rem, calc(100dvh - 2rem));
+    overflow: auto;
+    overflow-wrap: anywhere;
+  }
+
+  .footnote-popover p {
+    margin-block: 0.5em;
+  }
+
+  .footnote-popover > :first-child {
+    margin-top: 0;
+  }
+  .footnote-popover > :last-child {
+    margin-bottom: 0;
+  }
+</style>

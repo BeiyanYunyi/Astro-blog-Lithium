@@ -7,6 +7,7 @@ import type { MarkdownHeading } from 'astro';
 import headingsToToc from '@utils/headingsToToc';
 import TocHighlight from '@components/TocHighlight';
 import BaseLayout from './BaseLayout.astro';
+import FootnotePopovers from '@components/FootnotePopovers.astro';
 
 export type Props = MDInstance & {
   headings?: MarkdownHeading[];
@@ -31,6 +32,7 @@ const toc = headingsToToc(headings);
 
 <BaseLayout title={title} description={description} image={finalImage}>
   <div class="flex">
+    <FootnotePopovers />
     <article
       class="prose prose-neutral min-w-0 dark:prose-invert max-w-none card p-6 flex-grow"
     >

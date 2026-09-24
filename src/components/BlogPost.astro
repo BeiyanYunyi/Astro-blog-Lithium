@@ -8,6 +8,7 @@ import type { CollectionEntry } from 'astro:content';
 import svgPathToName from '@utils/svgPathToName';
 import headingsToToc from '@utils/headingsToToc';
 import TocHighlight from './TocHighlight';
+import FootnotePopovers from './FootnotePopovers.astro';
 
 export type Props = {
   headings: MarkdownHeading[];
@@ -30,6 +31,7 @@ const toc = headingsToToc(headings);
   image={remoteImage || (image?.src ? `/og-image/${svgPathToName(image?.src)}.png` : '/头像方.png')}
 >
   <div class="flex">
+    <FootnotePopovers />
     <div class="flex-grow min-w-0">
       <article
         class="prose prose-neutral dark:prose-invert max-w-full card overflow-clip"
