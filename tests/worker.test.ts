@@ -248,7 +248,7 @@ test('content negotiation preserves slugs, quality values, HEAD and cache isolat
     'text/html, application/activity+json;q=0.5',
   ]) {
     const response = await worker.fetch(
-      request('/posts/CornerOfTheWorld', { headers: { Accept: accept } }),
+      request('/posts/CornerOfTheWorld/', { headers: { Accept: accept } }),
       env,
     );
     assert.match(response.headers.get('Content-Type'), /text\/html/);
@@ -261,7 +261,7 @@ test('content negotiation preserves slugs, quality values, HEAD and cache isolat
   assert.equal(redirect.status, 302);
   assert.equal(
     redirect.headers.get('Location'),
-    '/posts/CornerOfTheWorld?from=fedi',
+    '/posts/CornerOfTheWorld/?from=fedi',
   );
   const head = await worker.fetch(
     request('/posts/CornerOfTheWorld', {
@@ -997,14 +997,46 @@ test('manual wake-up returns 202 and does not resend history, including with no 
   assert.equal(deliveries.length, 0);
 });
 
+test('article HTML URLs redirect permanently to a trailing slash', async (t) => {
+  const env = await environment(t, { realAssets: true });
+  for (const method of ['GET', 'HEAD']) {
+    for (const slug of [
+      'CornerOfTheWorld',
+      'removeHexo',
+      '%43ornerOfTheWorld',
+    ]) {
+      const path = `/posts/${slug}`;
+      const search = '?from=fedi&value=a%2Fb';
+      const response = await worker.fetch(
+        request(path + search, { method }),
+        env,
+      );
+      assert.equal(response.status, 301);
+      assert.equal(
+        response.headers.get('Location'),
+        `/posts/${decodeURIComponent(slug)}/${search}`,
+      );
+      assert.equal(response.headers.get('Vary'), 'Accept');
+      assert.equal(response.headers.get('Cache-Control'), 'no-store');
+      if (method === 'HEAD') assert.equal(await response.text(), '');
+      const canonical = await worker.fetch(
+        request(response.headers.get('Location'), { method }),
+        env,
+      );
+      assert.equal(canonical.status, 200);
+      assert.equal(canonical.headers.get('Location'), null);
+    }
+  }
+});
+
 test('static pages, RSS, sitemap, OG images and Markdown/MDX remain available', async (t) => {
   const env = await environment(t, { realAssets: true });
   for (const path of [
     '/',
     '/tags/',
     '/tags/杂谈/',
-    '/posts/CornerOfTheWorld',
-    '/posts/removeHexo',
+    '/posts/CornerOfTheWorld/',
+    '/posts/removeHexo/',
   ]) {
     const response = await worker.fetch(request(path), env);
     assert.equal(response.status, 200, path);

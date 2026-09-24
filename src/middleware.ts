@@ -62,7 +62,7 @@ export const onRequest = defineMiddleware(
       return response;
     }
     if (note && !wantsActivity(request)) {
-      target.pathname = `/posts/${note[1]}`;
+      target.pathname = `/posts/${note[1]}/`;
       return varyAccept(
         new Response(null, {
           status: 302,

@@ -15,7 +15,7 @@ const escapeHtml = (value: string) =>
 
 function postToNote(post: CollectionEntry<'posts'>) {
   const slug = filePathToSlug(post.filePath);
-  const url = new URL(`https://blog.yunyi.beiyan.us/posts/${slug}`);
+  const url = new URL(`https://blog.yunyi.beiyan.us/posts/${slug}/`);
   return new Note({
     id: new URL(`https://blog.yunyi.beiyan.us/api/activitypub/note/${slug}`),
     attribution: new URL(actorURL),
