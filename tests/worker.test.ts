@@ -335,10 +335,23 @@ const remoteKeys = await crypto.subtle.generateKey(
 );
 const remotePublicKey = `-----BEGIN PUBLIC KEY-----\n${Buffer.from(await crypto.subtle.exportKey('spki', remoteKeys.publicKey)).toString('base64')}\n-----END PUBLIC KEY-----`;
 
-function mockRemote(t, env) {
+function mockRemote(t, env, { objects = new Map(), fetched = [] } = {}) {
   const deliveries = [];
   t.mock.method(env, 'remoteFetch', async (input) => {
-    if (input.method === 'GET')
+    if (input.method === 'GET') {
+      fetched.push(input.url);
+      if (objects.has(input.url)) {
+        const object = objects.get(input.url);
+        return object instanceof Response
+          ? object.clone()
+          : Response.json(
+              {
+                '@context': 'https://www.w3.org/ns/activitystreams',
+                ...object,
+              },
+              { headers: { 'Content-Type': 'application/activity+json' } },
+            );
+      }
       return Response.json(
         {
           '@context': [
@@ -356,6 +369,7 @@ function mockRemote(t, env) {
         },
         { headers: { 'Content-Type': 'application/activity+json' } },
       );
+    }
     deliveries.push({
       url: input.url,
       body: await input.clone().json(),
@@ -411,7 +425,8 @@ const followActivity = (suffix = 'follow') => ({
 
 test('signed comments persist once, enforce ownership, apply newer edits and retain deletion tombstones', async (t) => {
   const env = await environment(t);
-  mockRemote(t, env);
+  const fetched = [];
+  mockRemote(t, env, { fetched });
   const note = {
     id: `${remote}/notes/reply`,
     type: 'Note',
@@ -464,6 +479,7 @@ test('signed comments persist once, enforce ownership, apply newer edits and ret
     },
   ])
     await receive('Create', object);
+  assert.ok(!fetched.includes(`${origin}/api/activitypub/note/missing`));
   assert.equal(
     (
       await env.database
@@ -511,6 +527,280 @@ test('signed comments persist once, enforce ownership, apply newer edits and ret
   });
   assert.equal((await stored()).content, '');
   assert.ok((await stored()).deleted_at);
+});
+
+test('signed nested replies inherit the root post and retain their immediate parent through edits and deletion', async (t) => {
+  const env = await environment(t);
+  mockRemote(t, env);
+  let sequence = 0;
+  const receive = async (type, object) => {
+    const response = await worker.fetch(
+      await signedActivity({
+        id: `${remote}/thread/${sequence++}`,
+        type,
+        actor: remote,
+        object,
+      }),
+      env,
+    );
+    assert.equal(response.status, 202, await response.text());
+  };
+  const stored = (id) =>
+    env.database
+      .prepare('SELECT * FROM ap_comment WHERE id = ?')
+      .bind(id)
+      .first();
+  const reply = (id, inReplyTo) => ({
+    id: `${remote}/notes/${id}`,
+    type: 'Note',
+    attributedTo: remote,
+    inReplyTo,
+    content: `<p>${id}</p>`,
+    published: '2026-09-01T00:00:00Z',
+  });
+  const root = reply('root', `${origin}/api/activitypub/note/CornerOfTheWorld`);
+  await receive('Create', root);
+  // Replies may be authored by someone other than the parent author.
+  await env.database
+    .prepare('UPDATE ap_comment SET author_id = ? WHERE id = ?')
+    .bind('https://9.9.9.9/users/bob', root.id)
+    .run();
+  const second = reply('second', root.id);
+  const third = reply('third', second.id);
+  for (const note of [second, third]) {
+    await receive('Create', note);
+    const row = await stored(note.id);
+    assert.equal(row?.post_id, 'CornerOfTheWorld');
+    assert.equal(row.in_reply_to, note.inReplyTo);
+    assert.equal(row.author_id, remote);
+    assert.equal(row.content, note.content);
+    await receive('Create', { ...note, content: 'Duplicate' });
+    assert.deepEqual(await stored(note.id), row);
+  }
+  await receive('Update', {
+    ...second,
+    content: '<p>Edited nested reply</p>',
+    updated: '2026-09-03T00:00:00Z',
+  });
+  assert.equal((await stored(second.id)).content, '<p>Edited nested reply</p>');
+  assert.equal((await stored(second.id)).in_reply_to, root.id);
+  await receive('Delete', second.id);
+  const deleted = await stored(second.id);
+  assert.ok(deleted.deleted_at);
+  assert.equal(deleted.content, '');
+  assert.equal((await stored(third.id)).post_id, 'CornerOfTheWorld');
+  const late = reply('late', second.id);
+  await receive('Create', late);
+  assert.equal((await stored(late.id)).post_id, 'CornerOfTheWorld');
+  assert.equal((await stored(late.id)).in_reply_to, second.id);
+  await receive('Create', second);
+  assert.deepEqual(await stored(second.id), deleted);
+
+  const unknown = reply('unknown-parent', `${remote}/notes/not-stored`);
+  await receive('Create', unknown);
+  assert.equal(await stored(unknown.id), null);
+  const forged = { ...reply('forged-child', root.id), attributedTo: actorId };
+  await receive('Create', forged);
+  assert.equal(await stored(forged.id), null);
+});
+
+test('verified replies backfill five missing ancestors from authoritative URIs atomically', async (t) => {
+  const env = await environment(t);
+  const objects = new Map();
+  const fetched = [];
+  const ancestorAuthor = 'https://9.9.9.9/users/bob';
+  objects.set(ancestorAuthor, {
+    id: ancestorAuthor,
+    type: 'Person',
+    name: 'Bob',
+    inbox: 'https://9.9.9.9/inbox',
+  });
+  let target = `${origin}/api/activitypub/note/CornerOfTheWorld`;
+  const ancestors = [];
+  for (let depth = 1; depth <= 5; depth++) {
+    const note = {
+      id: `https://9.9.9.9/notes/ancestor-${depth}`,
+      type: 'Note',
+      attributedTo: ancestorAuthor,
+      inReplyTo: target,
+      content: `<p>Ancestor ${depth}</p><script>unsafe()</script>`,
+      published: '2026-09-01T00:00:00Z',
+    };
+    objects.set(note.id, note);
+    ancestors.push(note);
+    target = note.id;
+  }
+  mockRemote(t, env, { objects, fetched });
+  const note = {
+    id: `${remote}/notes/backfill`,
+    type: 'Note',
+    attributedTo: remote,
+    // An inline parent must not bypass the authoritative fetch or depth limit.
+    inReplyTo: { ...ancestors[4], content: 'Forged inline content' },
+    content: '<p>Current reply</p>',
+    published: '2026-09-02T00:00:00Z',
+  };
+  const activity = {
+    id: `${remote}/backfill/create`,
+    type: 'Create',
+    actor: remote,
+    object: note,
+  };
+  const unsigned = await worker.fetch(
+    request('/api/activitypub/inbox', {
+      method: 'POST',
+      body: JSON.stringify({
+        '@context': 'https://www.w3.org/ns/activitystreams',
+        ...activity,
+      }),
+    }),
+    env,
+  );
+  assert.notEqual(unsigned.status, 202);
+  assert.ok(ancestors.every((parent) => !fetched.includes(parent.id)));
+  assert.equal(
+    (
+      await env.database
+        .prepare('SELECT count(*) AS count FROM ap_comment')
+        .first()
+    ).count,
+    0,
+  );
+  const response = await worker.fetch(await signedActivity(activity), env);
+  assert.equal(response.status, 202, await response.text());
+  const { results } = await env.database
+    .prepare('SELECT * FROM ap_comment')
+    .all();
+  assert.equal(results.length, 6);
+  for (const [index, parent] of ancestors.entries()) {
+    const row = results.find((row) => row.id === parent.id);
+    assert.equal(row?.post_id, 'CornerOfTheWorld');
+    assert.equal(row.in_reply_to, parent.inReplyTo);
+    assert.equal(row.author_id, ancestorAuthor);
+    assert.equal(row.author_name, 'Bob');
+    assert.equal(row.content, `<p>Ancestor ${index + 1}</p>`);
+    assert.equal(fetched.filter((url) => url === parent.id).length, 1);
+  }
+  assert.equal(results.find((row) => row.id === note.id)?.in_reply_to, target);
+  assert.equal(fetched.filter((url) => url === ancestorAuthor).length, 1);
+  // A new activity for the same reply uses stored ancestry without refetching
+  // or overwriting a parent's locally stored newer version.
+  await env.database
+    .prepare('UPDATE ap_comment SET content = ? WHERE id = ?')
+    .bind('Newer edit', target)
+    .run();
+  fetched.length = 0;
+  assert.equal(
+    (
+      await worker.fetch(
+        await signedActivity({ ...activity, id: `${remote}/backfill/retry` }),
+        env,
+      )
+    ).status,
+    202,
+  );
+  assert.ok(ancestors.every((parent) => !fetched.includes(parent.id)));
+  assert.equal(
+    (
+      await env.database
+        .prepare('SELECT content FROM ap_comment WHERE id = ?')
+        .bind(target)
+        .first()
+    ).content,
+    'Newer edit',
+  );
+});
+
+test('reply backfill rejects excessive, unrelated, cyclic and untrusted chains without partial writes', async (t) => {
+  for (const scenario of [
+    'depth',
+    'root',
+    'cycle',
+    'identity',
+    'author',
+    'blocked',
+    'missing',
+    'private',
+    'actor',
+  ]) {
+    await t.test(scenario, async (t) => {
+      const env = await environment(t, { blockedDomains: ['8.8.8.8'] });
+      const objects = new Map();
+      const fetched = [];
+      const parents = Array.from({ length: 6 }, (_, i) => ({
+        id: `${remote}/notes/parent-${i}`,
+        type: 'Note',
+        attributedTo: remote,
+        inReplyTo: `${remote}/notes/parent-${i + 1}`,
+        content: '<p>Parent</p>',
+      }));
+      parents[5].inReplyTo = `${origin}/api/activitypub/note/CornerOfTheWorld`;
+      switch (scenario) {
+        case 'root':
+          delete parents[1].inReplyTo;
+          break;
+        case 'cycle':
+          parents[1].inReplyTo = parents[0].id;
+          break;
+        case 'identity':
+          parents[1].id = `${remote}/notes/wrong-id`;
+          break;
+        case 'author':
+          parents[1].attributedTo = 'https://9.9.9.9/users/forged';
+          break;
+        case 'blocked':
+          parents[0].inReplyTo = 'https://8.8.8.8/notes/blocked';
+          break;
+        case 'private':
+          parents[0].inReplyTo = 'https://127.0.0.1/private';
+          break;
+        case 'actor':
+          parents[1].attributedTo = 'https://1.1.1.1/users/missing';
+          parents[1].inReplyTo = `${origin}/api/activitypub/note/CornerOfTheWorld`;
+          break;
+      }
+      for (const [i, parent] of parents.entries())
+        objects.set(`${remote}/notes/parent-${i}`, parent);
+      if (scenario === 'missing')
+        objects.set(parents[1].id, new Response('Not found', { status: 404 }));
+      mockRemote(t, env, { objects, fetched });
+      const response = await worker.fetch(
+        await signedActivity({
+          id: `${remote}/backfill/${scenario}`,
+          type: 'Create',
+          actor: remote,
+          object: {
+            id: `${remote}/notes/current`,
+            type: 'Note',
+            attributedTo: remote,
+            inReplyTo: parents[0].id,
+            content: '<p>Current</p>',
+          },
+        }),
+        env,
+      );
+      assert.equal(response.status, 202, await response.text());
+      assert.equal(
+        (
+          await env.database
+            .prepare('SELECT count(*) AS count FROM ap_comment')
+            .first()
+        ).count,
+        0,
+      );
+      if (scenario === 'depth') {
+        assert.equal(
+          parents.filter((parent) => fetched.includes(parent.id)).length,
+          5,
+        );
+        assert.ok(!fetched.includes(parents[5].id));
+      }
+      if (scenario === 'cycle')
+        assert.equal(fetched.filter((url) => url === parents[0].id).length, 1);
+      assert.ok(!fetched.some((url) => url.startsWith('https://8.8.8.8/')));
+      assert.ok(!fetched.some((url) => url.startsWith('https://127.0.0.1/')));
+    });
+  }
 });
 
 test('comment Create and Update sanitize HTML before persisting in D1', async (t) => {
