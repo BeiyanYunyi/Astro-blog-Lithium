@@ -9,8 +9,9 @@ import {
   getInstanceCredit,
   instanceHostname,
   listInstanceCredits,
-  recordInvalidSignature,
+  recordVerificationFailure,
   requestInstance,
+  shouldPenalizeVerificationFailure,
 } from '../src/server/activitypub/credits.ts';
 import { formatFederationLog } from '../src/server/activitypub/logging.ts';
 
@@ -1552,7 +1553,7 @@ test('credit decay preserves fractional minutes, thresholds, atomic failures and
   const start = 1_800_000_000_000;
   assert.equal(await getInstanceCredit(db, host, start), null);
   await Promise.all(
-    Array.from({ length: 7 }, () => recordInvalidSignature(db, host, start)),
+    Array.from({ length: 7 }, () => recordVerificationFailure(db, host, start)),
   );
   assert.equal((await getInstanceCredit(db, host, start)).credit, 64);
   assert.equal(
@@ -1563,7 +1564,7 @@ test('credit decay preserves fractional minutes, thresholds, atomic failures and
     (await getInstanceCredit(db, host, start + 240_000)).limited,
     false,
   );
-  await recordInvalidSignature(db, host, start + 270_000);
+  await recordVerificationFailure(db, host, start + 270_000);
   let state = await getInstanceCredit(db, host, start + 270_000);
   assert.equal(state.credit, 120);
   assert.equal(state.retryAfter, 3570);
@@ -1573,7 +1574,7 @@ test('credit decay preserves fractional minutes, thresholds, atomic failures and
   );
   await Promise.all(
     Array.from({ length: 3 }, () =>
-      recordInvalidSignature(db, host, start + 300_000),
+      recordVerificationFailure(db, host, start + 300_000),
     ),
   );
   assert.equal(
@@ -1583,7 +1584,7 @@ test('credit decay preserves fractional minutes, thresholds, atomic failures and
   const zeroAt = start + 300_000 + 120 * 60_000;
   assert.equal((await getInstanceCredit(db, host, zeroAt)).credit, 0);
   assert.deepEqual(await listInstanceCredits(db, zeroAt), []);
-  await recordInvalidSignature(db, host, zeroAt + 30_000);
+  await recordVerificationFailure(db, host, zeroAt + 30_000);
   state = await getInstanceCredit(db, host, zeroAt + 89_999);
   assert.equal(state.credit, 1);
   await cleanExpiredCredits(db, zeroAt + 90_000);
@@ -1656,16 +1657,80 @@ test('inbox counts only invalid signatures and blocks before body parsing or key
   assert.equal((await getInstanceCredit(env.database, hostname)).credit, 60);
 });
 
-test('remote key fetch failures do not create instance credit', async (t) => {
+test('remote HTTP key fetch errors create instance credit', async (t) => {
   const env = await environment(t);
+  let remoteStatus = 404;
+  t.mock.method(
+    env,
+    'remoteFetch',
+    async () => new Response('Remote error', { status: remoteStatus }),
+  );
+  for (const status of [404, 410, 429, 500, 502, 503]) {
+    remoteStatus = status;
+    const signer = `${remote}/http-${status}`;
+    const before =
+      (await getInstanceCredit(env.database, new URL(remote).hostname))
+        ?.credit ?? 0;
+    const response = await worker.fetch(
+      await signedActivity(
+        { ...followActivity(`key-${status}`), actor: signer },
+        { signer },
+      ),
+      env,
+    );
+    assert.equal(response.status, 401);
+    assert.equal(
+      (await getInstanceCredit(env.database, new URL(remote).hostname)).credit,
+      before === 0 ? 1 : before * 2,
+    );
+  }
+});
+
+test('key document parsing exceptions do not create instance credit', async (t) => {
+  const env = await environment(t);
+  t.mock.method(
+    env,
+    'remoteFetch',
+    async () =>
+      new Response('not JSON', {
+        status: 200,
+        headers: { 'Content-Type': 'application/activity+json' },
+      }),
+  );
   const response = await worker.fetch(
-    await signedActivity(followActivity('unavailable-key')),
+    await signedActivity(followActivity('malformed-key-document')),
     env,
   );
   assert.equal(response.status, 401);
   assert.equal(
     await getInstanceCredit(env.database, new URL(remote).hostname),
     null,
+  );
+});
+
+test('key fetch exceptions without an HTTP response are not penalized', () => {
+  const keyId = new URL('https://remote.example/key');
+  for (const error of [
+    new TypeError('fetch failed'),
+    new DOMException('timeout', 'TimeoutError'),
+    new SyntaxError('invalid JSON'),
+  ]) {
+    assert.equal(
+      shouldPenalizeVerificationFailure({
+        type: 'keyFetchError',
+        keyId,
+        result: { error },
+      }),
+      false,
+    );
+  }
+  assert.equal(
+    shouldPenalizeVerificationFailure({ type: 'noSignature' }),
+    false,
+  );
+  assert.equal(
+    shouldPenalizeVerificationFailure({ type: 'invalidSignature' }),
+    true,
   );
 });
 

@@ -1,4 +1,18 @@
 import type { D1Database } from '@cloudflare/workers-types';
+import type { VerifyRequestFailureReason } from '@fedify/fedify/sig';
+
+/** Only penalize explicit verification failures or remote HTTP error responses. */
+export function shouldPenalizeVerificationFailure(
+  reason: VerifyRequestFailureReason,
+): boolean {
+  return (
+    reason.type === 'invalidSignature' ||
+    (reason.type === 'keyFetchError' &&
+      'status' in reason.result &&
+      reason.result.status >= 400 &&
+      reason.result.status <= 599)
+  );
+}
 
 const minute = 60_000;
 const threshold = 60;
@@ -70,7 +84,7 @@ export async function getInstanceCredit(
 }
 
 /** Apply decay and a failure in one statement, including concurrent in-flight failures. */
-export async function recordInvalidSignature(
+export async function recordVerificationFailure(
   database: D1Database,
   hostname: string,
   now = Date.now(),

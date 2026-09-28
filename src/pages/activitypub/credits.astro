@@ -22,8 +22,9 @@ const formatTime = (value: number) =>
       credit。域名来自未验证的请求声明，不代表已确认的攻击来源。
     </p>
     <p>
-      无效签名使 credit 从 0 变为 1，此后每次翻倍，最高 120；每分钟减 1。大于 60
-      时暂停验签，降至 60 后恢复。成功请求不重置 credit。
+      无效签名或获取公钥时远端返回 HTTP 4xx/5xx，使 credit 从 0 变为
+      1，此后每次翻倍，最高 120；每分钟减 1。大于 60 时暂停验签，降至 60
+      后恢复。成功请求不重置 credit。
     </p>
     <p>
       数据时间：<time datetime={new Date(now).toISOString()}

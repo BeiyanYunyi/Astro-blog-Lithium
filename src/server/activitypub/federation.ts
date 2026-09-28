@@ -22,8 +22,9 @@ import { isBlockedInstance } from './blocklist';
 import { registerCommentListeners } from './comments';
 import {
   instanceHostname,
-  recordInvalidSignature,
+  recordVerificationFailure,
   requestInstance,
+  shouldPenalizeVerificationFailure,
 } from './credits';
 import createDatabase from './database';
 import { getPrivateKey, getPublicKey } from './getKey';
@@ -158,8 +159,16 @@ federation.setObjectDispatcher(
 const listeners = federation
   .setInboxListeners('/api/{identifier}/inbox')
   .onUnverifiedActivity(async (ctx, _activity, reason) => {
+    if (reason.type === 'keyFetchError') {
+      console.warn('ActivityPub signing key fetch failed', {
+        keyId: reason.keyId.href,
+        status: 'status' in reason.result ? reason.result.status : null,
+        errorName: 'error' in reason.result ? reason.result.error.name : null,
+        creditEligible: shouldPenalizeVerificationFailure(reason),
+      });
+    }
     if (
-      reason.type !== 'invalidSignature' ||
+      !shouldPenalizeVerificationFailure(reason) ||
       ctx.url.pathname.replace(/\/$/, '') !== '/api/activitypub/inbox'
     )
       return;
@@ -167,9 +176,11 @@ const listeners = federation
     // Use the same bucket as admission; do not charge a different claimed key.
     if (
       hostname &&
-      (!reason.keyId || instanceHostname(reason.keyId) === hostname)
+      (!('keyId' in reason) ||
+        !reason.keyId ||
+        instanceHostname(reason.keyId) === hostname)
     ) {
-      await recordInvalidSignature(ctx.data.ap, hostname);
+      await recordVerificationFailure(ctx.data.ap, hostname);
     }
   })
   .on(Follow, async (ctx, activity) => {

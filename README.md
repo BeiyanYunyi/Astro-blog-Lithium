@@ -162,10 +162,13 @@ normalized hostname (including the trailing-slash route). Subdomains remain
 separate. RFC 9421 `Signature-Input` takes precedence over Cavage `Signature`.
 Missing, unparseable or ambiguous multi-instance key IDs are not assigned a bucket.
 
-Only Fedify's final `invalidSignature` callback adds credit, once per request:
-zero becomes 1; positive credit doubles up to 120. Missing signatures, key-fetch
-failures, malformed activities that cannot reach the callback and internal errors
-are not scored. Successful requests do not reset credit. Every full minute
+Fedify's final `invalidSignature` result and `keyFetchError` with an HTTP
+4xx/5xx response add credit, once per request: zero becomes 1; positive credit
+doubles up to 120. Key-fetch exceptions without an HTTP error response (including
+network and parsing errors), missing signatures, malformed activities that cannot
+reach the callback and internal errors are not scored. Key-fetch callback logs
+include the HTTP status or exception name and whether the failure is eligible
+for credit. Successful requests do not reset credit. Every full minute
 subtracts 1 down to zero, preserving partial minutes; after reaching zero, a new
 failure starts a fresh minute. Decay is computed on reads and atomically on writes.
 
