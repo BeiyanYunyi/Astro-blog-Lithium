@@ -40,3 +40,10 @@ CREATE TABLE IF NOT EXISTS ap_publication_state (
   id INTEGER PRIMARY KEY CHECK (id = 1),
   initialized_at TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS ap_inbox_credit (
+  hostname TEXT PRIMARY KEY NOT NULL,
+  credit INTEGER NOT NULL CHECK (credit BETWEEN 1 AND 120),
+  decayed_at INTEGER NOT NULL,
+  last_failure_at INTEGER NOT NULL
+);

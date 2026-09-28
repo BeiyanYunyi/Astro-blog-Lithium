@@ -20,6 +20,11 @@ import { Temporal } from 'temporal-polyfill';
 import actorURL from './actorURL';
 import { isBlockedInstance } from './blocklist';
 import { registerCommentListeners } from './comments';
+import {
+  instanceHostname,
+  recordInvalidSignature,
+  requestInstance,
+} from './credits';
 import createDatabase from './database';
 import { getPrivateKey, getPublicKey } from './getKey';
 import { D1KvStore } from './kv';
@@ -152,6 +157,21 @@ federation.setObjectDispatcher(
 
 const listeners = federation
   .setInboxListeners('/api/{identifier}/inbox')
+  .onUnverifiedActivity(async (ctx, _activity, reason) => {
+    if (
+      reason.type !== 'invalidSignature' ||
+      ctx.url.pathname.replace(/\/$/, '') !== '/api/activitypub/inbox'
+    )
+      return;
+    const hostname = requestInstance(ctx.request);
+    // Use the same bucket as admission; do not charge a different claimed key.
+    if (
+      hostname &&
+      (!reason.keyId || instanceHostname(reason.keyId) === hostname)
+    ) {
+      await recordInvalidSignature(ctx.data.ap, hostname);
+    }
+  })
   .on(Follow, async (ctx, activity) => {
     if (activity.actorIds.some((id) => isBlockedInstance(id))) return;
     if (!activity.id || activity.objectId?.href !== actorURL) return;

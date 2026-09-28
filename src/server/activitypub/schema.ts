@@ -77,3 +77,16 @@ export const publicationState = sqliteTable(
   },
   (table) => [check('ap_publication_state_singleton', sql`${table.id} = 1`)],
 );
+
+export const inboxCredit = sqliteTable(
+  'ap_inbox_credit',
+  {
+    hostname: text('hostname').primaryKey().notNull(),
+    credit: integer('credit').notNull(),
+    decayedAt: integer('decayed_at').notNull(),
+    lastFailureAt: integer('last_failure_at').notNull(),
+  },
+  (table) => [
+    check('ap_inbox_credit_range', sql`${table.credit} BETWEEN 1 AND 120`),
+  ],
+);

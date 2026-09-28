@@ -1,0 +1,90 @@
+---
+import { env } from 'cloudflare:workers';
+import BaseLayout from '@layouts/BaseLayout.astro';
+import { listInstanceCredits } from '@server/activitypub/credits';
+
+export const prerender = false;
+const now = Date.now();
+const instances = await listInstanceCredits(env.ap, now);
+Astro.response.headers.set('Cache-Control', 'no-store');
+const formatTime = (value: number) =>
+  `${new Date(value).toISOString().slice(0, 19).replace('T', ' ')} UTC`;
+---
+
+<BaseLayout
+  title="ActivityPub 实例限制状态"
+  description="查看 inbox 实例 credit 与临时限制状态。"
+>
+  <article class="card p-6">
+    <h1>ActivityPub 实例限制状态</h1>
+    <p>
+      这里展示 inbox 请求的实例
+      credit。域名来自未验证的请求声明，不代表已确认的攻击来源。
+    </p>
+    <p>
+      无效签名使 credit 从 0 变为 1，此后每次翻倍，最高 120；每分钟减 1。大于 60
+      时暂停验签，降至 60 后恢复。成功请求不重置 credit。
+    </p>
+    <p>
+      数据时间：<time datetime={new Date(now).toISOString()}
+        >{formatTime(now)}</time
+      >。刷新页面可查看最新状态。
+    </p>
+    <p>
+      当前 {instances.length} 个实例有非零 credit，其中
+      {instances.filter((instance) => instance.limited).length}
+      个暂时受限。恢复时间以没有新增失败为前提。
+    </p>
+    {instances.length === 0 ? <p>当前没有 credit 大于零的实例。</p> : (
+      <div class="credit-table">
+        <table>
+          <caption>实例按当前 credit 从高到低排列</caption>
+          <thead><tr><th scope="col">实例域名</th><th scope="col">当前 credit</th><th scope="col">状态</th><th scope="col">预计恢复时间</th><th scope="col">最近验证失败</th></tr></thead>
+          <tbody>{instances.map((instance) => (
+            <tr>
+              <th scope="row">{instance.hostname}</th>
+              <td>{instance.credit}</td>
+              <td>{instance.limited ? '暂时限制' : '未限制'}</td>
+              <td>{instance.retryAt === null ? '—' : formatTime(instance.retryAt)}</td>
+              <td>{formatTime(instance.lastFailureAt)}</td>
+            </tr>
+          ))}</tbody>
+        </table>
+      </div>
+    )}
+  </article>
+</BaseLayout>
+
+<style>
+  h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+  p {
+    margin-block: 1rem;
+  }
+  .credit-table {
+    overflow-x: auto;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+  }
+  caption {
+    text-align: left;
+    margin-bottom: 0.75rem;
+  }
+  th,
+  td {
+    padding: 0.75rem;
+    border-bottom: 1px solid #8886;
+  }
+  th[scope="row"] {
+    overflow-wrap: anywhere;
+    min-width: 10rem;
+  }
+  td {
+    white-space: nowrap;
+  }
+</style>

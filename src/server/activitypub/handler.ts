@@ -1,9 +1,33 @@
 import { env } from 'cloudflare:workers';
 import type { APIRoute } from 'astro';
 import { isBlockedFederationRequest } from './blocklist';
+import { getInstanceCredit, requestInstance } from './credits';
 import { createBlogFederation, webFingerResources } from './federation';
 
 export const handleFederation: APIRoute = async ({ request }) => {
+  if (
+    request.method === 'POST' &&
+    new URL(request.url).pathname.replace(/\/$/, '') ===
+      '/api/activitypub/inbox'
+  ) {
+    const hostname = requestInstance(request);
+    const state = hostname ? await getInstanceCredit(env.ap, hostname) : null;
+    if (state?.limited) {
+      return Response.json(
+        {
+          error: 'Instance temporarily limited',
+          statusPage: '/activitypub/credits/',
+        },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': String(state.retryAfter),
+            'Cache-Control': 'no-store',
+          },
+        },
+      );
+    }
+  }
   if (await isBlockedFederationRequest(request)) {
     return new Response(
       request.method === 'HEAD'

@@ -60,6 +60,7 @@ waiting for production backoff intervals.
    ```sh
    pnpm exec wrangler d1 execute ap --remote --file migrations/0001_fedify_kv.sql
    pnpm exec wrangler d1 execute ap --remote --file migrations/0002_comments_publications.sql
+   pnpm exec wrangler d1 execute ap --remote --file migrations/0003_inbox_credit.sql
    ```
 
    For a fresh local database use `pnpm exec wrangler d1 execute ap --local
@@ -135,7 +136,8 @@ Each entry also blocks subdomains. Matching ignores case, ports and a trailing d
 
 Federation routes reject blocked HTTP signature key IDs (Cavage or RFC 9421) and
 incoming activity actor IDs with HTTP 403 and `{"error":"Instance blocked"}`.
-These early checks do not fetch keys, write D1 state or enqueue activities.
+The blocklist checks do not fetch keys, write D1 state or enqueue activities.
+The inbox credit admission check described below runs before the blocklist.
 Unblocked requests still undergo normal Fedify signature verification. Existing
 inbox queue messages are checked against the current list and acknowledged when
 blocked; listeners also check parsed actor IDs before resolving objects or writing
@@ -148,6 +150,37 @@ headers are not treated as proof of a caller's instance.
 
 The 403 response follows [Mastodon's signature-domain rejection](https://github.com/mastodon/mastodon/blob/main/app/controllers/concerns/signature_verification.rb),
 not the full account/content cleanup performed by Mastodon's domain suspension.
+
+### Inbox instance credit
+
+Apply `migrations/0003_inbox_credit.sql` before deploying this version. The
+`ap_inbox_credit` table is separate from Fedify's cache; existing databases must
+use the additive migration, not `setup.sql`.
+
+`POST /api/activitypub/inbox` groups requests by the unverified signature key ID's
+normalized hostname (including the trailing-slash route). Subdomains remain
+separate. RFC 9421 `Signature-Input` takes precedence over Cavage `Signature`.
+Missing, unparseable or ambiguous multi-instance key IDs are not assigned a bucket.
+
+Only Fedify's final `invalidSignature` callback adds credit, once per request:
+zero becomes 1; positive credit doubles up to 120. Missing signatures, key-fetch
+failures, malformed activities that cannot reach the callback and internal errors
+are not scored. Successful requests do not reset credit. Every full minute
+subtracts 1 down to zero, preserving partial minutes; after reaching zero, a new
+failure starts a fresh minute. Decay is computed on reads and atomically on writes.
+
+Above 60, the route returns HTTP 429 with `Retry-After` and `Cache-Control:
+no-store` before parsing the body or fetching/verifying a key. Rejected requests
+do not write or extend the restriction. Admission is best effort: requests already
+in verification can still fail and add credit concurrently, with atomic D1 updates
+preventing lost increments. The claimed hostname can be forged; these scores do
+not establish which instance sent an attack.
+
+`/activitypub/credits/` is retained for future use without a site navigation link.
+It shows a non-cached snapshot of all positive effective scores, restrictions,
+estimated recovery and last failure times.
+Times are UTC; refresh for a new snapshot. The existing scheduled handler deletes
+fully decayed records. No new binding, queue or cron schedule is required.
 
 ### Comments and inbox handling
 

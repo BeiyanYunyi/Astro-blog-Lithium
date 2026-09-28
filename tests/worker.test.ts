@@ -4,6 +4,15 @@ import { resolve } from 'node:path';
 import { test } from 'node:test';
 import { convertV4MiniflareOptions, Miniflare } from 'miniflare';
 import { isBlockedInstance } from '../src/server/activitypub/blocklist.ts';
+import {
+  cleanExpiredCredits,
+  getInstanceCredit,
+  instanceHostname,
+  listInstanceCredits,
+  recordInvalidSignature,
+  requestInstance,
+} from '../src/server/activitypub/credits.ts';
+import { formatFederationLog } from '../src/server/activitypub/logging.ts';
 
 const worker = {
   async fetch(request, env) {
@@ -1071,9 +1080,14 @@ test('additive migration is repeatable and retains existing follower rows', asyn
     .run();
   const before = await env.database.prepare('SELECT * FROM follower').first();
   await env.database.exec('DROP TABLE fedify_kv');
+  await env.database.exec('DROP TABLE ap_inbox_credit');
   const sql = (
     await Promise.all(
-      ['0001_fedify_kv.sql', '0002_comments_publications.sql'].map((name) =>
+      [
+        '0001_fedify_kv.sql',
+        '0002_comments_publications.sql',
+        '0003_inbox_credit.sql',
+      ].map((name) =>
         readFile(new URL(`../migrations/${name}`, import.meta.url), 'utf8'),
       ),
     )
@@ -1489,4 +1503,194 @@ test('inbox backlog from a blocked instance is acknowledged without processing',
     await env.database.prepare('SELECT * FROM follower').first(),
     null,
   );
+});
+
+test('instance identity normalizes domains and respects signature format precedence', () => {
+  assert.equal(
+    instanceHostname('https://EXAMPLE.COM.:8443/key#main'),
+    'example.com',
+  );
+  assert.equal(
+    instanceHostname('https://例子.测试/key'),
+    'xn--fsqu00a.xn--0zwm56d',
+  );
+  assert.equal(
+    instanceHostname('https://sub.example.com/key'),
+    'sub.example.com',
+  );
+  assert.equal(instanceHostname('data:text/plain,key'), null);
+  assert.equal(requestInstance(request('/api/activitypub/inbox')), null);
+  assert.equal(
+    requestInstance(
+      request('/api/activitypub/inbox', {
+        headers: {
+          Signature: 'keyId="https://ignored.example/key",signature="abc"',
+          'Signature-Input':
+            'sig1=("@method");keyid="https://EXAMPLE.COM./key"',
+        },
+      }),
+    ),
+    'example.com',
+  );
+  assert.equal(
+    requestInstance(
+      request('/api/activitypub/inbox', {
+        headers: {
+          'Signature-Input':
+            'a=("@method");keyid="https://a.example/key",b=("@method");keyid="https://b.example/key"',
+        },
+      }),
+    ),
+    null,
+  );
+});
+
+test('credit decay preserves fractional minutes, thresholds, atomic failures and expiry', async (t) => {
+  const env = await environment(t);
+  const db = env.database;
+  const host = 'credit.example';
+  const start = 1_800_000_000_000;
+  assert.equal(await getInstanceCredit(db, host, start), null);
+  await Promise.all(
+    Array.from({ length: 7 }, () => recordInvalidSignature(db, host, start)),
+  );
+  assert.equal((await getInstanceCredit(db, host, start)).credit, 64);
+  assert.equal(
+    (await getInstanceCredit(db, host, start + 239_999)).retryAfter,
+    1,
+  );
+  assert.equal(
+    (await getInstanceCredit(db, host, start + 240_000)).limited,
+    false,
+  );
+  await recordInvalidSignature(db, host, start + 270_000);
+  let state = await getInstanceCredit(db, host, start + 270_000);
+  assert.equal(state.credit, 120);
+  assert.equal(state.retryAfter, 3570);
+  assert.equal(
+    (await getInstanceCredit(db, host, start + 300_000)).credit,
+    119,
+  );
+  await Promise.all(
+    Array.from({ length: 3 }, () =>
+      recordInvalidSignature(db, host, start + 300_000),
+    ),
+  );
+  assert.equal(
+    (await getInstanceCredit(db, host, start + 300_000)).credit,
+    120,
+  );
+  const zeroAt = start + 300_000 + 120 * 60_000;
+  assert.equal((await getInstanceCredit(db, host, zeroAt)).credit, 0);
+  assert.deepEqual(await listInstanceCredits(db, zeroAt), []);
+  await recordInvalidSignature(db, host, zeroAt + 30_000);
+  state = await getInstanceCredit(db, host, zeroAt + 89_999);
+  assert.equal(state.credit, 1);
+  await cleanExpiredCredits(db, zeroAt + 90_000);
+  assert.equal(await getInstanceCredit(db, host, zeroAt + 90_000), null);
+});
+
+test('inbox counts only invalid signatures and blocks before body parsing or key fetch', async (t) => {
+  const env = await environment(t, { realAssets: true });
+  const fetched = [];
+  mockRemote(t, env, { fetched });
+  const hostname = new URL(remote).hostname;
+  const unsigned = await signedActivity(followActivity('unsigned-credit'));
+  unsigned.headers.delete('Signature');
+  assert.equal((await worker.fetch(unsigned, env)).status, 401);
+  assert.equal(await getInstanceCredit(env.database, hostname), null);
+  for (const expected of [1, 2, 4, 8, 16, 32, 64]) {
+    const response = await worker.fetch(
+      await signedActivity(followActivity(`credit-${expected}`), {
+        signingKey: keys.privateKey,
+      }),
+      env,
+    );
+    assert.equal(response.status, 401);
+    assert.equal(
+      (await getInstanceCredit(env.database, hostname)).credit,
+      expected,
+    );
+  }
+  const before = await env.database
+    .prepare('SELECT * FROM ap_inbox_credit')
+    .first();
+  const fetchCount = fetched.length;
+  const blocked = await worker.fetch(
+    request('/api/activitypub/inbox', {
+      method: 'POST',
+      body: 'not even JSON',
+      headers: { Signature: `keyId="${remote}#main-key"` },
+    }),
+    env,
+  );
+  assert.equal(blocked.status, 429);
+  assert.ok(Number(blocked.headers.get('Retry-After')) > 0);
+  assert.equal(blocked.headers.get('Cache-Control'), 'no-store');
+  assert.equal(fetched.length, fetchCount);
+  assert.deepEqual(
+    await env.database.prepare('SELECT * FROM ap_inbox_credit').first(),
+    before,
+  );
+  const page = await worker.fetch(request('/activitypub/credits/'), env);
+  assert.equal(page.status, 200);
+  assert.equal(page.headers.get('Cache-Control'), 'no-store');
+  const html = await page.text();
+  assert.ok(html.includes(hostname));
+  assert.ok(html.includes('暂时限制'));
+  assert.ok(html.includes('不代表已确认的攻击来源'));
+  // Re-admit at 60; a valid request leaves the stored score and decay clock alone.
+  await env.database
+    .prepare('UPDATE ap_inbox_credit SET credit = 60, decayed_at = ?')
+    .bind(Date.now())
+    .run();
+  assert.equal(
+    (
+      await worker.fetch(
+        await signedActivity(followActivity('credit-recovery')),
+        env,
+      )
+    ).status,
+    202,
+  );
+  assert.equal((await getInstanceCredit(env.database, hostname)).credit, 60);
+});
+
+test('remote key fetch failures do not create instance credit', async (t) => {
+  const env = await environment(t);
+  const response = await worker.fetch(
+    await signedActivity(followActivity('unavailable-key')),
+    env,
+  );
+  assert.equal(response.status, 401);
+  assert.equal(
+    await getInstanceCredit(env.database, new URL(remote).hostname),
+    null,
+  );
+});
+
+test('inbox verification logs expose failure classification without dumping activity data', () => {
+  for (const reason of ['noSignature', 'invalidSignature', 'keyFetchError']) {
+    const output = formatFederationLog({
+      category: ['fedify', 'federation', 'inbox'],
+      level: 'error',
+      timestamp: 0,
+      rawMessage: "Failed to verify the request's HTTP Signatures.",
+      message: ["Failed to verify the request's HTTP Signatures."],
+      properties: {
+        reason,
+        keyId: 'https://remote.example/key',
+        recipient: 'activitypub',
+        activity: { content: 'private-body' },
+        signature: 'private-signature',
+      },
+    });
+    assert.deepEqual(JSON.parse(output.at(-1)), {
+      reason,
+      keyId: 'https://remote.example/key',
+      recipient: 'activitypub',
+    });
+    assert.ok(!JSON.stringify(output).includes('private-body'));
+    assert.ok(!JSON.stringify(output).includes('private-signature'));
+  }
 });

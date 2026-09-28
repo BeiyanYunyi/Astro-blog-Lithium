@@ -3,6 +3,7 @@ import type { MessageBatch } from '@cloudflare/workers-types';
 import { WorkersMessageQueue } from '@fedify/cfworkers';
 import type { Message } from '@fedify/fedify';
 import { isBlockedActivity } from './activitypub/blocklist';
+import { cleanExpiredCredits } from './activitypub/credits';
 import { createBlogFederation } from './activitypub/federation';
 import {
   type PublicationTask,
@@ -14,7 +15,7 @@ import type { Env } from './activitypub/types';
 export default {
   fetch: astro.fetch,
   async scheduled(_controller: unknown, env: Env) {
-    await scanPublications(env);
+    await Promise.all([scanPublications(env), cleanExpiredCredits(env.ap)]);
   },
   async queue(batch: MessageBatch<Message | PublicationTask>, env: Env) {
     const federation = await createBlogFederation(env);
