@@ -52,6 +52,68 @@ export class D1KvStore implements KvStore {
       .run();
   }
 
+  /** Atomically compare JSON values, treating expired keys as absent. */
+  async cas(
+    key: KvKey,
+    expectedValue: unknown,
+    newValue: unknown,
+    options?: KvStoreSetOptions,
+  ): Promise<boolean> {
+    const encodedKey = JSON.stringify(key);
+    const now = Date.now();
+
+    if (expectedValue === undefined) {
+      if (newValue === undefined) {
+        // No mutation is needed; this read is the operation's atomic point.
+        return (await this.get(key)) === undefined;
+      }
+      const expires = options?.ttl
+        ? now + options.ttl.total('milliseconds')
+        : null;
+      const result = await this.database
+        .insert(fedifyKv)
+        .values({ key: encodedKey, value: JSON.stringify(newValue), expires })
+        .onConflictDoUpdate({
+          target: fedifyKv.key,
+          set: { value: JSON.stringify(newValue), expires },
+          setWhere: lte(fedifyKv.expires, now),
+        })
+        .run();
+      return result.meta.changes > 0;
+    }
+
+    const expectedJson = JSON.stringify(expectedValue);
+    // Compare the JSON trees in both directions: object member order is ignored,
+    // but array order, container types, empty containers and scalar types matter.
+    // The predicate runs inside the mutation, so no JS read/write race or
+    // interactive transaction is needed on D1.
+    const matches = and(
+      eq(fedifyKv.key, encodedKey),
+      unexpired(now),
+      sql`NOT EXISTS (
+        SELECT fullkey, type, atom FROM json_tree(${fedifyKv.value})
+        EXCEPT SELECT fullkey, type, atom FROM json_tree(${expectedJson})
+      ) AND NOT EXISTS (
+        SELECT fullkey, type, atom FROM json_tree(${expectedJson})
+        EXCEPT SELECT fullkey, type, atom FROM json_tree(${fedifyKv.value})
+      )`,
+    );
+    const result =
+      newValue === undefined
+        ? await this.database.delete(fedifyKv).where(matches).run()
+        : await this.database
+            .update(fedifyKv)
+            .set({
+              value: JSON.stringify(newValue),
+              expires: options?.ttl
+                ? now + options.ttl.total('milliseconds')
+                : null,
+            })
+            .where(matches)
+            .run();
+    return result.meta.changes > 0;
+  }
+
   async *list(prefix?: KvKey) {
     const encodedPrefix = prefix ? JSON.stringify(prefix).slice(0, -1) : '';
     const rows = await this.database

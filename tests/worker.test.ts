@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { readdir, readFile } from 'node:fs/promises';
+import { registerHooks } from 'node:module';
 import { resolve } from 'node:path';
 import { test } from 'node:test';
 import { convertV4MiniflareOptions, Miniflare } from 'miniflare';
@@ -14,6 +15,21 @@ import {
   shouldPenalizeVerificationFailure,
 } from '../src/server/activitypub/credits.ts';
 import { formatFederationLog } from '../src/server/activitypub/logging.ts';
+
+// Resolve the KV module's bundler-style imports while testing it directly in Node.
+const kvModuleUrl = new URL('../src/server/activitypub/kv.ts', import.meta.url);
+const kvImports = registerHooks({
+  resolve(specifier, context, nextResolve) {
+    return nextResolve(
+      context.parentURL === kvModuleUrl.href && specifier.startsWith('./')
+        ? `${specifier}.ts`
+        : specifier,
+      context,
+    );
+  },
+});
+const { D1KvStore } = await import(kvModuleUrl.href);
+kvImports.deregister();
 
 const buildDirectory = '.cloudflare/output/v0/workers/default';
 const bundleDirectory = `${buildDirectory}/bundle`;
@@ -196,6 +212,132 @@ const request = (path, init = {}) => {
     headers.set('Content-Type', 'application/activity+json');
   return new Request(`${origin}${path}`, { ...init, headers });
 };
+
+test('D1 KV CAS creates, replaces and deletes only matching values', async (t) => {
+  const { database } = await environment(t);
+  const store = new D1KvStore(database);
+  const key = ['cas'];
+  assert.equal(await store.cas(key, 'missing', 'value'), false);
+  assert.equal(await store.cas(key, 'missing', undefined), false);
+  assert.equal(await store.cas(key, undefined, undefined), true);
+  assert.equal(await store.cas(key, undefined, 'first'), true);
+  assert.equal(await store.cas(key, undefined, 'second'), false);
+  assert.equal(await store.cas(key, 'wrong', undefined), false);
+  assert.equal(await store.get(key), 'first');
+  assert.equal(await store.cas(key, 'first', 'second'), true);
+  assert.equal(await store.cas(key, 'first', 'third'), false);
+  assert.equal(await store.cas(key, 'second', 'second'), true);
+  assert.equal(await store.cas(key, undefined, undefined), false);
+  assert.equal(await store.cas(key, 'second', undefined), true);
+  assert.equal(await store.get(key), undefined);
+  assert.equal(
+    await database
+      .prepare('SELECT count(*) AS count FROM fedify_kv')
+      .first('count'),
+    0,
+  );
+});
+
+test('D1 KV CAS compares JSON structure independently of object member order', async (t) => {
+  const { database } = await environment(t);
+  const store = new D1KvStore(database);
+  const key = ['cas', 'json'];
+  for (const value of [null, false, 0, '', [], {}, [1, 2, 3]]) {
+    await store.set(key, value);
+    assert.equal(await store.cas(key, 'wrong', true), false);
+    assert.equal(await store.cas(key, value, true), true);
+    assert.equal(await store.get(key), true);
+  }
+  const value = { a: [{ x: 1, y: null }], b: {}, 'a.b': { '"': false } };
+  await store.set(key, value);
+  assert.equal(
+    await store.cas(
+      key,
+      { 'a.b': { '"': false }, b: {}, a: [{ y: null, x: 1 }] },
+      value,
+    ),
+    true,
+  );
+  for (const [stored, expected] of [
+    [
+      [1, 2],
+      [2, 1],
+    ],
+    [{ a: 1 }, { a: 1, b: 2 }],
+    [{ a: 1, b: 2 }, { a: 1 }],
+    [{ a: [] }, { a: {} }],
+    [false, 0],
+    [true, 1],
+    [null, undefined],
+    [1, '1'],
+  ]) {
+    await store.set(key, stored);
+    assert.equal(await store.cas(key, expected, 'changed'), false);
+    assert.deepEqual(await store.get(key), stored);
+  }
+});
+
+test('D1 KV CAS handles expiry and replaces TTL only on success', async (t) => {
+  const { database } = await environment(t);
+  const store = new D1KvStore(database);
+  const key = ['cas', 'ttl'];
+  const ttl = Temporal.Duration.from({ minutes: 1 });
+  await store.set(key, 'old', { ttl });
+  const row = () =>
+    database
+      .prepare('SELECT * FROM fedify_kv WHERE key = ?')
+      .bind(JSON.stringify(key))
+      .first();
+  const original = await row();
+  assert.equal(await store.cas(key, 'wrong', 'new', { ttl }), false);
+  assert.deepEqual(await row(), original);
+  assert.equal(await store.cas(key, 'old', 'new'), true);
+  assert.equal((await row()).expires, null);
+  const before = Date.now();
+  assert.equal(await store.cas(key, 'new', 'new', { ttl }), true);
+  assert.ok((await row()).expires >= before + 60_000);
+  assert.ok((await row()).expires <= Date.now() + 60_000);
+  await database.prepare('UPDATE fedify_kv SET expires = 0').run();
+  assert.equal(await store.cas(key, 'new', 'revived'), false);
+  assert.equal(await store.cas(key, 'new', undefined), false);
+  assert.equal(await store.cas(key, undefined, undefined), true);
+  assert.equal(await store.cas(key, undefined, 'fresh', { ttl }), true);
+  assert.equal(await store.get(key), 'fresh');
+  assert.ok((await row()).expires > Date.now());
+  assert.equal(
+    await store.cas(key, 'fresh', 'expired', {
+      ttl: Temporal.Duration.from({ milliseconds: 0 }),
+    }),
+    true,
+  );
+  assert.equal(await store.get(key), undefined);
+});
+
+test('D1 KV CAS permits only one concurrent winner for a shared expected value', async (t) => {
+  const { database } = await environment(t);
+  const stores = Array.from({ length: 8 }, () => new D1KvStore(database));
+  const key = ['cas', 'race'];
+  for (const state of ['absent', 'present', 'expired']) {
+    await stores[0].delete(key);
+    if (state !== 'absent') await stores[0].set(key, 'old');
+    if (state === 'expired') {
+      await database.prepare('UPDATE fedify_kv SET expires = 0').run();
+    }
+    const results = await Promise.all(
+      stores.map((store, index) =>
+        store.cas(key, state === 'present' ? 'old' : undefined, index),
+      ),
+    );
+    assert.equal(results.filter(Boolean).length, 1, state);
+    const winner = results.indexOf(true);
+    assert.equal(await stores[0].get(key), winner);
+    const deleted = await Promise.all(
+      stores.map((store) => store.cas(key, winner, undefined)),
+    );
+    assert.equal(deleted.filter(Boolean).length, 1, state);
+    assert.equal(await stores[0].get(key), undefined);
+  }
+});
 
 test('WebFinger validates resources and retains the existing identity', async (t) => {
   const env = await environment(t);
