@@ -32,8 +32,15 @@ unwraps each message with `processMessage()` before `processQueuedTask()`.
 `src/middleware.ts` retains article HTML/ActivityPub content negotiation,
 including quality values, `Vary: Accept` and `Cache-Control: no-store`. Home,
 tags and RSS remain prerendered. Article URLs remain in the sitemap. The build
-produces `dist/client/` and `dist/server/`; deployment uses the adapter-generated
-Wrangler configuration.
+produces Cloudflare Build Output in `.cloudflare/output/v0/`, with the Worker
+bundle and static assets under `workers/default/`. `cloudflare.config.ts` defines
+the Worker, bindings, and triggers. The project-local `cf` CLI is installed by
+`pnpm install`; no global CLI installation is needed. Run other Cloudflare
+commands with `pnpm exec cf` and authenticate with `pnpm exec cf auth login`
+or `CLOUDFLARE_API_TOKEN`.
+
+This migration uses pinned beta versions of cf, Astro 7.4, and the Cloudflare 15
+adapter, which supports the new configuration and Build Output format.
 
 ```sh
 pnpm install
@@ -58,31 +65,37 @@ waiting for production backoff intervals.
    additive migrations (the first is only needed if not already applied):
 
    ```sh
-   pnpm exec wrangler d1 execute ap --remote --file migrations/0001_fedify_kv.sql
-   pnpm exec wrangler d1 execute ap --remote --file migrations/0002_comments_publications.sql
-   pnpm exec wrangler d1 execute ap --remote --file migrations/0003_inbox_credit.sql
+   pnpm exec cf d1 raw 007ff8f3-681b-47e1-9f6e-e9ded6295b43 --sql @migrations/0001_fedify_kv.sql
+   pnpm exec cf d1 raw 007ff8f3-681b-47e1-9f6e-e9ded6295b43 --sql @migrations/0002_comments_publications.sql
+   pnpm exec cf d1 raw 007ff8f3-681b-47e1-9f6e-e9ded6295b43 --sql @migrations/0003_inbox_credit.sql
    ```
 
-   For a fresh local database use `pnpm exec wrangler d1 execute ap --local
-   --file setup.sql`. For an existing local database use the migrations with
-   `--local`. Do not rerun `setup.sql` against an existing database.
+   These commands target the remote database by default; cf requires its UUID.
+   For a fresh local database use `pnpm exec cf d1 raw
+   007ff8f3-681b-47e1-9f6e-e9ded6295b43 --local --sql @setup.sql`.
+   For an existing local database use the migrations with `--local`.
+   cf's local resource commands use `~/.config/cloudflare/state` by default;
+   use `--persist-to` to select another state directory. This state is separate
+   from the Astro dev server's state. Do not rerun `setup.sql` against an
+   existing database.
 2. Create the main queue and dead-letter queue before deploying the consumer:
 
    ```sh
-   pnpm exec wrangler queues create blog-federation
-   pnpm exec wrangler queues create blog-federation-dlq
+   pnpm exec cf queues create --queue-name blog-federation
+   pnpm exec cf queues create --queue-name blog-federation-dlq
    ```
 
-   `wrangler.jsonc` binds `FEDERATION_QUEUE`, connects the same Worker as consumer,
+   `cloudflare.config.ts` binds `FEDERATION_QUEUE`, connects the same Worker as consumer,
    and configures a cron every five minutes. Queue messages are processed one at
-   a time (`max_batch_size: 1`, `max_concurrency: 1`). Keep concurrency at one:
+   a time (`maxBatchSize: 1`, `maxConcurrency: 1`). Keep concurrency at one:
    publication cursor advancement assumes a single consumer. Failed tasks request
    exponential delays from 30 seconds to one hour, with 12 retries before the
    dead-letter queue. Inspect the main queue, dead-letter queue and Worker logs
    in Cloudflare when diagnosing failures. After fixing a failed task, replay it
    from the dead-letter queue; replaying a completed publication task is a no-op.
 3. Run `pnpm deploy`. With Workers Builds use build command `pnpm build` and deploy
-   command `pnpm exec wrangler deploy`. The first scan atomically registers all
+   command `pnpm exec cf deploy --prebuilt`. `pnpm worker:dry-run` checks the same
+   prebuilt output without uploading it. The first scan atomically registers all
    currently published articles as `baseline`, so historical articles are not
    broadcast. Confirm `ap_publication_state` contains its initialization row
    before deploying the first new article you want broadcast. Posts dated in the

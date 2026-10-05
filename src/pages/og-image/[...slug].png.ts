@@ -1,7 +1,7 @@
-import type { APIRoute, GetStaticPaths } from 'astro';
 import type { CollectionEntry } from 'astro:content';
-import svgPathToName from '@utils/svgPathToName';
 import { getCollection } from 'astro:content';
+import svgPathToName from '@utils/svgPathToName';
+import type { APIRoute, GetStaticPaths } from 'astro';
 import sharp from 'sharp';
 
 export const getStaticPaths = (async () => {
@@ -16,13 +16,13 @@ export const getStaticPaths = (async () => {
 
 export const GET: APIRoute<CollectionEntry<'posts'>> = async ({ props }) => {
   // Dev metadata points to the source file (sometimes through Vite's /@fs/ prefix).
-  // Build metadata points to assets emitted in dist/server before prerendering finishes.
+  // Node prerender assets live under the configured server output directory.
   const pathname = decodeURIComponent(
     new URL(props.data.image!.src, 'http://astro.local').pathname,
   );
   const source = import.meta.env.DEV
     ? pathname.replace(/^\/@fs(?=\/)/, '')
-    : `./dist/server${pathname}`;
+    : `./.cloudflare/output/v0/workers/default/bundle/.prerender${pathname}`;
   const image = await sharp(source)
     .resize(1200, 630, { fit: 'contain' })
     .png()

@@ -18,6 +18,7 @@
     "skipLibCheck": true
   },
   "include": [
+    "./cloudflare.config.ts",
     "./src/server/**/*.ts",
     "./src/pages/api/**/*.ts",
     "./src/pages/.well-known/**/*.ts",

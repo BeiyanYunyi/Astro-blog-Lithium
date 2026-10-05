@@ -27,6 +27,11 @@ export default defineConfig({
   site,
   output: 'static',
   session: false,
+  // Keep Astro and UnoCSS aligned with the Cloudflare adapter's output paths.
+  build: {
+    client: '../.cloudflare/output/v0/workers/default/assets',
+    server: '../.cloudflare/output/v0/workers/default/bundle',
+  },
   adapter: cloudflare({
     prerenderEnvironment: 'node',
     imageService: 'compile',

@@ -15,6 +15,10 @@ import {
 } from '../src/server/activitypub/credits.ts';
 import { formatFederationLog } from '../src/server/activitypub/logging.ts';
 
+const buildDirectory = '.cloudflare/output/v0/workers/default';
+const bundleDirectory = `${buildDirectory}/bundle`;
+const assetsDirectory = `${buildDirectory}/assets`;
+
 const worker = {
   async fetch(request, env) {
     const response = await env.runtime.dispatchFetch(request.url, {
@@ -84,7 +88,7 @@ async function environment(
       modules: [
         {
           type: 'ESModule',
-          path: resolve('dist/server/test-entry.mjs'),
+          path: resolve(bundleDirectory, 'test-entry.mjs'),
           // Miniflare's localhost transport rewrites Host even through getWorker().
           // Restore the HTTP invariant at the test boundary, before Astro/Fedify.
           contents: `import app from './entry.mjs';
@@ -106,7 +110,7 @@ async function environment(
           [
             'entry.mjs',
             ...(
-              await readdir('dist/server', { recursive: true })
+              await readdir(bundleDirectory, { recursive: true })
             ).filter(
               (path) =>
                 path.endsWith('.mjs') &&
@@ -115,9 +119,9 @@ async function environment(
             ),
           ].map(async (path) => ({
             type: 'ESModule',
-            path: resolve('dist/server', path),
+            path: resolve(bundleDirectory, path),
             contents: (
-              await readFile(resolve('dist/server', path), 'utf8')
+              await readFile(resolve(bundleDirectory, path), 'utf8')
             ).replace(
               /var blockedInstanceDomains = \[[\s\S]*?\];/,
               (declaration) => {
@@ -130,7 +134,7 @@ async function environment(
           })),
         )),
       ],
-      modulesRoot: resolve('dist/server'),
+      modulesRoot: resolve(bundleDirectory),
       compatibilityDate: '2026-08-27',
       compatibilityFlags: ['nodejs_compat'],
       bindings: {
@@ -156,7 +160,7 @@ async function environment(
       ...(realAssets
         ? {
             assets: {
-              directory: resolve('dist/client'),
+              directory: resolve(assetsDirectory),
               binding: 'ASSETS',
               routerConfig: { has_user_worker: true },
               run_worker_first: [
@@ -1347,6 +1351,15 @@ test('static pages, RSS, sitemap, OG images and Markdown/MDX remain available', 
     assert.equal(response.status, 200, path);
     const html = await response.text();
     assert.match(html, /<html/);
+    if (path === '/') {
+      const stylesheet = html.match(/href="([^" ]*\/_astro\/[^" ]+\.css)"/);
+      assert.ok(stylesheet, 'home page links to its generated stylesheet');
+      const response = await worker.fetch(request(stylesheet[1]), env);
+      assert.equal(response.status, 200);
+      const css = await response.text();
+      assert.doesNotMatch(css, /#--unocss--/);
+      assert.match(css, /display:\s*flex/);
+    }
     if (path.startsWith('/posts/')) {
       assert.match(html, /<article/);
       assert.ok(html.includes(path), 'article keeps its public URL');
@@ -1361,8 +1374,8 @@ test('static pages, RSS, sitemap, OG images and Markdown/MDX remain available', 
     await sitemap.text(),
     /https:\/\/stblog.penclub.club\/posts\/CornerOfTheWorld\//,
   );
-  const ogImage = (await readdir('dist/client/og-image')).find((path) =>
-    path.startsWith('CornerOfTheWorld.'),
+  const ogImage = (await readdir(resolve(assetsDirectory, 'og-image'))).find(
+    (path) => path.startsWith('CornerOfTheWorld.'),
   );
   const image = await worker.fetch(request(`/og-image/${ogImage}`), env);
   assert.equal(image.status, 200);

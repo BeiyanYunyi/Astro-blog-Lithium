@@ -19,6 +19,7 @@ pnpm-debug.log*
 .DS_Store
 .astro
 .wrangler
+.cloudflare
 
 # Local Worker secrets
 .dev.vars

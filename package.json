@@ -16,15 +16,15 @@
     "astro": "astro",
     "worker:dev": "astro dev --host",
     "worker:check": "tsc --project tsconfig.worker.json --noEmit",
-    "worker:dry-run": "wrangler deploy --dry-run --outdir .wrangler/dry-run",
-    "deploy": "pnpm build && wrangler deploy",
+    "worker:dry-run": "cf deploy --prebuilt --dry-run",
+    "deploy": "pnpm build && cf deploy --prebuilt",
     "test:worker": "node --test tests/worker.test.ts",
     "check": "biome check .",
     "lint": "biome lint .",
     "format": "biome format --write ."
   },
   "dependencies": {
-    "@astrojs/cloudflare": "^14.3.0",
+    "@astrojs/cloudflare": "15.0.0-beta.1",
     "@astrojs/markdown-satteri": "^0.3.8",
     "@astrojs/mdx": "^7.0.8",
     "@astrojs/rss": "^4.0.19",
@@ -37,7 +37,7 @@
     "@logtape/logtape": "^2.3.3",
     "@solid-primitives/storage": "^4.4.0",
     "@unocss/reset": "^66.8.1",
-    "astro": "^7.3.1",
+    "astro": "7.4.0-beta.1",
     "cross-env": "^10.1.0",
     "dayjs": "^1.11.23",
     "drizzle-orm": "1.0.0-rc.4",
@@ -55,9 +55,9 @@
     "@biomejs/biome": "2.5.12",
     "@cloudflare/workers-types": "^5.20260825.1",
     "@unocss/astro": "^66.8.1",
+    "cf": "1.0.0-beta.12",
     "miniflare": "5.20260903.0-alpha",
     "rollup": "^4.62.5",
-    "typescript": "^6.0.3",
-    "wrangler": "^4.129.0"
+    "typescript": "^6.0.3"
   }
 }
