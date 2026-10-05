@@ -234,5 +234,8 @@ export function createBlogFederation(bindings: Env) {
     kv: new D1KvStore(bindings.ap),
     queue: new WorkersMessageQueue(bindings.FEDERATION_QUEUE),
     manuallyStartQueue: true,
+    inboxChallengePolicy: {
+      enabled: true,
+    },
   });
 }
