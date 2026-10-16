@@ -206,20 +206,20 @@ importers:
         specifier: ^7.0.2
         version: 7.0.2(@types/node@24.12.0)(esbuild@0.28.2)(jiti@2.7.0)(solid-js@1.9.15)(supports-color@10.2.2)(tsx@4.19.2)(yaml@2.9.0)
       '@fedify/cfworkers':
-        specifier: ^2.3.6
-        version: 2.3.6(@cloudflare/workers-types@5.20260825.1)(@fedify/fedify@2.3.6)
+        specifier: ^2.4.4
+        version: 2.4.4(@cloudflare/workers-types@5.20260825.1)(@fedify/fedify@2.4.4)
       '@fedify/fedify':
-        specifier: ^2.3.6
-        version: 2.3.6
+        specifier: ^2.4.4
+        version: 2.4.4
       '@fedify/vocab':
-        specifier: ^2.3.6
-        version: 2.3.6
+        specifier: ^2.4.4
+        version: 2.4.4
       '@iconify-json/ion':
         specifier: ^1.2.7
         version: 1.2.7
       '@logtape/logtape':
-        specifier: ^2.3.3
-        version: 2.3.3
+        specifier: ^2.4.1
+        version: 2.4.1
       '@solid-primitives/storage':
         specifier: ^4.4.0
         version: 4.4.0(solid-js@1.9.15)
@@ -254,8 +254,8 @@ importers:
         specifier: ^1.9.15
         version: 1.9.15
       temporal-polyfill:
-        specifier: ^1.0.4
-        version: 1.0.4
+        specifier: ^1.0.6
+        version: 1.0.6
       unocss:
         specifier: ^66.8.1
         version: 66.10.5(@unocss/astro@66.10.5(cac@7.0.0)(srvx@1.0.5)(vite@8.2.2(@types/node@24.12.0)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.19.2)(yaml@2.9.0)))(cac@7.0.0)(rolldown@1.2.5)(rollup@4.62.5)(srvx@1.0.5)(vite@8.2.2(@types/node@24.12.0)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.19.2)(yaml@2.9.0))
@@ -1139,34 +1139,34 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@fedify/cfworkers@2.3.6':
-    resolution: {integrity: sha512-YKPC5entz3aUMam3JDXX+4/bjQjadGXNlaH6NNOI74eAQ4p5pyx1CY1yztspoUsVITOM2G+glw3MWn/q3Ulkzg==}
+  '@fedify/cfworkers@2.4.4':
+    resolution: {integrity: sha512-tdi/0drgKDmbuojs32Re33M56T5NpA6F9RL11ysfipZ4qMRABuM1Z8frPWuKQ47QxNsKIJd8d9VviEngCX1SEg==}
     peerDependencies:
-      '@cloudflare/workers-types': ^4.20260511.1
-      '@fedify/fedify': ^2.3.6
+      '@cloudflare/workers-types': ^4.20260511.1 || ^5.0.0
+      '@fedify/fedify': ^2.4.4
 
-  '@fedify/fedify@2.3.6':
-    resolution: {integrity: sha512-0teiORAV+r+ejxw42EoPsy7GmUqK7VH312YylmPAuiMPGlbJkj2k5vbjsZ2U4VCpPJr5uV4VBZRM6FTBVbkVPw==}
+  '@fedify/fedify@2.4.4':
+    resolution: {integrity: sha512-HVwzK6gWwdGvGrZa4d70Yfqjl77IXGVUxqRVXqXg1tn54WtisyrcMf6bH4D7XOSdmnAfGMefIG9fOoC93f/kHg==}
     engines: {bun: '>=1.1.0', deno: '>=2.0.0', node: '>=22.0.0'}
 
-  '@fedify/uri-template@2.3.6':
-    resolution: {integrity: sha512-Q4Q5Uiot/nXfAtVKXHxDjPm20pm3o7mMpBJ00bOAECC5Ca1uwVMpKkGkLqtLkudT2Fpbs5Gfh1jG40idODvOWA==}
+  '@fedify/uri-template@2.4.4':
+    resolution: {integrity: sha512-+Ip0bKwNpEIA2rffNJooWXeUFdgthhhwmxkzIbo0moG3tab4OMEbf5QLzPrqlV1OhPyIQAsKJxnOrc7SILO36g==}
     engines: {bun: '>=1.1.0', deno: '>=2.0.0', node: '>=22.0.0'}
 
-  '@fedify/vocab-runtime@2.3.6':
-    resolution: {integrity: sha512-ljxRvM2iauozQgr6e7QUu0qd25Kkvk49+yxQ4x8Ylv/6Eq6iJP8lMgIEWpv/dKRYsyKqzE6hMHBZkcuOts2kXw==}
+  '@fedify/vocab-runtime@2.4.4':
+    resolution: {integrity: sha512-y9deoidVIWhR7LrhZtQe6PqN6u/SVT7+2voRsJg5kTYAgMWk8ZbXSMld1JUXmte6RhPOMMKZKmf99A+VjXplSw==}
     engines: {bun: '>=1.1.0', deno: '>=2.0.0', node: '>=22.0.0'}
 
-  '@fedify/vocab-tools@2.3.6':
-    resolution: {integrity: sha512-YbXOmDQ3+E1eO4XCwcRzsBYjkCZcwaR8PiwmzaI3aD7SAdO5UhMQZSUFFg8OTUiVUbQ7Z/q5D//0lXLrROXI8Q==}
+  '@fedify/vocab-tools@2.4.4':
+    resolution: {integrity: sha512-9OqKFCtGHUEjBwv+pWa7CywkYT6Kfl2P5Azz3aoUHCXRmaUW2H3o2spDIeQWconoNe8LnIUMZ+pjloYVRcWI8g==}
     engines: {bun: '>=1.1.0', deno: '>=2.0.0', node: '>=22.0.0'}
 
-  '@fedify/vocab@2.3.6':
-    resolution: {integrity: sha512-4rNBYfTn1P1HYl2H8nuFX74htBIfJ7j73DlAEiGJiYZPIJgZ11wVZb4Xze0sMonq1BxwcixDHcdt542KzpcbTg==}
+  '@fedify/vocab@2.4.4':
+    resolution: {integrity: sha512-2plTRbI7BSylstKvXbDbIvZXxBvbKPHYfNKg1mbubXYKKcBXv/9DCUGE/IBpj1WqmhgoLMtQiyh/uFP8L1TUzw==}
     engines: {bun: '>=1.1.0', deno: '>=2.0.0', node: '>=22.0.0'}
 
-  '@fedify/webfinger@2.3.6':
-    resolution: {integrity: sha512-wLEB1AQ0bldL/vuiP3JhXCRsUZZsYJSL64oEu8dCFeQCd1GN6Z1+m43TP80HeMz39g+YVOn5iGhzh0JKSonjBA==}
+  '@fedify/webfinger@2.4.4':
+    resolution: {integrity: sha512-yJrnKMnkH+nMiUAX+5zDJJwPtpGZAZb9agQkY/4mIs6TmAP8uXa2A1ZW83bBEsNivn6rFeop+ikDDwVz/C/mRQ==}
     engines: {bun: '>=1.1.0', deno: '>=2.0.0', node: '>=22.0.0'}
 
   '@iconify-json/ion@1.2.7':
@@ -1521,8 +1521,8 @@ packages:
     resolution: {integrity: sha512-hloP58zRVCRSpgDxmqCWJNlizAlUgJFqG2ypq79DCvyv9tHjRYMDOcPFjzfl/A1/YxDvRCZz8wvZvmapQnKwFQ==}
     engines: {node: '>=12'}
 
-  '@logtape/logtape@2.3.3':
-    resolution: {integrity: sha512-H8AqgCq6M6Wu97FVPyfE5UT4w6H+Wdt9iGzLKPgtJRI/jrG9HbzzNUw9JL1LarkZD8xeKx9FqKfcLaXr0hGJuw==}
+  '@logtape/logtape@2.4.1':
+    resolution: {integrity: sha512-faEZkjQf5pI8WsnCXbpBInC9SeWqYUNAtLviTLkCI3JLHFkV1bKrfxbIJc96TVqqVjSUz8LYtX0JWKdiBwEpCg==}
 
   '@mdx-js/mdx@3.1.1':
     resolution: {integrity: sha512-f6ZO2ifpwAQIpzGWaBQT2TXxPv6z3RBzQKpVftEWN78Vl/YweF1uwussDx8ECAXVtr3Rs89fKyG9YlzUs9DyGQ==}
@@ -2035,6 +2035,9 @@ packages:
 
   '@speed-highlight/core@1.2.24':
     resolution: {integrity: sha512-qeW2e1l78afw8VhRPfPQ1Gjj+KU5XFQ/OFV5ti6eTa9bruO7mJyZtA4vw0ofqmA3tKCkROE9xLk3VZoeRc98nw==}
+
+  '@standard-schema/spec@1.1.0':
+    resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
 
   '@tybys/wasm-util@0.10.3':
     resolution: {integrity: sha512-F3fo1MYrRJYL3zER0OUOmkutjr1Vp23m7OsSgp7nq4SP6OqX6C/56XFIPAl5bt3zaBRjmW7SGz3u/6LwFpYcOg==}
@@ -3572,14 +3575,14 @@ packages:
     engines: {node: '>=16'}
     hasBin: true
 
-  temporal-polyfill@1.0.4:
-    resolution: {integrity: sha512-MLEU0qOD2uXlz24oINNtdLZQl8RgmMxSnRtKEGZGGetTJjlRwQJjk+VsJ4EREaUoiaTb8NJOcUiKtoAiWn9EBg==}
+  temporal-polyfill@1.0.6:
+    resolution: {integrity: sha512-tYyEry1HLGUDbm2356W3iYD0OZdo7rlP7h98Zr/EnjqLZQwTAfcBDUvJnJbfA15v/vQad57hJZScG5O0W2oKEA==}
 
   temporal-spec@1.0.1:
     resolution: {integrity: sha512-wxVoanmDeavXie1vu2JaQ3WIc3JZnWAOYFBsJyATaVsXsycKYUflGsyBmrRSnoCpZJpwPyr38VpgSUlQ8CbFxg==}
 
-  temporal-utils@1.0.2:
-    resolution: {integrity: sha512-1B8Dl4KzrOvsNUlpoWGno2VLQlxroLjDgc5NBjVC9ax9ymdo+ezfyvhyjEMx+IVfhINr6CIG2gcnlP95iRrybQ==}
+  temporal-utils@1.0.3:
+    resolution: {integrity: sha512-9jbTSX3HvkOWvDpNpFzwX/d1mkCrgQgwLmVTOEiuocZGKHsrQJtttGZFmybJ2zYP5zCSZuU5ZyeS8+eOEPABiQ==}
 
   tiny-inflate@1.0.3:
     resolution: {integrity: sha512-pkY1fj1cKHb2seWDy0B16HeWyczlJA9/WW3u3c4z/NiWDsO3DOU5D7nhTLE9CF0yXv/QZFY7sEJmj24dK+Rrqw==}
@@ -4721,37 +4724,39 @@ snapshots:
   '@esbuild/win32-x64@0.28.2':
     optional: true
 
-  '@fedify/cfworkers@2.3.6(@cloudflare/workers-types@5.20260825.1)(@fedify/fedify@2.3.6)':
+  '@fedify/cfworkers@2.4.4(@cloudflare/workers-types@5.20260825.1)(@fedify/fedify@2.4.4)':
     dependencies:
       '@cloudflare/workers-types': 5.20260825.1
-      '@fedify/fedify': 2.3.6
+      '@fedify/fedify': 2.4.4
 
-  '@fedify/fedify@2.3.6':
+  '@fedify/fedify@2.4.4':
     dependencies:
-      '@fedify/uri-template': 2.3.6
-      '@fedify/vocab': 2.3.6
-      '@fedify/vocab-runtime': 2.3.6
-      '@fedify/webfinger': 2.3.6
-      '@js-temporal/polyfill': 0.5.1
-      '@logtape/logtape': 2.3.3
+      '@fedify/uri-template': 2.4.4
+      '@fedify/vocab': 2.4.4
+      '@fedify/vocab-runtime': 2.4.4
+      '@fedify/webfinger': 2.4.4
+      '@logtape/logtape': 2.4.1
       '@opentelemetry/api': 1.9.1
       '@opentelemetry/core': 2.11.0(@opentelemetry/api@1.9.1)
       '@opentelemetry/sdk-metrics': 2.7.1(@opentelemetry/api@1.9.1)
       '@opentelemetry/sdk-trace-base': 2.11.0(@opentelemetry/api@1.9.1)
       '@opentelemetry/semantic-conventions': 1.43.0
+      '@standard-schema/spec': 1.1.0
       byte-encodings: 1.0.11
+      devalue: 5.9.1
       es-toolkit: 1.46.1
       json-canon: 1.0.1
       jsonld: 9.0.0
       structured-field-values: 2.0.4
+      temporal-polyfill: 1.0.6
       urlpattern-polyfill: 10.1.0
 
-  '@fedify/uri-template@2.3.6': {}
+  '@fedify/uri-template@2.4.4': {}
 
-  '@fedify/vocab-runtime@2.3.6':
+  '@fedify/vocab-runtime@2.4.4':
     dependencies:
       '@js-temporal/polyfill': 0.5.1
-      '@logtape/logtape': 2.3.3
+      '@logtape/logtape': 2.4.1
       '@multiformats/base-x': 4.0.1
       '@opentelemetry/api': 1.9.1
       asn1js: 3.0.10
@@ -4759,31 +4764,31 @@ snapshots:
       jsonld: 9.0.0
       pkijs: 3.4.0
 
-  '@fedify/vocab-tools@2.3.6':
+  '@fedify/vocab-tools@2.4.4':
     dependencies:
       '@cfworker/json-schema': 4.1.1
       byte-encodings: 1.0.11
       es-toolkit: 1.46.1
       yaml: 2.9.0
 
-  '@fedify/vocab@2.3.6':
+  '@fedify/vocab@2.4.4':
     dependencies:
-      '@fedify/vocab-runtime': 2.3.6
-      '@fedify/vocab-tools': 2.3.6
-      '@fedify/webfinger': 2.3.6
-      '@js-temporal/polyfill': 0.5.1
-      '@logtape/logtape': 2.3.3
+      '@fedify/vocab-runtime': 2.4.4
+      '@fedify/vocab-tools': 2.4.4
+      '@fedify/webfinger': 2.4.4
+      '@logtape/logtape': 2.4.1
       '@multiformats/base-x': 4.0.1
       '@opentelemetry/api': 1.9.1
       asn1js: 3.0.10
       es-toolkit: 1.46.1
       jsonld: 9.0.0
       pkijs: 3.4.0
+      temporal-polyfill: 1.0.6
 
-  '@fedify/webfinger@2.3.6':
+  '@fedify/webfinger@2.4.4':
     dependencies:
-      '@fedify/vocab-runtime': 2.3.6
-      '@logtape/logtape': 2.3.3
+      '@fedify/vocab-runtime': 2.4.4
+      '@logtape/logtape': 2.4.1
       '@opentelemetry/api': 1.9.1
       es-toolkit: 1.46.1
 
@@ -5037,7 +5042,7 @@ snapshots:
     dependencies:
       jsbi: 4.3.2
 
-  '@logtape/logtape@2.3.3': {}
+  '@logtape/logtape@2.4.1': {}
 
   '@mdx-js/mdx@3.1.1(supports-color@10.2.2)':
     dependencies:
@@ -5392,6 +5397,8 @@ snapshots:
       solid-js: 1.9.15
 
   '@speed-highlight/core@1.2.24': {}
+
+  '@standard-schema/spec@1.1.0': {}
 
   '@tybys/wasm-util@0.10.3':
     dependencies:
@@ -7489,14 +7496,14 @@ snapshots:
       picocolors: 1.1.1
       sax: 1.6.1
 
-  temporal-polyfill@1.0.4:
+  temporal-polyfill@1.0.6:
     dependencies:
       temporal-spec: 1.0.1
-      temporal-utils: 1.0.2
+      temporal-utils: 1.0.3
 
   temporal-spec@1.0.1: {}
 
-  temporal-utils@1.0.2: {}
+  temporal-utils@1.0.3: {}
 
   tiny-inflate@1.0.3: {}
 
