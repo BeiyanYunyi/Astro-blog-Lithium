@@ -1926,6 +1926,7 @@ test('comment reads coalesce refresh tasks via D1 CAS, serve stale content and r
   const note = {
     id: `${remote}/notes/cached`,
     type: 'Note',
+    to: ['https://www.w3.org/ns/activitystreams#Public'],
     attributedTo: remote,
     inReplyTo: `${origin}/api/activitypub/note/CornerOfTheWorld`,
     content: '<p>Fresh reply</p><script>alert(1)</script>',
@@ -1937,8 +1938,8 @@ test('comment reads coalesce refresh tasks via D1 CAS, serve stale content and r
   mockRemote(t, env, { objects, fetched });
   await env.database
     .prepare(`INSERT INTO ap_comment
-    (id, post_id, author_id, author_name, in_reply_to, content, published_at, updated_at)
-    VALUES (?, 'CornerOfTheWorld', ?, 'Alice', ?, '<p>Cached reply</p>', ?, ?)`)
+    (id, is_public, post_id, author_id, author_name, in_reply_to, content, published_at, updated_at)
+    VALUES (?, 1, 'CornerOfTheWorld', ?, 'Alice', ?, '<p>Cached reply</p>', ?, ?)`)
     .bind(note.id, remote, note.inReplyTo, note.published, note.published)
     .run();
   const read = () =>
@@ -2026,6 +2027,7 @@ test('failed comment refresh preserves stale data, retries and rejects changed i
   const note = {
     id: `${remote}/notes/retry`,
     type: 'Note',
+    to: ['https://www.w3.org/ns/activitystreams#Public'],
     attributedTo: remote,
     inReplyTo: `${origin}/api/activitypub/note/CornerOfTheWorld`,
     content: '<p>Recovered</p>',
@@ -2037,8 +2039,8 @@ test('failed comment refresh preserves stale data, retries and rejects changed i
   mockRemote(t, env, { objects });
   await env.database
     .prepare(`INSERT INTO ap_comment
-    (id, post_id, author_id, author_name, in_reply_to, content, published_at, updated_at)
-    VALUES (?, 'CornerOfTheWorld', ?, 'Alice', ?, 'Stale', '2026-09-01', '2026-09-01')`)
+    (id, is_public, post_id, author_id, author_name, in_reply_to, content, published_at, updated_at)
+    VALUES (?, 1, 'CornerOfTheWorld', ?, 'Alice', ?, 'Stale', '2026-09-01', '2026-09-01')`)
     .bind(note.id, remote, note.inReplyTo)
     .run();
   await env.runtime.dispatchFetch(`${origin}/posts/CornerOfTheWorld/`);
@@ -2087,8 +2089,8 @@ test('enqueue outage does not hide cached comments or prevent the next read from
   const env = await environment(t);
   await env.database
     .prepare(`INSERT INTO ap_comment
-    (id, post_id, author_id, author_name, in_reply_to, content, published_at, updated_at)
-    VALUES (?, 'post', ?, 'Alice', ?, 'Cached', '2026-09-01', '2026-09-01')`)
+    (id, is_public, post_id, author_id, author_name, in_reply_to, content, published_at, updated_at)
+    VALUES (?, 1, 'post', ?, 'Alice', ?, 'Cached', '2026-09-01', '2026-09-01')`)
     .bind(
       `${remote}/notes/outage`,
       remote,
@@ -2107,4 +2109,190 @@ test('enqueue outage does not hide cached comments or prevent the next read from
   assert.equal((await readComments(ctx, {}, 'post'))[0].content, 'Cached');
   assert.equal((await readComments(ctx, {}, 'post'))[0].content, 'Cached');
   assert.equal(attempts, 2);
+});
+
+test('article rendering sanitizes historical raw comment HTML before background refresh', async (t) => {
+  const env = await environment(t);
+  const id = `${remote}/notes/legacy-unsafe`;
+  const raw =
+    '<p onclick="alert(1)">Legacy reply<img src=x onerror="alert(2)"></p><script>alert(3)</script><a href="javascript:alert(4)">Unsafe link</a><a href="https://example.com/">Safe link</a>';
+  await env.database
+    .prepare(`INSERT INTO ap_comment
+    (id, is_public, post_id, author_id, author_name, in_reply_to, content, published_at, updated_at)
+    VALUES (?, 1, 'CornerOfTheWorld', ?, 'Alice', ?, ?, '2026-09-01', '2026-09-01')`)
+    .bind(id, remote, `${origin}/api/activitypub/note/CornerOfTheWorld`, raw)
+    .run();
+  // Even a fresh marker must not exempt historical data from rendering checks.
+  await new D1KvStore(env.database).set(['blog', 'comment-refresh', id], true);
+  const response = await env.runtime.dispatchFetch(
+    `${origin}/posts/CornerOfTheWorld/`,
+  );
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  const section = html.match(
+    /<section aria-label="联邦回复"[\s\S]*?<\/section>/,
+  )?.[0];
+  assert.ok(section);
+  assert.match(section, /<p>Legacy reply<\/p>/);
+  assert.match(section, /<a>Unsafe link<\/a>/);
+  assert.match(
+    section,
+    /href="https:\/\/example.com\/" rel="nofollow noopener noreferrer"/,
+  );
+  assert.doesNotMatch(
+    section,
+    /<script|<img|onclick|onerror|javascript:|alert\(/i,
+  );
+  assert.match(
+    html,
+    /id="comment-container"/,
+    'Existing Sodesu comment area remains present',
+  );
+  assert.equal(env.queued.length, 0);
+  assert.equal(
+    (
+      await env.database
+        .prepare('SELECT content FROM ap_comment WHERE id = ?')
+        .bind(id)
+        .first()
+    ).content,
+    raw,
+    'Rendering is safe without requiring a migration or remote timestamp change',
+  );
+});
+
+test('only explicit public Note audiences are displayed and verified privacy updates hide replies', async (t) => {
+  const env = await environment(t);
+  const objects = new Map();
+  mockRemote(t, env, { objects });
+  const publicAudience = 'https://www.w3.org/ns/activitystreams#Public';
+  const base = {
+    type: 'Note',
+    attributedTo: remote,
+    inReplyTo: `${origin}/api/activitypub/note/CornerOfTheWorld`,
+    published: '2026-09-01T00:00:00Z',
+  };
+  let sequence = 0;
+  const receive = async (type, note) => {
+    objects.set(note.id, note);
+    const response = await worker.fetch(
+      await signedActivity({
+        id: `${remote}/visibility/${sequence++}`,
+        type,
+        actor: remote,
+        to: publicAudience,
+        object: note,
+      }),
+      env,
+    );
+    assert.equal(response.status, 202);
+  };
+  const read = async () =>
+    (
+      await env.runtime.dispatchFetch(`${origin}/posts/CornerOfTheWorld/`)
+    ).text();
+  for (const [index, to] of [
+    [actorId],
+    [`${remote}/followers`],
+    [],
+  ].entries()) {
+    const note = {
+      ...base,
+      id: `${remote}/notes/restricted-${index}`,
+      to,
+      content: `Private message ${index}`,
+    };
+    await receive('Create', note);
+    assert.doesNotMatch(await read(), /Private message/);
+    await drain(env);
+    assert.doesNotMatch(await read(), /Private message/);
+  }
+  const note = {
+    ...base,
+    id: `${remote}/notes/public`,
+    cc: [publicAudience],
+    content: 'Public reply',
+  };
+  await receive('Create', note);
+  assert.match(await read(), /Public reply/);
+  await drain(env);
+  // No newer timestamp: an authenticated audience withdrawal still hides it.
+  await receive('Update', { ...note, cc: [], to: [actorId] });
+  assert.doesNotMatch(await read(), /Public reply/);
+  await receive('Update', {
+    ...note,
+    updated: '2026-09-02T00:00:00Z',
+    content: 'Public again',
+  });
+  assert.match(await read(), /Public again/);
+});
+
+test('visibility migration hides legacy rows until authoritative public revalidation and refresh respects withdrawal', async (t) => {
+  const env = await environment(t);
+  await env.database.exec('ALTER TABLE ap_comment DROP COLUMN is_public');
+  const id = `${remote}/notes/unknown-audience`;
+  await env.database
+    .prepare(`INSERT INTO ap_comment
+    (id, post_id, author_id, author_name, in_reply_to, content, published_at, updated_at)
+    VALUES (?, 'CornerOfTheWorld', ?, 'Alice', ?, 'Legacy secret', '2026-09-01T00:00:00Z', '2026-09-01T00:00:00Z')`)
+    .bind(id, remote, `${origin}/api/activitypub/note/CornerOfTheWorld`)
+    .run();
+  const migration = await readFile(
+    new URL('../migrations/0004_comment_visibility.sql', import.meta.url),
+    'utf8',
+  );
+  await env.database.prepare(migration).run();
+  const row = () =>
+    env.database
+      .prepare('SELECT * FROM ap_comment WHERE id = ?')
+      .bind(id)
+      .first();
+  assert.equal((await row()).is_public, 0);
+  assert.equal((await row()).content, 'Legacy secret');
+  const note = {
+    id,
+    type: 'Note',
+    attributedTo: remote,
+    to: [actorId],
+    inReplyTo: `${origin}/api/activitypub/note/CornerOfTheWorld`,
+    published: '2026-09-01T00:00:00Z',
+    content: 'Authoritative secret',
+  };
+  const objects = new Map([[id, note]]);
+  mockRemote(t, env, { objects });
+  const read = async () =>
+    (
+      await env.runtime.dispatchFetch(`${origin}/posts/CornerOfTheWorld/`)
+    ).text();
+  const expire = () =>
+    env.database
+      .prepare(
+        "UPDATE fedify_kv SET expires = 0 WHERE key LIKE '%comment-refresh%'",
+      )
+      .run();
+  assert.doesNotMatch(await read(), /Legacy secret|Authoritative secret/);
+  await drain(env);
+  assert.equal((await row()).is_public, 0);
+  await expire();
+  objects.set(id, {
+    ...note,
+    to: ['https://www.w3.org/ns/activitystreams#Public'],
+    content: '<p>Now public</p><script>alert(1)</script>',
+  });
+  assert.doesNotMatch(await read(), /Legacy secret|Now public/);
+  await drain(env);
+  assert.equal((await row()).is_public, 1);
+  assert.equal((await row()).content, '<p>Now public</p>');
+  assert.match(await read(), /Now public/);
+  await expire();
+  // Signed fetch can retrieve a restricted object; it must revoke visibility,
+  // even when its timestamp was not advanced by the remote server.
+  objects.set(id, note);
+  await read();
+  await drain(env);
+  assert.equal((await row()).is_public, 0);
+  assert.doesNotMatch(
+    await read(),
+    /Now public|Legacy secret|Authoritative secret/,
+  );
 });

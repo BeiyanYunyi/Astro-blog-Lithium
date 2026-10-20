@@ -1,8 +1,9 @@
 import type { Context, TaskRegistry } from '@fedify/fedify';
 import { Note } from '@fedify/vocab';
-import { and, asc, eq, isNull, lt, sql } from 'drizzle-orm';
+import { and, asc, eq, isNull, lte, sql } from 'drizzle-orm';
 import { Temporal } from 'temporal-polyfill';
 import { isBlockedInstance } from './blocklist';
+import { isPublicComment } from './commentVisibility';
 import createDatabase from './database';
 import { D1KvStore } from './kv';
 import { sanitizeCommentContent } from './sanitize';
@@ -80,11 +81,23 @@ async function refreshComment(
     // and let the queue retry. Only authenticated inbox Delete creates tombstones.
     throw new Error('Remote comment could not be revalidated');
   }
-  const updated = note.updated?.toString();
+  if (!isPublicComment(note)) {
+    // An authoritative restricted object must not be exposed, regardless of
+    // whether its server advanced the edit timestamp for the audience change.
+    await db
+      .update(comment)
+      .set({ isPublic: false })
+      .where(eq(comment.id, id))
+      .run();
+    await kv.set(freshKey(id), true, { ttl: freshness });
+    return;
+  }
+  const updated = note.updated?.toString() ?? note.published?.toString();
   if (updated) {
     await db
       .update(comment)
       .set({
+        isPublic: true,
         content: await sanitizeCommentContent(note.content?.toString() ?? ''),
         updatedAt: updated,
       })
@@ -94,7 +107,7 @@ async function refreshComment(
           eq(comment.authorId, row.authorId),
           eq(comment.inReplyTo, row.inReplyTo),
           isNull(comment.deletedAt),
-          lt(sql`julianday(${comment.updatedAt})`, sql`julianday(${updated})`),
+          lte(sql`julianday(${comment.updatedAt})`, sql`julianday(${updated})`),
         ),
       )
       .run();
@@ -113,11 +126,11 @@ export async function readComments(
     .where(and(eq(comment.postId, postId), isNull(comment.deletedAt)))
     .orderBy(asc(comment.publishedAt), asc(comment.id))
     .all();
-  const visible = rows.filter(
+  const eligible = rows.filter(
     (row) => safeRemote(row.id) && safeRemote(row.authorId),
   );
   const kv = new D1KvStore(ctx.data.ap);
-  for (const row of visible) {
+  for (const row of eligible) {
     try {
       if (await kv.get(freshKey(row.id))) continue;
       // Per-reply tasks isolate failures. Stable keys coalesce readers across
@@ -135,5 +148,7 @@ export async function readComments(
       console.error('Could not enqueue comment refresh', { id: row.id, error });
     }
   }
-  return visible;
+  // Unknown legacy rows are refreshed too, but stay hidden until an
+  // authoritative object proves the stored version is public.
+  return eligible.filter((row) => row.isPublic);
 }

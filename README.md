@@ -62,12 +62,14 @@ waiting for production backoff intervals.
 1. Keep the existing `ap` binding/database, `follower` rows, and `PUBLIC_KEY` and
    `PRIV_KEY` secrets. Keys retain their JSON-string encoding: PEM public key and
    base64 PKCS#8 private key. The public `#main-key` ID stays unchanged. Apply the
-   additive migrations (the first is only needed if not already applied):
+   outstanding additive migrations (run `0004` only once, before deploying the
+   public comment reader):
 
    ```sh
    pnpm exec cf d1 raw 007ff8f3-681b-47e1-9f6e-e9ded6295b43 --sql @migrations/0001_fedify_kv.sql
    pnpm exec cf d1 raw 007ff8f3-681b-47e1-9f6e-e9ded6295b43 --sql @migrations/0002_comments_publications.sql
    pnpm exec cf d1 raw 007ff8f3-681b-47e1-9f6e-e9ded6295b43 --sql @migrations/0003_inbox_credit.sql
+   pnpm exec cf d1 raw 007ff8f3-681b-47e1-9f6e-e9ded6295b43 --sql @migrations/0004_comment_visibility.sql
    ```
 
    These commands target the remote database by default; cf requires its UUID.
@@ -211,16 +213,26 @@ replies and up to five missing ancestors resolved from their authoritative URLs.
 Create requires attribution to match the activity actor and the Note ID to share
 that actor's HTTPS origin. Duplicate IDs do not overwrite edits or tombstones.
 Update requires the stored author and a newer timestamp. Delete clears content
-and author name while retaining a tombstone. Remote HTML is sanitized on ingestion
-and refresh; unrelated, cyclic and untrusted ancestor chains are rejected.
+and author name while retaining a tombstone. Remote HTML is sanitized on ingestion,
+refresh and rendering (including historical rows saved before sanitization);
+unrelated, cyclic and untrusted ancestor chains are rejected.
 
-Article pages show these cached federated replies alongside the existing Sodesu
-comments. Reads return stored content without waiting for remote HTTP requests.
+Article pages show explicitly public cached federated replies alongside the existing
+Sodesu comments. Only a Note with the ActivityStreams Public collection in its
+`to` or `cc` audience may be displayed. Create/Update record this visibility;
+verified privacy withdrawals hide replies even without a newer timestamp.
+Historical rows with unknown audiences stay hidden until an authoritative public
+Note at least as recent as the cached version is fetched. Signed refreshes may
+retrieve restricted objects, but those revoke public visibility rather than
+publish their contents. Reads return stored content without waiting for remote HTTP requests.
 Stale replies enqueue Fedify custom tasks, keyed by post ID, reply URL and a
 five-minute window. WorkersMessageQueue uses Fedify's D1KvStore CAS fallback to
 coalesce concurrent enqueue requests; this is not exactly-once execution. A
 successful authoritative lookup marks that reply fresh for 15 minutes in the
-existing KV table, so no database migration is needed. Each reply has its own
+existing KV table. **Before deploying this reader, run
+`migrations/0004_comment_visibility.sql` once on an existing database.** It adds
+`is_public` with a default of zero, preserving historical rows but hiding their
+unknown audiences. New databases created from `setup.sql` already have the column. Each reply has its own
 task, allowing independent retries through the existing queue consumer (whose
 `maxConcurrency: 1` is unchanged). Failed enqueue leaves the cached UI available;
 failed refresh retains old content without marking it fresh. Queue retries and
@@ -229,7 +241,8 @@ subsequent read windows can recover failed work.
 Refresh only revalidates known reply URLs; it does not discover arbitrary remote
 reply collections. Fedify's default private-address/SSRF protection, HTTPS and
 instance blocklist checks apply. Identity, sole author and immediate parent must
-match the stored reply. Only newer timestamped edits replace sanitized content;
+match the stored reply. Public remote versions must be at least as recent as the
+stored version before replacing content or making a historical row visible;
 concurrent inbox edits and deletion tombstones cannot be overwritten. A missing
 remote object is not evidence of deletion: only authenticated inbox Delete
 creates a tombstone. Author profile names are not refreshed. The inbox challenge
