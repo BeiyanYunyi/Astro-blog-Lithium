@@ -19,6 +19,7 @@ import { count, desc, eq } from 'drizzle-orm';
 import { Temporal } from 'temporal-polyfill';
 import actorURL from './actorURL';
 import { isBlockedInstance } from './blocklist';
+import { registerCommentRefresh } from './commentRefresh';
 import { registerCommentListeners } from './comments';
 import {
   instanceHostname,
@@ -50,6 +51,10 @@ export async function getPosts() {
 }
 
 const federation = createFederationBuilder<Env>();
+export const commentRefreshTask = registerCommentRefresh(
+  federation,
+  identifier,
+);
 
 federation
   .setActorDispatcher('/api/{identifier}/actor', async (ctx, id) => {
@@ -234,8 +239,10 @@ export function createBlogFederation(bindings: Env) {
     kv: new D1KvStore(bindings.ap),
     queue: new WorkersMessageQueue(bindings.FEDERATION_QUEUE),
     manuallyStartQueue: true,
+    taskDeduplicationTtl: Temporal.Duration.from({ minutes: 5 }),
     inboxChallengePolicy: {
       enabled: true,
+      requestNonce: true,
     },
   });
 }
