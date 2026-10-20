@@ -11,6 +11,7 @@ import {
 import { filePathToSlug } from '@utils/idToSlug';
 import { and, eq, isNull, lt, sql } from 'drizzle-orm';
 import { isBlockedInstance } from './blocklist';
+import { isPublicComment } from './commentVisibility';
 import createDatabase from './database';
 import { sanitizeCommentContent } from './sanitize';
 import { comment } from './schema';
@@ -90,6 +91,7 @@ async function commentValues(note: Note, author: Actor, postId: string) {
   const published = note.published?.toString() ?? new Date().toISOString();
   return {
     id: note.id.href,
+    isPublic: isPublicComment(note),
     postId,
     authorId: author.id.href,
     authorName:
@@ -157,11 +159,26 @@ export function registerCommentListeners(listeners: InboxListenerSetters<Env>) {
         return;
       const updated =
         note.updated?.toString() ?? activity.published?.toString();
+      // Privacy withdrawal is conservative even if a server omits or reuses
+      // its version timestamp. An old replay may hide, but cannot leak content.
+      if (!isPublicComment(note)) {
+        await createDatabase(ctx.data.ap)
+          .update(comment)
+          .set({ isPublic: false })
+          .where(
+            and(
+              eq(comment.id, note.id.href),
+              eq(comment.authorId, activity.actorId.href),
+            ),
+          )
+          .run();
+      }
       // Without a version timestamp, a retried old edit could overwrite a newer one.
       if (!updated) return;
       await createDatabase(ctx.data.ap)
         .update(comment)
         .set({
+          isPublic: isPublicComment(note),
           content: await sanitizeCommentContent(note.content?.toString() ?? ''),
           updatedAt: updated,
         })

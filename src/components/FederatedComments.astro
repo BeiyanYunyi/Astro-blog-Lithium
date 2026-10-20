@@ -5,13 +5,22 @@ import {
   commentRefreshTask,
   createBlogFederation,
 } from '@server/activitypub/federation';
+import { sanitizeCommentContent } from '@server/activitypub/sanitize';
 
 const { postId } = Astro.props;
 const federation = await createBlogFederation(env);
-const comments = await readComments(
+const cachedComments = await readComments(
   federation.createContext(Astro.request, env),
   commentRefreshTask,
   postId,
+);
+// Historical rows predate ingestion sanitization. Always sanitize at the HTML
+// boundary, even when a remote version has not changed or cannot be fetched.
+const comments = await Promise.all(
+  cachedComments.map(async (comment) => ({
+    ...comment,
+    content: await sanitizeCommentContent(comment.content),
+  })),
 );
 ---
 

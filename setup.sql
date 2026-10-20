@@ -24,7 +24,8 @@ CREATE TABLE IF NOT EXISTS ap_comment (
   content TEXT NOT NULL,
   published_at TEXT NOT NULL,
   updated_at TEXT NOT NULL,
-  deleted_at TEXT
+  deleted_at TEXT,
+  is_public INTEGER NOT NULL DEFAULT 0
 );
 CREATE INDEX IF NOT EXISTS ap_comment_post ON ap_comment(post_id, published_at);
 
