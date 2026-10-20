@@ -18,10 +18,15 @@ import { formatFederationLog } from '../src/server/activitypub/logging.ts';
 
 // Resolve the KV module's bundler-style imports while testing it directly in Node.
 const kvModuleUrl = new URL('../src/server/activitypub/kv.ts', import.meta.url);
+const refreshModuleUrl = new URL(
+  '../src/server/activitypub/commentRefresh.ts',
+  import.meta.url,
+);
 const kvImports = registerHooks({
   resolve(specifier, context, nextResolve) {
     return nextResolve(
-      context.parentURL === kvModuleUrl.href && specifier.startsWith('./')
+      [kvModuleUrl.href, refreshModuleUrl.href].includes(context.parentURL) &&
+        specifier.startsWith('./')
         ? `${specifier}.ts`
         : specifier,
       context,
@@ -29,6 +34,7 @@ const kvImports = registerHooks({
   },
 });
 const { D1KvStore } = await import(kvModuleUrl.href);
+const { readComments } = await import(refreshModuleUrl.href);
 kvImports.deregister();
 
 const buildDirectory = '.cloudflare/output/v0/workers/default';
@@ -1913,4 +1919,192 @@ test('inbox verification logs expose failure classification without dumping acti
     assert.ok(!JSON.stringify(output).includes('private-body'));
     assert.ok(!JSON.stringify(output).includes('private-signature'));
   }
+});
+
+test('comment reads coalesce refresh tasks via D1 CAS, serve stale content and refresh after expiry', async (t) => {
+  const env = await environment(t);
+  const note = {
+    id: `${remote}/notes/cached`,
+    type: 'Note',
+    attributedTo: remote,
+    inReplyTo: `${origin}/api/activitypub/note/CornerOfTheWorld`,
+    content: '<p>Fresh reply</p><script>alert(1)</script>',
+    published: '2026-09-01T00:00:00Z',
+    updated: '2026-09-02T00:00:00Z',
+  };
+  const objects = new Map([[note.id, note]]);
+  const fetched = [];
+  mockRemote(t, env, { objects, fetched });
+  await env.database
+    .prepare(`INSERT INTO ap_comment
+    (id, post_id, author_id, author_name, in_reply_to, content, published_at, updated_at)
+    VALUES (?, 'CornerOfTheWorld', ?, 'Alice', ?, '<p>Cached reply</p>', ?, ?)`)
+    .bind(note.id, remote, note.inReplyTo, note.published, note.published)
+    .run();
+  const read = () =>
+    env.runtime.dispatchFetch(`${origin}/posts/CornerOfTheWorld/`);
+  const pages = await Promise.all(Array.from({ length: 4 }, read));
+  for (const page of pages) {
+    assert.equal(page.status, 200);
+    assert.match(await page.text(), /Cached reply/);
+  }
+  assert.equal(
+    fetched.length,
+    0,
+    'Reading cached comments must not fetch remotely',
+  );
+  for (let i = 0; i < 50 && !env.queued.length; i++)
+    await new Promise((resolve) => setTimeout(resolve, 20));
+  assert.equal(
+    env.queued.length,
+    1,
+    'Concurrent readers enqueue only one task',
+  );
+  const duplicate = structuredClone(env.queued[0]);
+  await drain(env);
+  assert.equal(fetched.filter((url) => url === note.id).length, 1);
+  const stored = () =>
+    env.database
+      .prepare('SELECT * FROM ap_comment WHERE id = ?')
+      .bind(note.id)
+      .first();
+  assert.equal((await stored()).content, '<p>Fresh reply</p>');
+  assert.match(await (await read()).text(), /Fresh reply/);
+  await drain(env);
+  assert.equal(fetched.length, 1, 'Fresh cache skips enqueue and remote fetch');
+  env.queued.push(duplicate);
+  await drain(env);
+  assert.equal(fetched.length, 1, 'Duplicate task is harmless while fresh');
+  await env.database
+    .prepare(
+      "UPDATE fedify_kv SET expires = 0 WHERE key LIKE '%comment-refresh%'",
+    )
+    .run();
+  objects.set(note.id, {
+    ...note,
+    content: '<p>Next edit</p>',
+    updated: '2026-09-03T00:00:00Z',
+  });
+  assert.match(await (await read()).text(), /Fresh reply/);
+  await drain(env);
+  assert.equal(fetched.length, 2);
+  assert.equal((await stored()).content, '<p>Next edit</p>');
+
+  // Older remote versions cannot overwrite a newer inbox edit.
+  await env.database
+    .prepare(
+      "UPDATE fedify_kv SET expires = 0 WHERE key LIKE '%comment-refresh%'",
+    )
+    .run();
+  objects.set(note.id, note);
+  await read();
+  await drain(env);
+  assert.equal((await stored()).content, '<p>Next edit</p>');
+
+  // A task queued before a signed Delete must never resurrect its tombstone.
+  await env.database
+    .prepare(
+      "UPDATE fedify_kv SET expires = 0 WHERE key LIKE '%comment-refresh%'",
+    )
+    .run();
+  await read();
+  await env.database
+    .prepare(
+      "UPDATE ap_comment SET deleted_at = '2026-09-04', content = '', author_name = '' WHERE id = ?",
+    )
+    .bind(note.id)
+    .run();
+  const before = fetched.length;
+  await drain(env);
+  assert.equal(fetched.length, before);
+  assert.equal((await stored()).content, '');
+  assert.doesNotMatch(await (await read()).text(), /联邦回复/);
+});
+
+test('failed comment refresh preserves stale data, retries and rejects changed identity or parent', async (t) => {
+  const env = await environment(t);
+  const note = {
+    id: `${remote}/notes/retry`,
+    type: 'Note',
+    attributedTo: remote,
+    inReplyTo: `${origin}/api/activitypub/note/CornerOfTheWorld`,
+    content: '<p>Recovered</p>',
+    updated: '2026-09-02T00:00:00Z',
+  };
+  const objects = new Map([
+    [note.id, new Response('Unavailable', { status: 503 })],
+  ]);
+  mockRemote(t, env, { objects });
+  await env.database
+    .prepare(`INSERT INTO ap_comment
+    (id, post_id, author_id, author_name, in_reply_to, content, published_at, updated_at)
+    VALUES (?, 'CornerOfTheWorld', ?, 'Alice', ?, 'Stale', '2026-09-01', '2026-09-01')`)
+    .bind(note.id, remote, note.inReplyTo)
+    .run();
+  await env.runtime.dispatchFetch(`${origin}/posts/CornerOfTheWorld/`);
+  for (let i = 0; i < 50 && !env.queued.length; i++)
+    await new Promise((resolve) => setTimeout(resolve, 20));
+  assert.equal(env.queued.length, 1);
+  const message = env.queued.shift();
+  const runtimeWorker = await env.runtime.getWorker();
+  const run = () =>
+    runtimeWorker.queue('test-drain', [
+      { ...message, timestamp: new Date(message.timestamp) },
+    ]);
+  const content = async () =>
+    (
+      await env.database
+        .prepare('SELECT content FROM ap_comment WHERE id = ?')
+        .bind(note.id)
+        .first()
+    ).content;
+  for (const remoteObject of [
+    new Response('Unavailable', { status: 503 }),
+    { ...note, id: `${remote}/notes/forged` },
+    { ...note, attributedTo: 'https://9.9.9.9/actor' },
+    { ...note, inReplyTo: `${origin}/api/activitypub/note/other` },
+  ]) {
+    objects.set(note.id, remoteObject);
+    const result = await run();
+    assert.equal(result.retryMessages.length, 1);
+    assert.equal(await content(), 'Stale');
+    assert.equal(
+      await new D1KvStore(env.database).get([
+        'blog',
+        'comment-refresh',
+        note.id,
+      ]),
+      undefined,
+    );
+  }
+  objects.set(note.id, note);
+  const recovered = await run();
+  assert.equal(recovered.retryMessages.length, 0);
+  assert.equal(await content(), '<p>Recovered</p>');
+});
+
+test('enqueue outage does not hide cached comments or prevent the next read from retrying', async (t) => {
+  const env = await environment(t);
+  await env.database
+    .prepare(`INSERT INTO ap_comment
+    (id, post_id, author_id, author_name, in_reply_to, content, published_at, updated_at)
+    VALUES (?, 'post', ?, 'Alice', ?, 'Cached', '2026-09-01', '2026-09-01')`)
+    .bind(
+      `${remote}/notes/outage`,
+      remote,
+      `${origin}/api/activitypub/note/post`,
+    )
+    .run();
+  let attempts = 0;
+  const ctx = {
+    data: { ap: env.database },
+    enqueueTask: async () => {
+      attempts++;
+      if (attempts === 1) throw new Error('Queue unavailable');
+    },
+  };
+  t.mock.method(console, 'error', () => {});
+  assert.equal((await readComments(ctx, {}, 'post'))[0].content, 'Cached');
+  assert.equal((await readComments(ctx, {}, 'post'))[0].content, 'Cached');
+  assert.equal(attempts, 2);
 });
