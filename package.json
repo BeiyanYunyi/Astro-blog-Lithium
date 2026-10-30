@@ -44,8 +44,9 @@
     "katex": "^0.18.4",
     "satteri": "^0.10.5",
     "sharp": "^0.35.3",
-    "sodesu-comment": "^0.5.2",
+    "sodesu-comment": "^0.6.0",
     "solid-js": "^1.9.15",
+    "svelte": "^5.57.3",
     "temporal-polyfill": "^1.0.6",
     "unocss": "^66.8.1",
     "vite": "^8.2.2"

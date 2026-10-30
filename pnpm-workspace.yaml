@@ -27,3 +27,5 @@ allowBuilds:
   esbuild: true
   sharp: true
   workerd: true
+minimumReleaseAgeExclude:
+  - sodesu-comment@0.6.0
