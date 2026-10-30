@@ -37,14 +37,14 @@
     "@iconify-json/ion": "^1.2.7",
     "@logtape/logtape": "^2.4.1",
     "@unocss/reset": "^66.8.1",
-    "astro": "7.4.0-beta.1",
+    "astro": "^7.4.4",
     "cross-env": "^10.1.0",
     "dayjs": "^1.11.23",
     "drizzle-orm": "1.0.0-rc.4",
     "katex": "^0.18.4",
     "satteri": "^0.10.5",
     "sharp": "^0.35.3",
-    "sodesu-comment": "^0.6.0",
+    "sodesu-comment": "^0.6.1",
     "svelte": "^5.57.3",
     "temporal-polyfill": "^1.0.6",
     "unocss": "^66.8.1",
@@ -57,7 +57,7 @@
     "cf": "1.0.0-beta.12",
     "miniflare": "5.20260903.0-alpha",
     "rollup": "^4.62.5",
-    "typescript": "^6.0.3",
-    "svelte-check": "^4.7.7"
+    "svelte-check": "^4.7.7",
+    "typescript": "^6.0.3"
   }
 }

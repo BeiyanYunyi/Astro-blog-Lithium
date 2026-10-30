@@ -41,10 +41,6 @@ export default defineConfig({
     sitemap({ customPages: postPages }),
     svelte({
       compilerOptions: { runes: true },
-      // This dependency ships compiled JS with a .svelte.js filename.
-      experimental: {
-        compileModule: { exclude: ['**/sodesu-comment/dist/**'] },
-      },
     }),
     UnoCSS(),
   ],
