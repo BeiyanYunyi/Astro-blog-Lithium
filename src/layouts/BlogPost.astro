@@ -2,12 +2,12 @@
 import type MDInstance from '@app-types/MDInstance';
 import ArticleTags from '@components/ArticleTags.astro';
 import ArticleTime from '@components/ArticleTime.astro';
-import { SITE_DESCRIPTION, SITE_TITLE } from '@config';
-import type { MarkdownHeading } from 'astro';
-import headingsToToc from '@utils/headingsToToc';
-import TocHighlight from '@components/TocHighlight';
-import BaseLayout from './BaseLayout.astro';
 import FootnotePopovers from '@components/FootnotePopovers.astro';
+import TocHighlight from '@components/TocHighlight.svelte';
+import { SITE_DESCRIPTION, SITE_TITLE } from '@config';
+import headingsToToc from '@utils/headingsToToc';
+import type { MarkdownHeading } from 'astro';
+import BaseLayout from './BaseLayout.astro';
 
 export type Props = MDInstance & {
   headings?: MarkdownHeading[];
@@ -65,6 +65,6 @@ const toc = headingsToToc(headings);
           />
         </aside>
       )}
-    {toc && <TocHighlight headings={headings} client:only="solid-js" />}
+    {toc && <TocHighlight headings={headings} client:only="svelte" />}
   </div>
 </BaseLayout>

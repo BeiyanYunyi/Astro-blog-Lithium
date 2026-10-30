@@ -21,7 +21,8 @@
     "test:worker": "node --test tests/worker.test.ts",
     "check": "biome check .",
     "lint": "biome lint .",
-    "format": "biome format --write ."
+    "format": "biome format --write .",
+    "check:svelte": "svelte-check --tsconfig ./tsconfig.svelte.json"
   },
   "dependencies": {
     "@astrojs/cloudflare": "15.0.0-beta.1",
@@ -29,13 +30,12 @@
     "@astrojs/mdx": "^7.0.8",
     "@astrojs/rss": "^4.0.19",
     "@astrojs/sitemap": "^3.7.3",
-    "@astrojs/solid-js": "^7.0.2",
+    "@astrojs/svelte": "^9.1.2",
     "@fedify/cfworkers": "^2.4.4",
     "@fedify/fedify": "^2.4.4",
     "@fedify/vocab": "^2.4.4",
     "@iconify-json/ion": "^1.2.7",
     "@logtape/logtape": "^2.4.1",
-    "@solid-primitives/storage": "^4.4.0",
     "@unocss/reset": "^66.8.1",
     "astro": "7.4.0-beta.1",
     "cross-env": "^10.1.0",
@@ -45,20 +45,19 @@
     "satteri": "^0.10.5",
     "sharp": "^0.35.3",
     "sodesu-comment": "^0.6.0",
-    "solid-js": "^1.9.15",
     "svelte": "^5.57.3",
     "temporal-polyfill": "^1.0.6",
     "unocss": "^66.8.1",
     "vite": "^8.2.2"
   },
   "devDependencies": {
-    "@babel/core": "^8.0.1",
     "@biomejs/biome": "2.5.12",
     "@cloudflare/workers-types": "^5.20260825.1",
     "@unocss/astro": "^66.8.1",
     "cf": "1.0.0-beta.12",
     "miniflare": "5.20260903.0-alpha",
     "rollup": "^4.62.5",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "svelte-check": "^4.7.7"
   }
 }

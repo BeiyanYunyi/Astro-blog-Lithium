@@ -1,6 +1,6 @@
 ---
 import { SITE_TITLE } from '@config';
-import DarkSwitch from './DarkSwitch';
+import DarkSwitch from './DarkSwitch.svelte';
 import HeaderLink from './HeaderLink.astro';
 ---
 
@@ -24,6 +24,6 @@ import HeaderLink from './HeaderLink.astro';
     <HeaderLink class="ml-2" href="/intro">关于我</HeaderLink>
     <HeaderLink class="ml-2" href="/links">友链</HeaderLink>
     <div class="flex-grow hidden sm:block"></div>
-    <DarkSwitch client:only="solid-js" />
+    <DarkSwitch client:only="svelte" />
   </nav>
 </header>

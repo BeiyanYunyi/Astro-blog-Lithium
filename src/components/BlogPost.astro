@@ -1,14 +1,14 @@
 ---
+import type { CollectionEntry } from 'astro:content';
 import ArticleTags from '@components/ArticleTags.astro';
 import ArticleTime from '@components/ArticleTime.astro';
+import headingsToToc from '@utils/headingsToToc';
+import svgPathToName from '@utils/svgPathToName';
+import type { MarkdownHeading } from 'astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import CoverImage from './CoverImage.astro';
-import type { MarkdownHeading } from 'astro';
-import type { CollectionEntry } from 'astro:content';
-import svgPathToName from '@utils/svgPathToName';
-import headingsToToc from '@utils/headingsToToc';
-import TocHighlight from './TocHighlight';
 import FootnotePopovers from './FootnotePopovers.astro';
+import TocHighlight from './TocHighlight.svelte';
 
 export type Props = {
   headings: MarkdownHeading[];
@@ -76,7 +76,7 @@ const toc = headingsToToc(headings);
           />
         </aside>
       )}
-    {toc && <TocHighlight headings={headings} client:only="solid-js" />}
+    {toc && <TocHighlight headings={headings} client:only="svelte" />}
   </div>
   <script>
     import getWordCount from '@utils/getWordCount';

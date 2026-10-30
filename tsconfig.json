@@ -2,8 +2,6 @@
   "extends": "astro/tsconfigs/strictest",
   "compilerOptions": {
     "rootDir": ".",
-    "jsx": "preserve",
-    "jsxImportSource": "solid-js",
     "paths": {
       "@server/*": ["./src/server/*"],
       "@layouts/*": ["./src/layouts/*"],
@@ -17,11 +15,13 @@
       "@assets/*": ["./src/assets/*"]
     }
   },
-  "mdx": { "checkMdx": true },
+  "mdx": {
+    "checkMdx": true
+  },
   "include": [
     "src/**/*.astro",
     "src/**/*.ts",
-    "src/**/*.tsx",
+    "src/**/*.svelte",
     "uno.config.ts",
     "astro.config.ts"
   ]

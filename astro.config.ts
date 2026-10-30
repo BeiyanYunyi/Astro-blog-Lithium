@@ -3,7 +3,7 @@ import cloudflare from '@astrojs/cloudflare';
 import { satteri } from '@astrojs/markdown-satteri';
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
-import solidJs from '@astrojs/solid-js';
+import svelte from '@astrojs/svelte';
 import { defineConfig } from 'astro/config';
 import { parseFrontmatter } from 'astro/markdown';
 import UnoCSS from 'unocss/astro';
@@ -39,7 +39,13 @@ export default defineConfig({
   integrations: [
     mdx(),
     sitemap({ customPages: postPages }),
-    solidJs(),
+    svelte({
+      compilerOptions: { runes: true },
+      // This dependency ships compiled JS with a .svelte.js filename.
+      experimental: {
+        compileModule: { exclude: ['**/sodesu-comment/dist/**'] },
+      },
+    }),
     UnoCSS(),
   ],
   markdown: {
@@ -55,6 +61,7 @@ export default defineConfig({
   },
   image: { domains: ['s3.penclub.club'] },
   vite: {
+    optimizeDeps: { exclude: ['sodesu-comment'] },
     build: {
       sourcemap: true,
     },
