@@ -46,6 +46,9 @@ export const comment = sqliteTable(
     publishedAt: text('published_at').notNull(),
     updatedAt: text('updated_at').notNull(),
     deletedAt: text('deleted_at'),
+    isPublic: integer('is_public', { mode: 'boolean' })
+      .notNull()
+      .default(false),
   },
   (table) => [index('ap_comment_post').on(table.postId, table.publishedAt)],
 );
