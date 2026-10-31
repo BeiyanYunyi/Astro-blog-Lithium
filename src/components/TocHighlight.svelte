@@ -123,6 +123,7 @@
     };
   }
 </script>
+
 <nav
   class="pointer-events-none fixed inset-y-0 right-0 z-30 hidden w-12 lg:block"
   aria-label="Table of Contents"
@@ -132,14 +133,17 @@
     {@const positionStyle = `--toc-position: ${positions[index] ?? 50}%`}
     {@const isActive = activeIndexes.has(index)}
     <a
-      class={['pointer-events-auto absolute right-0 top-[var(--toc-position)] block h-1 rounded-l-full transition-[width,height,background-color,opacity] duration-[160ms] ease-in-out -translate-y-1/2 hover:bg-blue-500/95 focus-visible:outline-2 focus-visible:outline-blue-500/80 focus-visible:outline-offset-3 dark:hover:bg-blue-400/95', {
-        'bg-neutral-400/55 dark:bg-neutral-300/45': !isActive,
-        'h-1.5 bg-blue-500/95 dark:bg-blue-400/95': isActive,
-        'w-7': item.depth <= 2,
-        'w-[1.35rem]': item.depth === 3,
-        'w-4': item.depth === 4,
-        'w-3': item.depth >= 5,
-      }]}
+      class={[
+        'pointer-events-auto absolute right-0 top-[var(--toc-position)] block h-1 rounded-l-full transition-[width,height,background-color,opacity] duration-[160ms] ease-in-out -translate-y-1/2 hover:bg-blue-500/95 focus-visible:outline-2 focus-visible:outline-blue-500/80 focus-visible:outline-offset-3 dark:hover:bg-blue-400/95',
+        {
+          'bg-neutral-400/55 dark:bg-neutral-300/45': !isActive,
+          'h-1.5 bg-blue-500/95 dark:bg-blue-400/95': isActive,
+          'w-7': item.depth <= 2,
+          'w-[1.35rem]': item.depth === 3,
+          'w-4': item.depth === 4,
+          'w-3': item.depth >= 5,
+        },
+      ]}
       href={item.href}
       title={item.label}
       aria-label={item.label}

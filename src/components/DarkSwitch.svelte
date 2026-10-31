@@ -48,7 +48,20 @@
 
 <button
   type="button"
-  onclick={() => { mode = mode === 'auto' ? (systemDark ? 'light' : 'dark') : 'auto'; }}
-  aria-label={mode === 'auto' ? (dark ? '切换到浅色模式' : '切换到深色模式') : '跟随系统主题'}
-  class={['ml-2 text-2xl', mode === 'auto' ? 'i-ion:transgender-outline' : dark ? 'i-ion:moon-outline' : 'i-ion:sunny-outline']}
+  onclick={() => {
+    mode = mode === 'auto' ? (systemDark ? 'light' : 'dark') : 'auto';
+  }}
+  aria-label={mode === 'auto'
+    ? dark
+      ? '切换到浅色模式'
+      : '切换到深色模式'
+    : '跟随系统主题'}
+  class={[
+    'ml-2 text-2xl',
+    mode === 'auto'
+      ? 'i-ion:transgender-outline'
+      : dark
+        ? 'i-ion:moon-outline'
+        : 'i-ion:sunny-outline',
+  ]}
 ></button>

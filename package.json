@@ -1,13 +1,9 @@
 {
   "name": "astro-blog-lithium",
-  "type": "module",
   "version": "3.0.0",
-  "packageManager": "pnpm@12.16.1+sha512.091d1dee7927575661b25dab3c2ae31cafc1c54d6b71ed6a6600cf0c1cb10434a447eae14015f1b23e2e6bedeed79df94a932e2164d2832280dce3fb32f656d1",
   "description": "拿去吧！",
   "license": "AGPL-3.0-or-later",
-  "engines": {
-    "node": ">=26.0.0"
-  },
+  "type": "module",
   "scripts": {
     "dev": "cross-env DEV=true astro dev --host",
     "start": "astro dev",
@@ -19,9 +15,9 @@
     "worker:dry-run": "cf deploy --prebuilt --dry-run",
     "deploy": "pnpm build && cf deploy --prebuilt",
     "test:worker": "node --test tests/worker.test.ts",
-    "check": "biome check .",
-    "lint": "biome lint .",
-    "format": "biome format --write .",
+    "check": "oxfmt --check . && oxlint .",
+    "lint": "oxlint .",
+    "format": "oxfmt --write .",
     "check:svelte": "svelte-check --tsconfig ./tsconfig.svelte.json"
   },
   "dependencies": {
@@ -51,13 +47,19 @@
     "vite": "^8.2.2"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.5.12",
+    "@astrojs/compiler-rs": "^0.5.2",
     "@cloudflare/workers-types": "^5.20260825.1",
     "@unocss/astro": "^66.8.1",
     "cf": "1.0.0-beta.12",
     "miniflare": "5.20260903.0-alpha",
+    "oxfmt": "^0.75.0",
+    "oxlint": "^1.90.0",
     "rollup": "^4.62.5",
     "svelte-check": "^4.7.7",
     "typescript": "^6.0.3"
-  }
+  },
+  "engines": {
+    "node": ">=26.0.0"
+  },
+  "packageManager": "pnpm@12.16.1+sha512.091d1dee7927575661b25dab3c2ae31cafc1c54d6b71ed6a6600cf0c1cb10434a447eae14015f1b23e2e6bedeed79df94a932e2164d2832280dce3fb32f656d1"
 }

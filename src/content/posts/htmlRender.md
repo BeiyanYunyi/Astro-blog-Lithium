@@ -7,13 +7,27 @@ description: Vue对HTML自定义渲染
 
 ```typescript
 import { defineComponent, h } from 'vue';
-import { NH1, NH2, NH3, NH4, NH5, NH6, NBlockquote, NP, NText, NScrollbar, NA } from 'naive-ui';
+import {
+  NH1,
+  NH2,
+  NH3,
+  NH4,
+  NH5,
+  NH6,
+  NBlockquote,
+  NP,
+  NText,
+  NScrollbar,
+  NA,
+} from 'naive-ui';
 import TextSlot from '../components/TextSlot.vue';
 
 const render: (nodeList: Node) => any = (nodeList) => {
   //@ts-ignore
-  if (nodeList.nodeName === '#text') return h(TextSlot, null, () => nodeList.nodeValue);
-  const childs = () => Array.from(nodeList.childNodes).map((node) => render(node));
+  if (nodeList.nodeName === '#text')
+    return h(TextSlot, null, () => nodeList.nodeValue);
+  const childs = () =>
+    Array.from(nodeList.childNodes).map((node) => render(node));
   switch (nodeList.nodeName) {
     case 'H1':
       return h(NH1, null, childs);
@@ -32,10 +46,13 @@ const render: (nodeList: Node) => any = (nodeList) => {
     case 'BLOCKQUOTE':
       return h(NBlockquote, null, childs);
     case 'PRE':
-      return h(NScrollbar, { xScrollable: true, style: { maxWidth: '90vw' } }, () =>
-        h('pre', {
-          innerHTML: (nodeList as HTMLPreElement).innerHTML,
-        }),
+      return h(
+        NScrollbar,
+        { xScrollable: true, style: { maxWidth: '90vw' } },
+        () =>
+          h('pre', {
+            innerHTML: (nodeList as HTMLPreElement).innerHTML,
+          }),
       );
     case 'A':
       return h(

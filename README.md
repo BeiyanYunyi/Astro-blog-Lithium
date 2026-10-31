@@ -78,6 +78,7 @@ waiting for production backoff intervals.
    use `--persist-to` to select another state directory. This state is separate
    from the Astro dev server's state. Do not rerun `setup.sql` against an
    existing database.
+
 2. Create the main queue and dead-letter queue before deploying the consumer:
 
    ```sh
@@ -93,6 +94,7 @@ waiting for production backoff intervals.
    dead-letter queue. Inspect the main queue, dead-letter queue and Worker logs
    in Cloudflare when diagnosing failures. After fixing a failed task, replay it
    from the dead-letter queue; replaying a completed publication task is a no-op.
+
 3. Run `pnpm deploy`. With Workers Builds use build command `pnpm build` and deploy
    command `pnpm exec cf deploy --prebuilt`. `pnpm worker:dry-run` checks the same
    prebuilt output without uploading it. The first scan atomically registers all
@@ -113,6 +115,7 @@ waiting for production backoff intervals.
    discovery and repair logic as cron and no longer resends the entire archive.
    Missing token configuration returns 503; bad authorization returns 401. Cron
    does not require this token.
+
 5. Validate a real remote Follow/Undo, a reply/edit/delete, actor lookup, article
    HTML/JSON, tags and RSS after deployment. Local tests do not contact real
    federation servers or provision remote resources.

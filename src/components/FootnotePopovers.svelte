@@ -153,6 +153,7 @@
     };
   }
 </script>
+
 <div
   use:setupPopover
   class="footnote-popover prose prose-neutral dark:prose-invert fixed m-0 p-3 border border-solid border-stone-200 dark:border-stone-600 rounded-lg shadow-lg bg-white dark:bg-stone-800 text-neutral-800 dark:text-neutral-200 text-sm"

@@ -125,9 +125,7 @@ async function environment(
         ...(await Promise.all(
           [
             'entry.mjs',
-            ...(
-              await readdir(bundleDirectory, { recursive: true })
-            ).filter(
+            ...(await readdir(bundleDirectory, { recursive: true })).filter(
               (path) =>
                 path.endsWith('.mjs') &&
                 path !== 'entry.mjs' &&
@@ -1258,7 +1256,9 @@ test('additive migration is repeatable and retains existing follower rows', asyn
 });
 
 const scan = async (env) => {
-  const result = await (await env.runtime.getWorker()).scheduled({
+  const result = await (
+    await env.runtime.getWorker()
+  ).scheduled({
     cron: '*/5 * * * *',
   });
   assert.equal(result.outcome, 'ok');
@@ -1298,9 +1298,9 @@ test('cron baselines history, discovers new posts, pages distinct inboxes and do
   assert.equal(deliveries.length, 0);
   const task = env.queued.shift();
   assert.equal(task.body.type, 'blog-publish');
-  const result = await (await env.runtime.getWorker()).queue('test-drain', [
-    { ...task, timestamp: new Date(task.timestamp) },
-  ]);
+  const result = await (
+    await env.runtime.getWorker()
+  ).queue('test-drain', [{ ...task, timestamp: new Date(task.timestamp) }]);
   assert.equal(result.retryMessages.length, 0);
   const partial = await env.database
     .prepare("SELECT * FROM ap_publication WHERE post_id = 'CornerOfTheWorld'")
@@ -1345,7 +1345,9 @@ test('cron baselines history, discovers new posts, pages distinct inboxes and do
   await scan(env);
   await drain(env);
   // Cloudflare can redeliver an already completed job.
-  await (await env.runtime.getWorker()).queue('test-drain', [
+  await (
+    await env.runtime.getWorker()
+  ).queue('test-drain', [
     { ...task, timestamp: new Date(task.timestamp), attempts: 2 },
   ]);
   await drain(env);

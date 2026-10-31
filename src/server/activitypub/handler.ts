@@ -58,7 +58,9 @@ export const handleFederation: APIRoute = async ({ request }) => {
   if (request.method !== 'POST')
     headers.set('Accept', 'application/activity+json');
   if (request.method !== 'POST') url.pathname = url.pathname.replace(/\/$/, '');
-  const response = await (await createBlogFederation(env)).fetch(
+  const response = await (
+    await createBlogFederation(env)
+  ).fetch(
     new Request(url, {
       method: request.method === 'HEAD' ? 'GET' : request.method,
       headers,

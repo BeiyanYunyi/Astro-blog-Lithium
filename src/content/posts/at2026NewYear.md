@@ -27,7 +27,11 @@ tag:
 而与传统家庭的斗争、与不负责任的政府的斗争，在很长一段时间内，都将是社会一切进步力量的重要任务。
 
 ---
+
 [^1]: 《[龙腾未来，光耀金陵，拉满2024跨年仪式感](https://js.news.cn/20240101/8d14513ba36045169e0d880ea45dc779/c.html)》，[备份于archive.is](https://archive.is/bvXZ1)
+
 [^2]: 《[南京新街口商圈不统一组织跨年倒计时活动](http://js.people.cn/n2/2024/1226/c360303-41087754.html)》，[备份于archive.is](https://archive.is/wip/4lOIN)
+
 [^3]: 参见《[家庭暴力责任论](/posts/ResponsibilityOfFamilyViolence)》
+
 [^4]: 《[婚礼当天坠亡的28岁女教师已安葬，“遗言”背后多个传言不实](https://news.ifeng.com/c/8pIGvdFYhOu)》，[备份于archive.org](https://web.archive.org/web/20251222083808/https://news.ifeng.com/c/8pIGvdFYhOu)

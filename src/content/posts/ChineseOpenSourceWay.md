@@ -46,12 +46,21 @@ V2Ray绝不是个案：同样是前些日子，V2Board被爆出[硬编码](https
 ---
 
 [^1]: 指由生活在中国大陆的独立开发者构成的集合。
+
 [^2]: 和pjax指的是同一个技术。
+
 [^3]: 尽管这个目标不一定是正确的，毕竟“没有特征就是最大的特征”。
+
 [^4]: [V2fly.org](https://guide.v2fly.org/#%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98-q-a) “白话文教程”宣称，V2Ray“一开始就致力于让大家更好更快的科学上网”。
+
 [^5]: SSR作者实现的是对AES-CFB的重放攻击，使用AEAD可以规避，但V2Ray也有类似问题，并且是和SS差不多同时换上AEAD加密方式（AES-GCM、ChaCha20-IETF-Poly1305等）的，也就是说单纯的VMess的安全性从未高于SS。
+
 [^6]: 或者第二，视标准而定。
+
 [^7]: 只是说Clash的可扩展性和可配置性好，而不是说它和它衍生产物的安全性好。例：[漏洞1](https://web.archive.org/web/20220226105832/https://github.com/Fndroid/clash_for_windows_pkg/issues/2710)、[漏洞2](https://web.archive.org/web/20230115024746/https://github.com/Fndroid/clash_for_windows_pkg/issues/3891)，亦可见博客作者对其[评价](https://o3o.ca/@21018365486/111341857762957393)。
+
 [^8]: [前端编译产物中也存在](https://github.com/v2board/v2board-admin/blob/50b6058bf67fa9cea13f8a6cb9d0cd8d3c30a42b/index.html#L9)，可以相互验证。
+
 [^9]: 硬编码的这段谷歌统计是为开发者而非部署者收集数据，且没有展示任何相关选项或说明，性质极其恶劣。甚至这段统计代码被作为特征去[申请了专利](https://patents.google.com/patent/CN113505323A/zh)，可谓粗心大意 / 不安好心vs. 沽名钓誉。
+
 [^10]: 把流量加密以后套个WebSocket发出去，这件事情（无论要不要再套一层TLS）在NodeJS上100行代码以内就可以实现，技术要求并没有特别高。大概在C++ 和 [Go](https://github.com/v2fly/v2ray-core) 上写起来会更难吧。

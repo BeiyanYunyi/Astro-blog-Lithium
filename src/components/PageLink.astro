@@ -9,22 +9,22 @@ const { target, active, num, class: className, ...rest } = Astro.props;
 ---
 
 {active ? (
-    <span
-      class:list={[
-        className,
-        'bg-blue-600',
-        'dark:bg-blue-600',
-        'text-neutral-50',
-        'hover:text-neutral-50',
-        'dark:hover:text-neutral-50',
-      ]}
-      aria-current="page"
-      {...rest}
-    >
-      {num}
-    </span>
-  ) : (
-    <a href={target} class:list={[className]} {...rest}>
-      {num}
-    </a>
-  )}
+  <span
+    class:list={[
+      className,
+      'bg-blue-600',
+      'dark:bg-blue-600',
+      'text-neutral-50',
+      'hover:text-neutral-50',
+      'dark:hover:text-neutral-50',
+    ]}
+    aria-current="page"
+    {...rest}
+  >
+    {num}
+  </span>
+) : (
+  <a href={target} class:list={[className]} {...rest}>
+    {num}
+  </a>
+)}

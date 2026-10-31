@@ -15,29 +15,28 @@ tag:
 [它的官方文档](https://waline.js.org/guide/deploy/vps.html#%E7%9B%B4%E6%8E%A5%E8%BF%90%E8%A1%8C-%E6%8E%A8%E8%8D%90)会告诉你，随便新建一个包，在里面加入 @waline/vercel这个依赖，然后 `node node_modules/@waline/vercel/vanilla.js` 就能跑起来。让我们来看看它的代码：
 
 ```javascript
-const path = require('node:path')
+const path = require('node:path');
 
-const Application = require('thinkjs')
+const Application = require('thinkjs');
 
 const instance = new Application({
   ROOT_PATH: __dirname,
   APP_PATH: path.join(__dirname, 'src'),
   proxy: true, // use proxy
   env: 'production',
-})
+});
 
-instance.run()
+instance.run();
 
-let config = {}
+let config = {};
 
 try {
-  config = require('./config.js')
-}
-catch {
+  config = require('./config.js');
+} catch {
   // do nothing
 }
 for (const k in config) {
-  think.config(k, config[k])
+  think.config(k, config[k]);
 }
 ```
 
@@ -48,34 +47,33 @@ for (const k in config) {
 于是我把它复制出来，改写一下，命名为index.js，并且加入thinkjs这个依赖：
 
 ```javascript
-import { createRequire } from 'node:module'
-import path from 'node:path'
-import Application from 'thinkjs'
+import { createRequire } from 'node:module';
+import path from 'node:path';
+import Application from 'thinkjs';
 
-const require = createRequire(import.meta.url)
+const require = createRequire(import.meta.url);
 
-const ROOT_PATH = path.resolve(require.resolve('@waline/vercel'), '..')
+const ROOT_PATH = path.resolve(require.resolve('@waline/vercel'), '..');
 
 const instance = new Application({
   ROOT_PATH,
   APP_PATH: path.resolve(ROOT_PATH, 'src'),
   proxy: true, // use proxy
   env: 'production',
-})
+});
 
-instance.run()
+instance.run();
 
-let config = {}
+let config = {};
 
 try {
-  const { default: conf } = await import('./config.js')
-  config = conf
-}
-catch {
+  const { default: conf } = await import('./config.js');
+  config = conf;
+} catch {
   // do nothing
 }
 for (const k in config) {
-  think.config(k, config[k])
+  think.config(k, config[k]);
 }
 ```
 
@@ -166,7 +164,7 @@ Error: Cannot find module 'leancloud-storage'
 顺着找过去，注意到第一行：
 
 ```js
-const AV = require('leancloud-storage')
+const AV = require('leancloud-storage');
 ```
 
 显然，这个src/service/storage/leancloud.js被谁给加载（执行）了，并且它自己require了leancloud-storage，这就是前面报错的来源。为此，我们需要修改 @waline/vercel这个包（报错栈路径第一个版本号前面的就是包名），移除对leancloud的依赖：

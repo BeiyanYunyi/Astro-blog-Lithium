@@ -5,16 +5,16 @@ const { tag: tags } = Astro.props;
 
 <>
   {tags && (
-      <div class="flex gap-1 text-xs items-center">
-        {tags.map((tag) => (
-          <a
-            href={`/tags/${tag}`}
-            class="rounded-md transition-all no-underline hover:shadow-md outline-neutral-200 dark:outline-neutral-600 outline outline-1 p-1 flex items-center"
-          >
-            <span class="i-ion:pricetag-outline text-4" />
-            <span class="flex-shrink-0 ml-1">{tag}</span>
-          </a>
-        ))}
-      </div>
-    )}
+    <div class="flex gap-1 text-xs items-center">
+      {tags.map((tag) => (
+        <a
+          href={`/tags/${tag}`}
+          class="rounded-md transition-all no-underline hover:shadow-md outline-neutral-200 dark:outline-neutral-600 outline outline-1 p-1 flex items-center"
+        >
+          <span class="i-ion:pricetag-outline text-4" />
+          <span class="flex-shrink-0 ml-1">{tag}</span>
+        </a>
+      ))}
+    </div>
+  )}
 </>

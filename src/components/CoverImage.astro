@@ -14,15 +14,15 @@ const svg = typeof src !== 'string' && src.format === 'svg' ? src : undefined;
 ---
 
 {svg ? (
-    <img
-      src={svg.src}
-      width={svg.width}
-      height={svg.height}
-      alt={alt}
-      class={className}
-      loading="lazy"
-      decoding="async"
-    />
-  ) : (
-    <Image src={src} alt={alt} class={className} inferSize />
-  )}
+  <img
+    src={svg.src}
+    width={svg.width}
+    height={svg.height}
+    alt={alt}
+    class={className}
+    loading="lazy"
+    decoding="async"
+  />
+) : (
+  <Image src={src} alt={alt} class={className} inferSize />
+)}

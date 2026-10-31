@@ -28,19 +28,24 @@ const toc = headingsToToc(headings);
 <BaseLayout
   title={title}
   description={description}
-  image={remoteImage || (image?.src ? `/og-image/${svgPathToName(image?.src)}.png` : '/头像方.png')}
+  image={
+    remoteImage ||
+    (image?.src ? `/og-image/${svgPathToName(image?.src)}.png` : '/头像方.png')
+  }
 >
   <div class="flex">
     <FootnotePopovers />
     <div class="flex-grow min-w-0">
-      <article
-        class="prose prose-neutral dark:prose-invert max-w-full card overflow-clip"
-      >
+      <article class="prose prose-neutral dark:prose-invert max-w-full card overflow-clip">
         <header>
           <slot name="before-article" />
           {image && (
-              <CoverImage class="w-full object-contain my-0" src={image} alt="Article cover" />
-            )}
+            <CoverImage
+              class="w-full object-contain my-0"
+              src={image}
+              alt="Article cover"
+            />
+          )}
           <div class="p-6 pb-0">
             <ArticleTime slug={slug} date={date} class="mb-2" />
             <h1 class="mb-6">{title}</h1>
@@ -52,16 +57,13 @@ const toc = headingsToToc(headings);
           <ArticleTags tag={tag} />
         </div>
       </article>
-      <div
-        class="prose prose-neutral min-w-0 dark:prose-invert max-w-none my-4"
-      >
+      <div class="prose prose-neutral min-w-0 dark:prose-invert max-w-none my-4">
         <details class="rounded-md card py-5 px-6">
           <summary>分享</summary>
           <p>
-            复制此页面地址到邦联宇宙搜索框以在邦联宇宙分享本文：<code
-              id="page_address"
-              class="break-all select-all"
-              >https://blog.yunyi.beiyan.us/posts/{slug.replaceAll('/', '_')}
+            复制此页面地址到邦联宇宙搜索框以在邦联宇宙分享本文：
+            <code id="page_address" class="break-all select-all">
+              https://blog.yunyi.beiyan.us/posts/{slug.replaceAll('/', '_')}
               <!-- https://blog.yunyi.beiyan.us/api/activitypub/note/{slug.replaceAll('/', '_')} -->
             </code>
           </p>
@@ -69,13 +71,13 @@ const toc = headingsToToc(headings);
       </div>
     </div>
     {toc && (
-        <aside class="hidden lg:block mt-4 lg:(mt-0 ml-4) flex-shrink-0" id="toc">
-          <nav
-            class="prose prose-neutral dark:prose-invert sticky top-20 text-sm card px-4 w-[15rem] max-h-[calc(100vh-6rem)] overflow-y-auto"
-            set:html={toc}
-          />
-        </aside>
-      )}
+      <aside class="hidden lg:block mt-4 lg:(mt-0 ml-4) flex-shrink-0" id="toc">
+        <nav
+          class="prose prose-neutral dark:prose-invert sticky top-20 text-sm card px-4 w-[15rem] max-h-[calc(100vh-6rem)] overflow-y-auto"
+          set:html={toc}
+        />
+      </aside>
+    )}
     {toc && <TocHighlight headings={headings} client:only="svelte" />}
   </div>
   <script>

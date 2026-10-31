@@ -27,29 +27,45 @@ const formatTime = (value: number) =>
       后恢复。成功请求不重置 credit。
     </p>
     <p>
-      数据时间：<time datetime={new Date(now).toISOString()}
-        >{formatTime(now)}</time
-      >。刷新页面可查看最新状态。
+      数据时间：
+      <time datetime={new Date(now).toISOString()}>{formatTime(now)}</time>
+      。刷新页面可查看最新状态。
     </p>
     <p>
       当前 {instances.length} 个实例有非零 credit，其中
       {instances.filter((instance) => instance.limited).length}
       个暂时受限。恢复时间以没有新增失败为前提。
     </p>
-    {instances.length === 0 ? <p>当前没有 credit 大于零的实例。</p> : (
+    {instances.length === 0 ? (
+      <p>当前没有 credit 大于零的实例。</p>
+    ) : (
       <div class="credit-table">
         <table>
           <caption>实例按当前 credit 从高到低排列</caption>
-          <thead><tr><th scope="col">实例域名</th><th scope="col">当前 credit</th><th scope="col">状态</th><th scope="col">预计恢复时间</th><th scope="col">最近验证失败</th></tr></thead>
-          <tbody>{instances.map((instance) => (
+          <thead>
             <tr>
-              <th scope="row">{instance.hostname}</th>
-              <td>{instance.credit}</td>
-              <td>{instance.limited ? '暂时限制' : '未限制'}</td>
-              <td>{instance.retryAt === null ? '—' : formatTime(instance.retryAt)}</td>
-              <td>{formatTime(instance.lastFailureAt)}</td>
+              <th scope="col">实例域名</th>
+              <th scope="col">当前 credit</th>
+              <th scope="col">状态</th>
+              <th scope="col">预计恢复时间</th>
+              <th scope="col">最近验证失败</th>
             </tr>
-          ))}</tbody>
+          </thead>
+          <tbody>
+            {instances.map((instance) => (
+              <tr>
+                <th scope="row">{instance.hostname}</th>
+                <td>{instance.credit}</td>
+                <td>{instance.limited ? '暂时限制' : '未限制'}</td>
+                <td>
+                  {instance.retryAt === null
+                    ? '—'
+                    : formatTime(instance.retryAt)}
+                </td>
+                <td>{formatTime(instance.lastFailureAt)}</td>
+              </tr>
+            ))}
+          </tbody>
         </table>
       </div>
     )}
@@ -81,7 +97,7 @@ const formatTime = (value: number) =>
     padding: 0.75rem;
     border-bottom: 1px solid #8886;
   }
-  th[scope="row"] {
+  th[scope='row'] {
     overflow-wrap: anywhere;
     min-width: 10rem;
   }

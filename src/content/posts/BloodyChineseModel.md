@@ -51,15 +51,27 @@ Transformer被发明后，美国人开始探索其各类用途（文本分类、
 ---
 
 [^1]: 《[用NLP模型过滤缠扰言论](/posts/FilterStalking)》、《[告王旷逸](/posts/ToWangKuangyi)》。
+
 [^2]: 这里有一些技术细节上的不同。我是对BERT进行微调，其输出为0/1两个值。更泛用的做法是，输出为一个特定长度的数组（“特定维度的向量”）也就是“Text Embedding”。此后，计算两段语言对应的向量之间的距离，就可以判断两段语言是否相近。它准确率稍低，但不需要对每一种语言风格都训练一次，并且能给出连续的“相似度”，而非离散的是/否。
+
 [^3]: 《百度大脑内容审核平台全新上线》，重复发了两篇，相隔5分钟。区别在于后一篇文章多了“敏感人脸自助入库”，但后一篇并不展示，仅能通过链接进入。[文1](https://ai.baidu.com/support/news?action=detail&id=1104)（[备份](https://web.archive.org/web/20261026113348/https://ai.baidu.com/support/news?action=detail&id=1104)）、[文2](https://ai.baidu.com/support/news?action=detail&id=1105)（[备份](https://web.archive.org/web/20261026113626/https://ai.baidu.com/support/news?action=detail&id=1105)）。
+
 [^4]: 《[520礼包 | 情感分析算法从原理到PaddlePaddle实战全解](https://ai.baidu.com/support/news?action=detail&id=1106)》，[备份](https://web.archive.org/web/20261026113710/https://ai.baidu.com/support/news?action=detail&id=1106)
+
 [^5]: 此前我并没有百度用“AI”审查的证据，但在让ChatGPT在对我的文章进行事实检验时，ChatGPT检索到了文1，随后我检索到了文2和《520礼包》。
+
 [^6]: 朱世强、王永恒. 基于人工智能的内容安全发展战略研究. 中国工程科学, 2021, 23(3): 67-74. DOI: [10.15302/J-SSCAE-2021.03.004](https://doi.org/10.15302/J-SSCAE-2021.03.004)，百度官方百家号《[百度发布2020年治理年报：公立机构官网保护计划已覆盖20万网站](https://baijiahao.baidu.com/s?id=1691178485883046579)》
+
 [^7]: 维基百科：[2019冠状病毒疾病湖北省疫情相关执法争议](https://zh.wikipedia.org/wiki/2019%E5%86%A0%E7%8B%80%E7%97%85%E6%AF%92%E7%97%85%E6%B9%96%E5%8C%97%E7%9C%81%E7%96%AB%E6%83%85%E7%9B%B8%E9%97%9C%E5%9F%B7%E6%B3%95%E7%88%AD%E8%AD%B0)
+
 [^8]: 《[百分点认知智能实验室出品：情感分析在舆情中的研发实践（上）](https://mp.weixin.qq.com/s/WcfgT1UVeMRAjACdq_Tvjg)》，微信公众号无法利用archive.org备份，但有其它平台的[备份](https://web.archive.org/web/20210420044413/https://cloud.tencent.com/developer/news/609231)
+
 [^9]: 阿里云《[AI安全护栏 - 功能发布记录](https://help.aliyun.com/zh/document_detail/28420.html)》，[备份](https://web.archive.org/web/20260410093426/https://help.aliyun.com/zh/document_detail/28420.html)
+
 [^10]: 阿里云《[使用文本审核增强版识别文本违规风险](https://help.aliyun.com/zh/document_detail/464388.html)》，[备份](https://web.archive.org/web/20260213073838/https://help.aliyun.com/zh/document_detail/464388.html)
+
 [^11]: 《[我不得不把才华埋葬在昨天](https://mp.weixin.qq.com/s/zk0KxuLzhmMJ4LPYW_OHMA)》，公众号无法备份，但有[转载](https://telegra.ph/%E6%88%91%E4%B8%8D%E5%BE%97%E4%B8%8D%E6%8A%8A%E6%89%8D%E5%8D%8E%E5%9F%8B%E8%91%AC%E5%9C%A8%E6%98%A8%E5%A4%A9-09-14)
+
 [^12]: 《[2020年度智谱·AI人工智能技术发展报告集](https://mp.weixin.qq.com/s/fj73YsrKXI78bZFN6rx3vA)》，公众号无法备份，可参考“[智源社区](https://web.archive.org/web/20261027023403/https://hub.baai.ac.cn/view/5261)”
+
 [^13]: 《[CSDN专访杨植麟：“人机耦合”将是对话语义应用的新趋势](https://www.rcrai.com/about-us/news/cover/data_77.html)》，[备份](https://web.archive.org/web/20261027022635/https://www.rcrai.com/about-us/news/cover/data_77.html)

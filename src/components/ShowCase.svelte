@@ -18,14 +18,14 @@
     <button
       type="button"
       class="rounded-md p-2 no-underline outline-1 outline-neutral-200 outline transition-all hover:shadow-md dark:outline-neutral-600"
-      onclick={() => count -= 1}
+      onclick={() => (count -= 1)}
     >
       -1s
     </button>
     <button
       type="button"
       class="rounded-md p-2 no-underline outline-1 outline-neutral-200 outline transition-all hover:shadow-md dark:outline-neutral-600"
-      onclick={() => count += 1}
+      onclick={() => (count += 1)}
     >
       +1s
     </button>
