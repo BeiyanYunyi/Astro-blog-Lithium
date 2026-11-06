@@ -25,9 +25,18 @@ Use Node >=26 and pnpm. `src/server/worker.ts` delegates HTTP requests to Astro'
 Cloudflare adapter and implements Cloudflare `scheduled()` and `queue()` handlers.
 `src/server/activitypub/federation.ts` registers dispatchers and listeners once
 with `createFederationBuilder<Env>()`, then builds a federation per invocation
-with `D1KvStore` and `@fedify/cfworkers`'s `WorkersMessageQueue`. No Workers KV
+with `WorkersD1KvStore` and `@fedify/cfworkers`'s `WorkersMessageQueue`. No Workers KV
 namespace is required. `manuallyStartQueue: true` disables polling; the consumer
 unwraps each message with `processMessage()` before `processQueuedTask()`.
+
+The D1 store is vendored from [Fedify PR #1360](https://github.com/fedify-dev/fedify/pull/1360)
+at commit `ef3249512d99faa5b2dce9f4462e48a868fd885f`, pending a stable release.
+It uses the raw `ap` binding with `initialized: true`. Existing `fedify_kv`
+rows, JSON keys/values, millisecond expirations, and the `fedify_kv_expires`
+index remain compatible; no new database migration is required. Keep applying
+`0001_fedify_kv.sql` for databases that do not have the table yet. The store
+checks expiration using D1's clock, pages listings, and bounds expired-row
+cleanup per write. Upstream's MIT notice is in `src/server/activitypub/kv.LICENSE`.
 
 `src/middleware.ts` retains article HTML/ActivityPub content negotiation,
 including quality values, `Vary: Accept` and `Cache-Control: no-store`. Home,

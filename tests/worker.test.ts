@@ -1,6 +1,5 @@
 import assert from 'node:assert/strict';
 import { readdir, readFile } from 'node:fs/promises';
-import { registerHooks } from 'node:module';
 import { resolve } from 'node:path';
 import { test } from 'node:test';
 import { convertV4MiniflareOptions, Miniflare } from 'miniflare';
@@ -16,20 +15,7 @@ import {
 } from '../src/server/activitypub/credits.ts';
 import { formatFederationLog } from '../src/server/activitypub/logging.ts';
 
-// Resolve the KV module's bundler-style imports while testing it directly in Node.
-const kvModuleUrl = new URL('../src/server/activitypub/kv.ts', import.meta.url);
-const kvImports = registerHooks({
-  resolve(specifier, context, nextResolve) {
-    return nextResolve(
-      context.parentURL === kvModuleUrl.href && specifier.startsWith('./')
-        ? `${specifier}.ts`
-        : specifier,
-      context,
-    );
-  },
-});
-const { D1KvStore } = await import(kvModuleUrl.href);
-kvImports.deregister();
+import { WorkersD1KvStore } from '../src/server/activitypub/kv.ts';
 
 const buildDirectory = '.cloudflare/output/v0/workers/default';
 const bundleDirectory = `${buildDirectory}/bundle`;
@@ -211,9 +197,70 @@ const request = (path, init = {}) => {
   return new Request(`${origin}${path}`, { ...init, headers });
 };
 
+test('D1 KV reads legacy rows and pages literal prefixes without changing the schema', async (t) => {
+  const { database } = await environment(t);
+  const schema = () =>
+    database
+      .prepare(
+        "SELECT name, sql FROM sqlite_master WHERE name LIKE '%fedify_kv%' ORDER BY name",
+      )
+      .all();
+  const before = await schema();
+  const keys = Array.from({ length: 45 }, (_, i) => [
+    'legacy%_雪',
+    String(i).padStart(2, '0'),
+  ]);
+  await database.batch(
+    keys.map((key, i) =>
+      database
+        .prepare('INSERT INTO fedify_kv (key, value, expires) VALUES (?, ?, ?)')
+        .bind(
+          JSON.stringify(key),
+          JSON.stringify({ old: i }),
+          i === 0 ? 0 : null,
+        ),
+    ),
+  );
+  const store = new WorkersD1KvStore(database, { initialized: true });
+  await store.set(['legacyXX雪'], 'unrelated');
+  assert.deepEqual(await store.get(keys[1]), { old: 1 });
+  assert.equal(await store.get(keys[0]), undefined);
+  assert.deepEqual(
+    await Array.fromAsync(store.list(['legacy%_雪'])),
+    keys.slice(1).map((key, i) => ({ key, value: { old: i + 1 } })),
+  );
+  assert.equal(await store.cas(keys[1], { old: 1 }, { migrated: true }), true);
+  assert.deepEqual(await store.get(keys[1]), { migrated: true });
+  assert.deepEqual((await schema()).results, before.results);
+});
+
+test('D1 KV checks expiry at execution even when a CAS batch is delayed', async (t) => {
+  const { database } = await environment(t);
+  const store = new WorkersD1KvStore(database, { initialized: true });
+  await store.set(['delayed'], 'old');
+  const delayed = new WorkersD1KvStore(
+    {
+      prepare: (query) => database.prepare(query),
+      async batch(statements) {
+        // Simulate expiration after the Worker constructs SQL, before D1 executes it.
+        await new Promise((resolve) => setTimeout(resolve, 30));
+        await database
+          .prepare(
+            "UPDATE fedify_kv SET expires = CAST(unixepoch('subsec') * 1000 AS INTEGER) - 1",
+          )
+          .run();
+        return database.batch(statements);
+      },
+    },
+    { initialized: true },
+  );
+  assert.equal(await delayed.cas(['delayed'], 'old', 'new'), false);
+  assert.equal(await store.get(['delayed']), undefined);
+});
+
 test('D1 KV CAS creates, replaces and deletes only matching values', async (t) => {
   const { database } = await environment(t);
-  const store = new D1KvStore(database);
+  const store = new WorkersD1KvStore(database, { initialized: true });
   const key = ['cas'];
   assert.equal(await store.cas(key, 'missing', 'value'), false);
   assert.equal(await store.cas(key, 'missing', undefined), false);
@@ -238,7 +285,7 @@ test('D1 KV CAS creates, replaces and deletes only matching values', async (t) =
 
 test('D1 KV CAS compares JSON structure independently of object member order', async (t) => {
   const { database } = await environment(t);
-  const store = new D1KvStore(database);
+  const store = new WorkersD1KvStore(database, { initialized: true });
   const key = ['cas', 'json'];
   for (const value of [null, false, 0, '', [], {}, [1, 2, 3]]) {
     await store.set(key, value);
@@ -277,7 +324,7 @@ test('D1 KV CAS compares JSON structure independently of object member order', a
 
 test('D1 KV CAS handles expiry and replaces TTL only on success', async (t) => {
   const { database } = await environment(t);
-  const store = new D1KvStore(database);
+  const store = new WorkersD1KvStore(database, { initialized: true });
   const key = ['cas', 'ttl'];
   const ttl = Temporal.Duration.from({ minutes: 1 });
   await store.set(key, 'old', { ttl });
@@ -313,7 +360,10 @@ test('D1 KV CAS handles expiry and replaces TTL only on success', async (t) => {
 
 test('D1 KV CAS permits only one concurrent winner for a shared expected value', async (t) => {
   const { database } = await environment(t);
-  const stores = Array.from({ length: 8 }, () => new D1KvStore(database));
+  const stores = Array.from(
+    { length: 8 },
+    () => new WorkersD1KvStore(database, { initialized: true }),
+  );
   const key = ['cas', 'race'];
   for (const state of ['absent', 'present', 'expired']) {
     await stores[0].delete(key);

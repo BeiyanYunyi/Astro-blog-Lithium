@@ -24,16 +24,6 @@ const follower = sqliteTable(
 
 export default follower;
 
-export const fedifyKv = sqliteTable(
-  'fedify_kv',
-  {
-    key: text('key').primaryKey().notNull(),
-    value: text('value').notNull(),
-    expires: integer('expires'),
-  },
-  (table) => [index('fedify_kv_expires').on(table.expires)],
-);
-
 export const comment = sqliteTable(
   'ap_comment',
   {

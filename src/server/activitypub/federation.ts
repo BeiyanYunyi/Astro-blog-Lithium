@@ -28,7 +28,7 @@ import {
 } from './credits';
 import createDatabase from './database';
 import { getPrivateKey, getPublicKey } from './getKey';
-import { D1KvStore } from './kv';
+import { WorkersD1KvStore } from './kv';
 import follower from './schema';
 import type { Env } from './types';
 
@@ -231,7 +231,7 @@ registerCommentListeners(listeners);
 export function createBlogFederation(bindings: Env) {
   return federation.build({
     origin,
-    kv: new D1KvStore(bindings.ap),
+    kv: new WorkersD1KvStore(bindings.ap, { initialized: true }),
     queue: new WorkersMessageQueue(bindings.FEDERATION_QUEUE),
     manuallyStartQueue: true,
     inboxChallengePolicy: {
