@@ -1599,17 +1599,42 @@ test('static pages, RSS, sitemap, OG images and Markdown/MDX remain available', 
   );
 });
 
-test('Astro retains Origin protection for form-like and headerless POST requests', async (t) => {
+test('Astro rejects cross-site form submissions and accepts same-origin or non-browser POSTs', async (t) => {
   const env = await environment(t);
-  for (const headers of [{}, { 'Content-Type': 'text/plain' }]) {
-    const response = await worker.fetch(
-      new Request(`${origin}/api/sendToInbox`, {
-        method: 'POST',
-        headers: { ...headers, Authorization: 'Bearer local-test-token' },
-      }),
-      env,
-    );
-    assert.equal(response.status, 403);
+  for (const contentType of [
+    null,
+    'text/plain',
+    'application/x-www-form-urlencoded',
+    'multipart/form-data; boundary=test',
+  ]) {
+    for (const [sourceHeaders, expectedStatus] of [
+      [{ Origin: 'https://cross-site.example' }, 403],
+      [{ 'Sec-Fetch-Site': 'cross-site' }, 403],
+      [{ 'Sec-Fetch-Site': 'same-site' }, 403],
+      [{ Origin: origin }, 202],
+      [{ 'Sec-Fetch-Site': 'same-origin' }, 202],
+      [{ 'Sec-Fetch-Site': 'none' }, 202],
+      // Requests without browser source headers are allowed by Astro.
+      [{}, 202],
+    ]) {
+      const headers = new Headers({
+        ...sourceHeaders,
+        Authorization: 'Bearer local-test-token',
+      });
+      if (contentType) headers.set('Content-Type', contentType);
+      const response = await worker.fetch(
+        new Request(origin + '/api/sendToInbox', {
+          method: 'POST',
+          headers,
+        }),
+        env,
+      );
+      assert.equal(
+        response.status,
+        expectedStatus,
+        JSON.stringify({ contentType, sourceHeaders }),
+      );
+    }
   }
 });
 
