@@ -36,6 +36,10 @@ export const comment = sqliteTable(
     publishedAt: text('published_at').notNull(),
     updatedAt: text('updated_at').notNull(),
     deletedAt: text('deleted_at'),
+    mutationVersion: integer('mutation_version').notNull().default(0),
+    undatedRevocation: integer('undated_revocation', { mode: 'boolean' })
+      .notNull()
+      .default(false),
     isPublic: integer('is_public', { mode: 'boolean' })
       .notNull()
       .default(false),

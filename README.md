@@ -71,15 +71,20 @@ waiting for production backoff intervals.
 1. Keep the existing `ap` binding/database, `follower` rows, and `PUBLIC_KEY` and
    `PRIV_KEY` secrets. Keys retain their JSON-string encoding: PEM public key and
    base64 PKCS#8 private key. The public `#main-key` ID stays unchanged. Apply the
-   outstanding additive migrations (run `0004` only once, before deploying the
-   public comment reader):
+   outstanding additive migrations, then choose the comment-visibility upgrade
+   using the current schema as described below:
 
    ```sh
    pnpm exec cf d1 raw 007ff8f3-681b-47e1-9f6e-e9ded6295b43 --sql @migrations/0001_fedify_kv.sql
    pnpm exec cf d1 raw 007ff8f3-681b-47e1-9f6e-e9ded6295b43 --sql @migrations/0002_comments_publications.sql
    pnpm exec cf d1 raw 007ff8f3-681b-47e1-9f6e-e9ded6295b43 --sql @migrations/0003_inbox_credit.sql
-   pnpm exec cf d1 raw 007ff8f3-681b-47e1-9f6e-e9ded6295b43 --sql @migrations/0004_comment_visibility.sql
    ```
+
+   Before deploying the comment reader, inspect `PRAGMA table_info(ap_comment)`.
+   If `is_public` has never existed, use `migrations/legacy_comment_visibility.sql`
+   instead of both 0004 and 0005. If the old `is_public` column exists but
+   `mutation_version` does not, use `migrations/0005_comment_mutation_version.sql`.
+   Do not rerun either path on the new schema. See [migration details](migrations/README.md).
 
    These commands target the remote database by default; cf requires its UUID.
    For a fresh local database use `pnpm exec cf d1 raw
@@ -241,10 +246,9 @@ Stale replies enqueue Fedify custom tasks, keyed by post ID, reply URL and a
 five-minute window. WorkersMessageQueue uses Fedify's D1KvStore CAS fallback to
 coalesce concurrent enqueue requests; this is not exactly-once execution. A
 successful authoritative lookup marks that reply fresh for 15 minutes in the
-existing KV table. **Before deploying this reader, run
-`migrations/0004_comment_visibility.sql` once on an existing database.** It adds
-`is_public` with a default of zero, preserving historical rows but hiding their
-unknown audiences. New databases created from `setup.sql` already have the column. Each reply has its own
+existing KV table. **Before deploying this reader, apply the schema-appropriate
+[comment visibility migration](migrations/README.md).** New databases created
+from `setup.sql` already contain all required columns. Each reply has its own
 task, allowing independent retries through the existing queue consumer (whose
 `maxConcurrency: 1` is unchanged). Failed enqueue leaves the cached UI available;
 failed refresh retains old content without marking it fresh. Queue retries and
@@ -254,8 +258,14 @@ Refresh only revalidates known reply URLs; it does not discover arbitrary remote
 reply collections. Fedify's default private-address/SSRF protection, HTTPS and
 instance blocklist checks apply. Identity, sole author and immediate parent must
 match the stored reply. Public remote versions must be at least as recent as the
-stored version before replacing content or making a historical row visible;
-concurrent inbox edits and deletion tombstones cannot be overwritten. A missing
+stored version before replacing content or making a genuinely unknown legacy
+row visible. After a dated privacy withdrawal, only a strictly newer public
+version can restore visibility. An undated withdrawal stays hidden until a
+newer authenticated public inbox Update. Already-hidden rows from the original
+visibility schema have ambiguous provenance and are migrated conservatively to
+that same latched state. Every mutation advances a local revision; delayed
+refreshes and public inbox edits cannot overwrite intervening mutations or
+remove deletion tombstones. A missing
 remote object is not evidence of deletion: only authenticated inbox Delete
 creates a tombstone. Author profile names are not refreshed. The inbox challenge
 policy also requests nonces (`requestNonce: true`).

@@ -1,6 +1,6 @@
 import type { Context, TaskRegistry } from '@fedify/fedify';
 import { Note } from '@fedify/vocab';
-import { and, asc, eq, isNull, lte, sql } from 'drizzle-orm';
+import { and, asc, eq, isNull, lt, lte, or, sql } from 'drizzle-orm';
 import { Temporal } from 'temporal-polyfill';
 import { isBlockedInstance } from './blocklist';
 import { isPublicComment } from './commentVisibility';
@@ -81,36 +81,70 @@ async function refreshComment(
     // and let the queue retry. Only authenticated inbox Delete creates tombstones.
     throw new Error('Remote comment could not be revalidated');
   }
+  const updated = note.updated?.toString() ?? note.published?.toString();
+  const unchanged = and(
+    eq(comment.id, id),
+    eq(comment.authorId, row.authorId),
+    eq(comment.inReplyTo, row.inReplyTo),
+    eq(comment.mutationVersion, row.mutationVersion),
+    isNull(comment.deletedAt),
+  );
   if (!isPublicComment(note)) {
-    // An authoritative restricted object must not be exposed, regardless of
-    // whether its server advanced the edit timestamp for the audience change.
-    await db
+    const newer = updated
+      ? sql`julianday(${comment.updatedAt}) < julianday(${updated})`
+      : sql`0`;
+    const result = await db
       .update(comment)
-      .set({ isPublic: false })
-      .where(eq(comment.id, id))
-      .run();
+      .set({
+        isPublic: false,
+        mutationVersion: sql`${comment.mutationVersion} + 1`,
+        undatedRevocation: note.updated ? comment.undatedRevocation : true,
+        updatedAt: sql`CASE WHEN ${newer} THEN ${updated ?? ''} ELSE ${comment.updatedAt} END`,
+      })
+      .where(unchanged)
+      .returning({ id: comment.id })
+      .all();
+    if (!result.length) throw new Error('Comment changed during revalidation');
     await kv.set(freshKey(id), true, { ttl: freshness });
     return;
   }
-  const updated = note.updated?.toString() ?? note.published?.toString();
   if (updated) {
-    await db
+    const result = await db
       .update(comment)
       .set({
         isPublic: true,
         content: await sanitizeCommentContent(note.content?.toString() ?? ''),
         updatedAt: updated,
+        mutationVersion: sql`${comment.mutationVersion} + 1`,
       })
       .where(
         and(
-          eq(comment.id, id),
-          eq(comment.authorId, row.authorId),
-          eq(comment.inReplyTo, row.inReplyTo),
-          isNull(comment.deletedAt),
+          unchanged,
+          eq(comment.undatedRevocation, false),
           lte(sql`julianday(${comment.updatedAt})`, sql`julianday(${updated})`),
+          // Equal-version hydration is safe only for unknown legacy or public rows.
+          // Known withdrawal requires evidence of a strictly later public version.
+          or(
+            eq(comment.mutationVersion, 0),
+            eq(comment.isPublic, true),
+            lt(
+              sql`julianday(${comment.updatedAt})`,
+              sql`julianday(${updated})`,
+            ),
+          ),
         ),
       )
-      .run();
+      .returning({ id: comment.id })
+      .all();
+    if (!result.length) {
+      const current = await db
+        .select({ version: comment.mutationVersion })
+        .from(comment)
+        .where(eq(comment.id, id))
+        .get();
+      if (current?.version !== row.mutationVersion)
+        throw new Error('Comment changed during revalidation');
+    }
   }
   await kv.set(freshKey(id), true, { ttl: freshness });
 }

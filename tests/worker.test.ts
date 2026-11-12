@@ -2213,7 +2213,10 @@ test('article rendering sanitizes historical raw comment HTML before background 
     .bind(id, remote, `${origin}/api/activitypub/note/CornerOfTheWorld`, raw)
     .run();
   // Even a fresh marker must not exempt historical data from rendering checks.
-  await new WorkersD1KvStore(env.database, { initialized: true }).set(['blog', 'comment-refresh', id], true);
+  await new WorkersD1KvStore(env.database, { initialized: true }).set(
+    ['blog', 'comment-refresh', id],
+    true,
+  );
   const response = await env.runtime.dispatchFetch(
     `${origin}/posts/CornerOfTheWorld/`,
   );
@@ -2320,6 +2323,12 @@ test('only explicit public Note audiences are displayed and verified privacy upd
 test('visibility migration hides legacy rows until authoritative public revalidation and refresh respects withdrawal', async (t) => {
   const env = await environment(t);
   await env.database.exec('ALTER TABLE ap_comment DROP COLUMN is_public');
+  await env.database.exec(
+    'ALTER TABLE ap_comment DROP COLUMN mutation_version',
+  );
+  await env.database.exec(
+    'ALTER TABLE ap_comment DROP COLUMN undated_revocation',
+  );
   const id = `${remote}/notes/unknown-audience`;
   await env.database
     .prepare(`INSERT INTO ap_comment
@@ -2328,10 +2337,11 @@ test('visibility migration hides legacy rows until authoritative public revalida
     .bind(id, remote, `${origin}/api/activitypub/note/CornerOfTheWorld`)
     .run();
   const migration = await readFile(
-    new URL('../migrations/0004_comment_visibility.sql', import.meta.url),
+    new URL('../migrations/legacy_comment_visibility.sql', import.meta.url),
     'utf8',
   );
-  await env.database.prepare(migration).run();
+  for (const statement of migration.split(';').filter((part) => part.trim()))
+    await env.database.prepare(statement).run();
   const row = () =>
     env.database
       .prepare('SELECT * FROM ap_comment WHERE id = ?')
@@ -2346,9 +2356,15 @@ test('visibility migration hides legacy rows until authoritative public revalida
     to: [actorId],
     inReplyTo: `${origin}/api/activitypub/note/CornerOfTheWorld`,
     published: '2026-09-01T00:00:00Z',
+    updated: '2026-09-01T00:00:00Z',
     content: 'Authoritative secret',
   };
-  const objects = new Map([[id, note]]);
+  const publicNote = {
+    ...note,
+    to: ['https://www.w3.org/ns/activitystreams#Public'],
+    content: '<p>Now public</p><script>alert(1)</script>',
+  };
+  const objects = new Map([[id, publicNote]]);
   mockRemote(t, env, { objects });
   const read = async () =>
     (
@@ -2362,15 +2378,6 @@ test('visibility migration hides legacy rows until authoritative public revalida
       .run();
   assert.doesNotMatch(await read(), /Legacy secret|Authoritative secret/);
   await drain(env);
-  assert.equal((await row()).is_public, 0);
-  await expire();
-  objects.set(id, {
-    ...note,
-    to: ['https://www.w3.org/ns/activitystreams#Public'],
-    content: '<p>Now public</p><script>alert(1)</script>',
-  });
-  assert.doesNotMatch(await read(), /Legacy secret|Now public/);
-  await drain(env);
   assert.equal((await row()).is_public, 1);
   assert.equal((await row()).content, '<p>Now public</p>');
   assert.match(await read(), /Now public/);
@@ -2381,6 +2388,28 @@ test('visibility migration hides legacy rows until authoritative public revalida
   await read();
   await drain(env);
   assert.equal((await row()).is_public, 0);
+  await expire();
+  objects.set(id, publicNote);
+  await read();
+  await drain(env);
+  assert.equal(
+    (await row()).is_public,
+    0,
+    'Equal-version public fetch cannot undo withdrawal',
+  );
+  await expire();
+  objects.set(id, { ...publicNote, updated: '2026-09-02T00:00:00Z' });
+  await read();
+  await drain(env);
+  assert.equal(
+    (await row()).is_public,
+    1,
+    'Strictly newer public revalidation is accepted',
+  );
+  await expire();
+  objects.set(id, { ...note, updated: '2026-09-02T00:00:00Z' });
+  await read();
+  await drain(env);
   assert.doesNotMatch(
     await read(),
     /Now public|Legacy secret|Authoritative secret/,

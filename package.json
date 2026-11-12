@@ -14,7 +14,7 @@
     "worker:check": "tsc --project tsconfig.worker.json --noEmit",
     "worker:dry-run": "cf deploy --prebuilt --dry-run",
     "deploy": "pnpm build && cf deploy --prebuilt",
-    "test:worker": "node --test tests/worker.test.ts",
+    "test:worker": "node --test tests/worker.test.ts tests/comment-visibility.test.ts",
     "check": "oxfmt --check . && oxlint .",
     "lint": "oxlint .",
     "format": "oxfmt --write .",

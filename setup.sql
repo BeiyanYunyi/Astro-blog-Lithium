@@ -25,6 +25,8 @@ CREATE TABLE IF NOT EXISTS ap_comment (
   published_at TEXT NOT NULL,
   updated_at TEXT NOT NULL,
   deleted_at TEXT,
+  mutation_version INTEGER NOT NULL DEFAULT 0,
+  undated_revocation INTEGER NOT NULL DEFAULT 0,
   is_public INTEGER NOT NULL DEFAULT 0
 );
 CREATE INDEX IF NOT EXISTS ap_comment_post ON ap_comment(post_id, published_at);

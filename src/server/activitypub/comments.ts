@@ -91,6 +91,9 @@ async function commentValues(note: Note, author: Actor, postId: string) {
   const published = note.published?.toString() ?? new Date().toISOString();
   return {
     id: note.id.href,
+    mutationVersion: 1,
+    undatedRevocation:
+      !isPublicComment(note) && !note.updated && !note.published,
     isPublic: isPublicComment(note),
     postId,
     authorId: author.id.href,
@@ -159,33 +162,86 @@ export function registerCommentListeners(listeners: InboxListenerSetters<Env>) {
         return;
       const updated =
         note.updated?.toString() ?? activity.published?.toString();
-      // Privacy withdrawal is conservative even if a server omits or reuses
-      // its version timestamp. An old replay may hide, but cannot leak content.
+      const db = createDatabase(ctx.data.ap);
+      const row = await db
+        .select()
+        .from(comment)
+        .where(eq(comment.id, note.id.href))
+        .get();
+      if (!row || row.deletedAt || row.authorId !== activity.actorId.href)
+        return;
+      // A withdrawal is conservative even when replayed or unversioned. Keep a
+      // high-watermark for dated revocations and latch undated ones closed.
       if (!isPublicComment(note)) {
-        await createDatabase(ctx.data.ap)
+        const newer = updated
+          ? sql`julianday(${comment.updatedAt}) < julianday(${updated})`
+          : sql`0`;
+        const hidden = await db
           .update(comment)
-          .set({ isPublic: false })
+          .set({
+            isPublic: false,
+            mutationVersion: sql`${comment.mutationVersion} + 1`,
+            undatedRevocation: updated ? comment.undatedRevocation : true,
+            updatedAt: sql`CASE WHEN ${newer} THEN ${updated ?? ''} ELSE ${comment.updatedAt} END`,
+          })
           .where(
             and(
               eq(comment.id, note.id.href),
               eq(comment.authorId, activity.actorId.href),
+              isNull(comment.deletedAt),
             ),
           )
-          .run();
+          .returning({ version: comment.mutationVersion })
+          .all();
+        // Hiding must succeed before sanitization, which may fail or be delayed.
+        // Never let a delayed private body overwrite a later public Update.
+        if (
+          hidden.length &&
+          updated &&
+          Date.parse(updated) > Date.parse(row.updatedAt)
+        ) {
+          const content = await sanitizeCommentContent(
+            note.content?.toString() ?? '',
+          );
+          await db
+            .update(comment)
+            .set({
+              content,
+              mutationVersion: sql`${comment.mutationVersion} + 1`,
+            })
+            .where(
+              and(
+                eq(comment.id, note.id.href),
+                eq(comment.mutationVersion, hidden[0].version),
+                eq(comment.updatedAt, updated),
+                eq(comment.isPublic, false),
+                isNull(comment.deletedAt),
+              ),
+            )
+            .run();
+        }
+        return;
       }
-      // Without a version timestamp, a retried old edit could overwrite a newer one.
       if (!updated) return;
-      await createDatabase(ctx.data.ap)
+      const content = await sanitizeCommentContent(
+        note.content?.toString() ?? '',
+      );
+      // Capture before asynchronous sanitization: a delayed public Update must
+      // not undo a withdrawal which arrived while that work was in flight.
+      await db
         .update(comment)
         .set({
-          isPublic: isPublicComment(note),
-          content: await sanitizeCommentContent(note.content?.toString() ?? ''),
+          isPublic: true,
+          content,
           updatedAt: updated,
+          mutationVersion: sql`${comment.mutationVersion} + 1`,
+          undatedRevocation: false,
         })
         .where(
           and(
             eq(comment.id, note.id.href),
             eq(comment.authorId, activity.actorId.href),
+            eq(comment.mutationVersion, row.mutationVersion),
             isNull(comment.deletedAt),
             lt(
               sql`julianday(${comment.updatedAt})`,
@@ -202,6 +258,7 @@ export function registerCommentListeners(listeners: InboxListenerSetters<Env>) {
       await createDatabase(ctx.data.ap)
         .update(comment)
         .set({
+          mutationVersion: sql`${comment.mutationVersion} + 1`,
           content: '',
           authorName: '',
           deletedAt: new Date().toISOString(),
