@@ -22,7 +22,7 @@ export const GET: APIRoute<CollectionEntry<'posts'>> = async ({ props }) => {
   );
   const source = import.meta.env.DEV
     ? pathname.replace(/^\/@fs(?=\/)/, '')
-    : `./.cloudflare/output/v0/workers/default/bundle/.prerender${pathname}`;
+    : `./.cloudflare/output/v1/workers/default/bundle/.prerender${pathname}`;
   const image = await sharp(source)
     .resize(1200, 630, { fit: 'contain' })
     .png()

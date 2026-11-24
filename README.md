@@ -41,15 +41,15 @@ cleanup per write. Upstream's MIT notice is in `src/server/activitypub/kv.LICENS
 `src/middleware.ts` retains article HTML/ActivityPub content negotiation,
 including quality values, `Vary: Accept` and `Cache-Control: no-store`. Home,
 tags and RSS remain prerendered. Article URLs remain in the sitemap. The build
-produces Cloudflare Build Output in `.cloudflare/output/v0/`, with the Worker
+produces Cloudflare Build Output in `.cloudflare/output/v1/`, with the Worker
 bundle and static assets under `workers/default/`. `cloudflare.config.ts` defines
 the Worker, bindings, and triggers. The project-local `cf` CLI is installed by
 `pnpm install`; no global CLI installation is needed. Run other Cloudflare
 commands with `pnpm exec cf` and authenticate with `pnpm exec cf auth login`
 or `CLOUDFLARE_API_TOKEN`.
 
-This migration uses pinned beta versions of cf, Astro 7.4, and the Cloudflare 15
-adapter, which supports the new configuration and Build Output format.
+With Astro 7.4, `@astrojs/cloudflare` `15.0.0-beta.6` writes v1 Build Output
+for `cf` `1.0.0-rc.2` to deploy.
 
 ```sh
 pnpm install
@@ -70,16 +70,17 @@ waiting for production backoff intervals.
 
 1. Keep the existing `ap` binding/database, `follower` rows, and `PUBLIC_KEY` and
    `PRIV_KEY` secrets. Keys retain their JSON-string encoding: PEM public key and
-   base64 PKCS#8 private key. The public `#main-key` ID stays unchanged. Apply the
-   additive migrations (the first is only needed if not already applied):
+   base64 PKCS#8 private key. The public `#main-key` ID stays unchanged. Apply
+   pending migrations before deploying:
 
    ```sh
-   pnpm exec cf d1 raw 007ff8f3-681b-47e1-9f6e-e9ded6295b43 --sql @migrations/0001_fedify_kv.sql
-   pnpm exec cf d1 raw 007ff8f3-681b-47e1-9f6e-e9ded6295b43 --sql @migrations/0002_comments_publications.sql
-   pnpm exec cf d1 raw 007ff8f3-681b-47e1-9f6e-e9ded6295b43 --sql @migrations/0003_inbox_credit.sql
+   pnpm exec cf d1 migrations apply 007ff8f3-681b-47e1-9f6e-e9ded6295b43
    ```
 
-   These commands target the remote database by default; cf requires its UUID.
+   The command targets the remote database by default and records applied
+   filenames in `d1_migrations`. For databases previously migrated with raw SQL,
+   verify the resulting schema and register the applied filenames before
+   switching to `migrations apply`.
    For a fresh local database use `pnpm exec cf d1 raw
    007ff8f3-681b-47e1-9f6e-e9ded6295b43 --local --sql @setup.sql`.
    For an existing local database use the migrations with `--local`.
@@ -178,9 +179,8 @@ not the full account/content cleanup performed by Mastodon's domain suspension.
 
 ### Inbox instance credit
 
-Apply `migrations/0003_inbox_credit.sql` before deploying this version. The
-`ap_inbox_credit` table is separate from Fedify's cache; existing databases must
-use the additive migration, not `setup.sql`.
+The deployment migration command applies `0003_inbox_credit.sql` to create
+`ap_inbox_credit`, which stores admission state separately from Fedify's cache.
 
 `POST /api/activitypub/inbox` groups requests by the unverified signature key ID's
 normalized hostname (including the trailing-slash route). Subdomains remain

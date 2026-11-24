@@ -17,7 +17,7 @@ import { formatFederationLog } from '../src/server/activitypub/logging.ts';
 
 import { WorkersD1KvStore } from '../src/server/activitypub/kv.ts';
 
-const buildDirectory = '.cloudflare/output/v0/workers/default';
+const buildDirectory = '.cloudflare/output/v1/workers/default';
 const bundleDirectory = `${buildDirectory}/bundle`;
 const assetsDirectory = `${buildDirectory}/assets`;
 
