@@ -35,10 +35,11 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
   noindex
   comments={false}
 >
-  <article class="card p-6">
+  <article class="card p-6 prose prose-neutral dark:prose-invert max-w-full">
     <h1>你好，你刚刚上墙了</h1>
     <p>
-      你访问的地址被本站的robots.txt明确禁止抓取，所以这次访问的来源IP、ASN与User-Agent已被记录，并公开展示在下面的Wall of Shame上（IP只展示到网段）。
+      你访问的地址被本站的robots.txt明确禁止抓取，所以这次访问的来源IP、ASN与User-Agent已被记录，并公开展示在下面的Wall
+      of Shame上（IP只展示到网段）。
     </p>
     {token ? (
       <form method="post" action="/api/crawler-trap/revoke" class="revoke">
@@ -63,13 +64,6 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
 </script>
 
 <style>
-  h1 {
-    font-size: 1.5rem;
-    font-weight: 700;
-  }
-  p {
-    margin-block: 1rem;
-  }
   .revoke {
     margin-block: 1rem;
     padding: 0.75rem 1rem;

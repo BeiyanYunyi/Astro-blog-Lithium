@@ -4,6 +4,7 @@ import {
   type TrapRow,
   type TrapVia,
   truncateIp,
+  uaName,
 } from '@server/crawlerTrap';
 
 export interface Props {
@@ -11,9 +12,18 @@ export interface Props {
 }
 
 const { rows } = Astro.props;
+const now = Date.now();
 const uaPreviewLength = 72;
 const formatTime = (value: number) =>
   `${new Date(value).toISOString().slice(0, 16).replace('T', ' ')} UTC`;
+const formatAgo = (value: number) => {
+  const minutes = Math.max(0, Math.floor((now - value) / 60_000));
+  if (minutes < 1) return '刚刚';
+  if (minutes < 60) return `${minutes}分钟前`;
+  if (minutes < 24 * 60) return `${Math.floor(minutes / 60)}小时前`;
+  if (minutes < 30 * 24 * 60) return `${Math.floor(minutes / 60 / 24)}天前`;
+  return new Date(value).toISOString().slice(0, 10);
+};
 const sections: { via: TrapVia; title: string; note: string }[] = [
   {
     via: 'link',
@@ -30,121 +40,168 @@ const sections: { via: TrapVia; title: string; note: string }[] = [
 
 {sections.map((section) => {
   const list = rows.filter((row) => row.via === section.via);
+  const hits = list.reduce((sum, row) => sum + row.hit_count, 0);
   return (
     <section>
-      <h2>
-        {section.title}
-        <small>（{list.length}）</small>
-      </h2>
+      <h2>{section.title}</h2>
       <p>{section.note}</p>
       {list.length === 0 ? (
-        <p>暂时还没有。</p>
+        <p class="not-prose summary">暂时还没有。</p>
       ) : (
-        <div class="shame-table">
-          <table>
-            <thead>
-              <tr>
-                <th scope="col">IP段</th>
-                <th scope="col">ASN / 组织</th>
-                <th scope="col">User-Agent（自称）</th>
-                <th scope="col">次数</th>
-                <th scope="col">首次 / 最近</th>
-              </tr>
-            </thead>
-            <tbody>
-              {list.map((row) => (
-                <tr>
-                  <td class="mono">{truncateIp(row.ip)}</td>
-                  <td>
-                    {row.asn === null ? '—' : `AS${row.asn}`}
-                    {row.as_org && <div>{row.as_org}</div>}
-                    {row.country && <div class="muted">{row.country}</div>}
-                  </td>
-                  <td class="ua">
-                    {looksLikePreview(row.ua) && (
-                      <span
-                        class="tag"
-                        title="可能是有人分享了链接，由聊天软件或联邦宇宙实例抓取预览"
-                      >
-                        疑似链接预览
-                      </span>
-                    )}
-                    {row.ua === '' ? (
-                      <span class="muted">（未发送UA）</span>
-                    ) : row.ua.length > uaPreviewLength ? (
-                      <details>
-                        <summary class="mono">
-                          {row.ua.slice(0, uaPreviewLength)}…
-                        </summary>
-                        <span class="mono">{row.ua}</span>
-                      </details>
-                    ) : (
-                      <span class="mono">{row.ua}</span>
-                    )}
-                  </td>
-                  <td>{row.hit_count}</td>
-                  <td class="time">
-                    {formatTime(row.first_seen)}
-                    <br />
-                    {formatTime(row.last_seen)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <>
+          <p class="not-prose summary">
+            {list.length}个来源，共{hits}次访问
+          </p>
+          <ol class="not-prose entries">
+            {list.map((row) => (
+              <li class:list={['entry', { preview: looksLikePreview(row.ua) }]}>
+                <div class="entry-head">
+                  <span class="name">
+                    {row.ua === '' ? '未发送UA' : uaName(row.ua)}
+                  </span>
+                  {looksLikePreview(row.ua) && (
+                    <span
+                      class="tag"
+                      title="可能是有人分享了链接，由聊天软件或联邦宇宙实例抓取预览"
+                    >
+                      疑似链接预览
+                    </span>
+                  )}
+                  <span class="count">
+                    <b>{row.hit_count}</b>次
+                  </span>
+                </div>
+                <p class="origin">
+                  {row.as_org ?? '未知网络'}
+                  <span class="muted">
+                    {[row.asn === null ? null : `AS${row.asn}`, row.country]
+                      .filter(Boolean)
+                      .join(' · ')}
+                  </span>
+                </p>
+                <p class="meta">
+                  <code>{truncateIp(row.ip)}</code>
+                  <span>
+                    最近
+                    <time
+                      datetime={new Date(row.last_seen).toISOString()}
+                      title={formatTime(row.last_seen)}
+                    >
+                      {formatAgo(row.last_seen)}
+                    </time>
+                  </span>
+                  <span>
+                    首次
+                    <time
+                      datetime={new Date(row.first_seen).toISOString()}
+                      title={formatTime(row.first_seen)}
+                    >
+                      {formatAgo(row.first_seen)}
+                    </time>
+                  </span>
+                </p>
+                {row.ua !== '' &&
+                  (row.ua.length > uaPreviewLength ? (
+                    <details class="ua">
+                      <summary>
+                        <code>{row.ua.slice(0, uaPreviewLength)}…</code>
+                      </summary>
+                      <code>{row.ua}</code>
+                    </details>
+                  ) : (
+                    <code class="ua">{row.ua}</code>
+                  ))}
+              </li>
+            ))}
+          </ol>
+        </>
       )}
     </section>
   );
 })}
 
 <style>
-  h2 {
-    font-size: 1.25rem;
-    font-weight: 700;
-    margin-top: 2rem;
-  }
-  small {
-    font-weight: 400;
-    font-size: 1rem;
-  }
-  p {
-    margin-block: 1rem;
-  }
-  .shame-table {
-    overflow-x: auto;
-  }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    text-align: left;
+  .summary {
+    margin-block: 0.5rem 1rem;
     font-size: 0.875rem;
+    opacity: 0.75;
   }
-  th,
-  td {
-    padding: 0.5rem;
-    border-bottom: 1px solid #8886;
-    vertical-align: top;
+  .entries {
+    display: grid;
+    gap: 0.75rem;
+    margin: 0 0 2rem;
+    padding: 0;
+    list-style: none;
   }
-  .mono {
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  .entry {
+    display: grid;
+    gap: 0.35rem;
+    min-width: 0;
+    padding: 0.9rem 1rem;
+    border: 1px solid #8884;
+    border-left: 4px solid #ef4444aa;
+    border-radius: 0.5rem;
   }
-  .ua {
-    min-width: 16rem;
+  .entry.preview {
+    border-left-color: #f59e0baa;
+    opacity: 0.8;
+  }
+  .entry-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.25rem 0.75rem;
+  }
+  .name {
+    font-size: 1.125rem;
+    font-weight: 700;
     overflow-wrap: anywhere;
   }
-  summary {
+  .count {
+    margin-left: auto;
+    font-size: 0.875rem;
+    white-space: nowrap;
+  }
+  .count b {
+    margin-right: 0.125rem;
+    font-size: 1.25rem;
+  }
+  .origin {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+  .origin .muted {
+    margin-left: 0.5rem;
+    font-size: 0.875rem;
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
+    margin: 0;
+    font-size: 0.8125rem;
+    opacity: 0.75;
+  }
+  code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.8125rem;
+  }
+  .ua {
+    display: block;
+    font-size: 0.8125rem;
+    opacity: 0.75;
+    overflow-wrap: anywhere;
+  }
+  .ua summary {
     cursor: pointer;
   }
-  .time {
-    white-space: nowrap;
+  .ua[open] summary {
+    margin-bottom: 0.25rem;
   }
   .muted {
     opacity: 0.7;
   }
   .tag {
-    display: inline-block;
-    margin-bottom: 0.25rem;
     padding: 0 0.4rem;
     border-radius: 0.25rem;
     font-size: 0.75rem;

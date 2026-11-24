@@ -148,3 +148,26 @@ const previewAgents =
 export function looksLikePreview(ua: string): boolean {
   return previewAgents.test(ua);
 }
+
+const agentKeyword = /bot|crawl|spider|scrap|fetch|agent|archiv|preview|scan/i;
+
+/**
+ * Picks a short display name from a raw UA: the self-declared crawler token
+ * when there is one, otherwise the leading product token.
+ */
+export function uaName(raw: string): string {
+  // Contact URLs often mention "crawler" or "bot" without naming the agent.
+  const ua = raw.replace(/\+?https?:\/\/\S+/g, '').trim();
+  const products = [...ua.matchAll(/([A-Za-z][\w.\- ]*?)\/[\w.]+/g)]
+    .map((match) => match[1].trim())
+    .filter((name) => name && name !== 'Mozilla');
+  const compatible = ua.match(/compatible;\s*([^;/)]+)/i)?.[1]?.trim();
+  const named = [compatible, ...products].find(
+    (name) => name && agentKeyword.test(name),
+  );
+  if (named) return named;
+  const bare = ua.match(/[\w.-]*(?:bot|crawler|spider)[\w.-]*/i)?.[0];
+  if (bare) return bare;
+  if (/^Mozilla\//.test(ua)) return '浏览器式UA';
+  return products[0] ?? (ua.split(/[\s;(]/)[0] || '未知');
+}
