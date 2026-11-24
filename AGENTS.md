@@ -37,3 +37,5 @@ Recent history uses Conventional Commit prefixes with gitmoji, such as `fix: �
 ## Content & Deployment Notes
 
 Post frontmatter must satisfy the content schema: `title`, `date`, `description`, optional `tag`, and optional `image`, and optional `draft` (defaults to `false`). Set `draft: true` to keep a post accessible by direct URL while excluding it from public listings, RSS, sitemap, and ActivityPub publication. When editing deployment-related code, review `astro.config.ts`, `cloudflare.config.ts`, and `setup.sql` together so Astro output, Cloudflare bindings, and database expectations stay aligned. Use the project-local `cf` CLI via `pnpm exec cf`; no global installation is required. Build Output lives in `.cloudflare/output/v1/`.
+
+Do not insert spaces between Chinese and Latin text or digits in posts, pages, or component copy (write `无视robots.txt的访问者`, not `无视 robots.txt 的访问者`). `src/styles/global.css` sets `text-autospace: normal`, so the browser adds that spacing itself.
