@@ -57,6 +57,7 @@ const toc = headingsToToc(headings);
           <ArticleTags tag={tag} />
         </div>
       </article>
+      <slot name="after-article" />
       <div class="prose prose-neutral min-w-0 dark:prose-invert max-w-none my-4">
         <details class="rounded-md card py-5 px-6">
           <summary>分享</summary>

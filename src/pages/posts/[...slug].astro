@@ -1,7 +1,8 @@
 ---
-import BlogPost from '@components/BlogPost.astro';
-import { filePathToSlug } from '@utils/idToSlug';
 import { getCollection, render } from 'astro:content';
+import BlogPost from '@components/BlogPost.astro';
+import FederatedComments from '@components/FederatedComments.astro';
+import { filePathToSlug } from '@utils/idToSlug';
 
 export const prerender = false;
 
@@ -32,4 +33,8 @@ const { Content, headings } = await render(entry);
   image={entry.data.image}
 >
   <Content />
+  <FederatedComments
+    slot="after-article"
+    postId={filePathToSlug(entry.filePath)}
+  />
 </BlogPost>

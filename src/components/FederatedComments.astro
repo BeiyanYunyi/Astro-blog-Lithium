@@ -1,0 +1,39 @@
+---
+import { env } from 'cloudflare:workers';
+import { readComments } from '@server/activitypub/commentRefresh';
+import {
+  commentRefreshTask,
+  createBlogFederation,
+} from '@server/activitypub/federation';
+import { sanitizeCommentContent } from '@server/activitypub/sanitize';
+
+const { postId } = Astro.props;
+const federation = await createBlogFederation(env);
+const cachedComments = await readComments(
+  federation.createContext(Astro.request, env),
+  commentRefreshTask,
+  postId,
+);
+// Historical rows predate ingestion sanitization. Always sanitize at the HTML
+// boundary, even when a remote version has not changed or cannot be fetched.
+const comments = await Promise.all(
+  cachedComments.map(async (comment) => ({
+    ...comment,
+    content: await sanitizeCommentContent(comment.content),
+  })),
+);
+---
+
+{comments.length > 0 && (
+  <section aria-label="联邦回复" class="prose prose-neutral dark:prose-invert max-w-none my-4">
+    <h2>联邦回复</h2>
+    <p>显示已收到的回复；远端修改会在后台刷新。</p>
+    {comments.map((comment) => (
+      <article class="card p-4 my-2">
+        <a href={comment.id} target="_blank" rel="nofollow noopener noreferrer">{comment.authorName}</a>
+        <time datetime={comment.publishedAt}> · {comment.publishedAt.slice(0, 10)}</time>
+        <div set:html={comment.content} />
+      </article>
+    ))}
+  </section>
+)}
