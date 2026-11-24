@@ -1,0 +1,89 @@
+---
+import { env } from 'cloudflare:workers';
+import ShameIntro from '@components/ShameIntro.astro';
+import ShameWall from '@components/ShameWall.astro';
+import BaseLayout from '@layouts/BaseLayout.astro';
+import {
+  listTrapHits,
+  recordTrapHit,
+  trapVia,
+  trapVisitor,
+  wallPath,
+} from '@server/crawlerTrap';
+
+export const prerender = false;
+
+if (!['GET', 'HEAD'].includes(Astro.request.method))
+  return new Response('Method Not Allowed', {
+    status: 405,
+    headers: { Allow: 'GET, HEAD' },
+  });
+
+const visitor = trapVisitor(Astro.request, Astro.clientAddress);
+const token = visitor
+  ? await recordTrapHit(env.ap, visitor, trapVia(Astro.url.pathname))
+  : null;
+const rows = await listTrapHits(env.ap);
+Astro.response.headers.set('Cache-Control', 'no-store');
+Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+---
+
+<BaseLayout
+  title="Wall of Shame"
+  description="无视robots.txt的爬虫们。"
+  canonical={wallPath}
+  noindex
+  comments={false}
+>
+  <article class="card p-6">
+    <h1>你好，你刚刚上墙了</h1>
+    <p>
+      你访问的地址被本站的robots.txt明确禁止抓取，所以这次访问的来源IP、ASN与User-Agent已被记录，并公开展示在下面的Wall of Shame上（IP只展示到网段）。
+    </p>
+    {token ? (
+      <form method="post" action="/api/crawler-trap/revoke" class="revoke">
+        <p>
+          如果你是人类——比如看到robots.txt里的路径，好奇点了进来——点下面的按钮就能撤回这条记录。撤回凭据只在这个页面里，离开或刷新后就无法撤回了。
+        </p>
+        <input type="hidden" name="token" value={token} />
+        <button type="submit">我是人类，撤回记录</button>
+      </form>
+    ) : (
+      <p>这次访问没有拿到来源IP，因此没有记录。</p>
+    )}
+    <ShameIntro />
+    <ShameWall rows={rows} />
+  </article>
+</BaseLayout>
+
+<script is:inline define:vars={{ wallPath }}>
+  // Keep the trap URL out of the address bar, so a shared link does not make
+  // chat previews land in the trap.
+  history.replaceState(null, '', wallPath);
+</script>
+
+<style>
+  h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+  p {
+    margin-block: 1rem;
+  }
+  .revoke {
+    margin-block: 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    background: #3b82f622;
+  }
+  button {
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    background: #2563eb;
+    color: #fafafa;
+    cursor: pointer;
+  }
+  button:hover {
+    background: #1d4ed8;
+  }
+</style>

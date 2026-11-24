@@ -1,0 +1,47 @@
+---
+import { env } from 'cloudflare:workers';
+import ShameIntro from '@components/ShameIntro.astro';
+import ShameWall from '@components/ShameWall.astro';
+import BaseLayout from '@layouts/BaseLayout.astro';
+import { listTrapHits } from '@server/crawlerTrap';
+
+export const prerender = false;
+
+if (!['GET', 'HEAD'].includes(Astro.request.method))
+  return new Response('Method Not Allowed', {
+    status: 405,
+    headers: { Allow: 'GET, HEAD' },
+  });
+
+const rows = await listTrapHits(env.ap);
+const revoked = Astro.url.searchParams.get('revoked');
+Astro.response.headers.set('Cache-Control', 'no-store');
+Astro.response.headers.set('X-Robots-Tag', 'noindex');
+---
+
+<BaseLayout
+  title="Wall of Shame"
+  description="无视robots.txt的爬虫们。"
+  noindex
+>
+  <article class="card p-6 prose prose-neutral dark:prose-invert">
+    <h1>Wall of Shame</h1>
+    {revoked === 'ok' && <p class="notice">已撤回你的访问记录，抱歉打扰。</p>}
+    {revoked === 'missing' && (
+      <p class="notice">
+        没有找到可撤回的记录：它可能已经被撤回，或者同一来源之后又访问过一次，旧的撤回凭据随之失效。
+      </p>
+    )}
+    <ShameIntro />
+    <ShameWall rows={rows} />
+  </article>
+</BaseLayout>
+
+<style>
+  .notice {
+    margin-block: 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    background: #3b82f622;
+  }
+</style>

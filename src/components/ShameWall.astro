@@ -1,0 +1,153 @@
+---
+import {
+  looksLikePreview,
+  type TrapRow,
+  type TrapVia,
+  truncateIp,
+} from '@server/crawlerTrap';
+
+export interface Props {
+  rows: TrapRow[];
+}
+
+const { rows } = Astro.props;
+const uaPreviewLength = 72;
+const formatTime = (value: number) =>
+  `${new Date(value).toISOString().slice(0, 16).replace('T', ' ')} UTC`;
+const sections: { via: TrapVia; title: string; note: string }[] = [
+  {
+    via: 'link',
+    title: '顺着隐藏链接爬进来的',
+    note: '页脚里有一个对人类不可见、未在任何地方公开、但被robots.txt禁止访问的链接。会走到这里的，基本是顺着链接一路抓取全站的内容爬虫。',
+  },
+  {
+    via: 'robots',
+    title: '照着robots.txt找上门的',
+    note: '这个路径只出现在robots.txt的Disallow里。会走到这里的，是读了robots.txt、专门去访问被禁止路径的程序，多为安全扫描器——以及好奇的人类。',
+  },
+];
+---
+
+{sections.map((section) => {
+  const list = rows.filter((row) => row.via === section.via);
+  return (
+    <section>
+      <h2>
+        {section.title}
+        <small>（{list.length}）</small>
+      </h2>
+      <p>{section.note}</p>
+      {list.length === 0 ? (
+        <p>暂时还没有。</p>
+      ) : (
+        <div class="shame-table">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">IP段</th>
+                <th scope="col">ASN / 组织</th>
+                <th scope="col">User-Agent（自称）</th>
+                <th scope="col">次数</th>
+                <th scope="col">首次 / 最近</th>
+              </tr>
+            </thead>
+            <tbody>
+              {list.map((row) => (
+                <tr>
+                  <td class="mono">{truncateIp(row.ip)}</td>
+                  <td>
+                    {row.asn === null ? '—' : `AS${row.asn}`}
+                    {row.as_org && <div>{row.as_org}</div>}
+                    {row.country && <div class="muted">{row.country}</div>}
+                  </td>
+                  <td class="ua">
+                    {looksLikePreview(row.ua) && (
+                      <span
+                        class="tag"
+                        title="可能是有人分享了链接，由聊天软件或联邦宇宙实例抓取预览"
+                      >
+                        疑似链接预览
+                      </span>
+                    )}
+                    {row.ua === '' ? (
+                      <span class="muted">（未发送UA）</span>
+                    ) : row.ua.length > uaPreviewLength ? (
+                      <details>
+                        <summary class="mono">
+                          {row.ua.slice(0, uaPreviewLength)}…
+                        </summary>
+                        <span class="mono">{row.ua}</span>
+                      </details>
+                    ) : (
+                      <span class="mono">{row.ua}</span>
+                    )}
+                  </td>
+                  <td>{row.hit_count}</td>
+                  <td class="time">
+                    {formatTime(row.first_seen)}
+                    <br />
+                    {formatTime(row.last_seen)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
+  );
+})}
+
+<style>
+  h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-top: 2rem;
+  }
+  small {
+    font-weight: 400;
+    font-size: 1rem;
+  }
+  p {
+    margin-block: 1rem;
+  }
+  .shame-table {
+    overflow-x: auto;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 0.875rem;
+  }
+  th,
+  td {
+    padding: 0.5rem;
+    border-bottom: 1px solid #8886;
+    vertical-align: top;
+  }
+  .mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  .ua {
+    min-width: 16rem;
+    overflow-wrap: anywhere;
+  }
+  summary {
+    cursor: pointer;
+  }
+  .time {
+    white-space: nowrap;
+  }
+  .muted {
+    opacity: 0.7;
+  }
+  .tag {
+    display: inline-block;
+    margin-bottom: 0.25rem;
+    padding: 0 0.4rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    background: #f59e0b33;
+  }
+</style>

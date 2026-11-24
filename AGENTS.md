@@ -24,6 +24,8 @@ Use `pnpm` with Node `>=26`.
 
 Use oxfmt formatting configured in `.oxfmtrc.json` (two spaces, 80 columns, and single quotes in JavaScript) and oxlint’s default recommended (correctness) rules. File exclusions for linting are configured in `.oxlintrc.json`. Prefer TypeScript for logic and keep Astro components in `.astro`, interactive Svelte components in `.svelte` with TypeScript and Runes, and content in `.md` or `.mdx`. Use PascalCase for components (`PostCard.astro`), camelCase for utilities (`getAllPosts.ts`), and kebab-case or slug-style names for posts and route folders.
 
+Do not insert whitespace between CJK text and latin text. The blog uses `text-autospace: normal;`.
+
 ## Testing Guidelines
 
 Worker regression tests live in `tests/worker.test.ts`. Run `pnpm worker:check` and `pnpm test:worker` for server changes. Before opening a PR, run `pnpm build` and `pnpm check`, then manually verify affected pages, tag routes, RSS output, and any `src/pages/api/` endpoint you touched. If you add tests later, place them near the feature or under a top-level `tests/` directory and use `*.test.ts` naming.
