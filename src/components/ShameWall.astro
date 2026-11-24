@@ -74,9 +74,17 @@ const sections: { via: TrapVia; title: string; note: string }[] = [
                 <p class="origin">
                   {row.as_org ?? '未知网络'}
                   <span class="muted">
-                    {[row.asn === null ? null : `AS${row.asn}`, row.country]
-                      .filter(Boolean)
-                      .join(' · ')}
+                    {row.asn !== null && (
+                      <a
+                        href={`https://bgp.he.net/AS${row.asn}`}
+                        target="_blank"
+                        rel="noopener noreferrer nofollow"
+                      >
+                        AS{row.asn}
+                      </a>
+                    )}
+                    {row.asn !== null && row.country && ' · '}
+                    {row.country}
                   </span>
                 </p>
                 <p class="meta">
