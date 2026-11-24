@@ -1,10 +1,16 @@
 ---
+import { trapLinkPath } from '@server/crawlerTrap';
+
 const today = new Date();
 ---
 
 <footer class="p-6 text-center text-sm">
   Copyleft &copy; 2018-{today.getFullYear()}
   北雁云依Under CC BY-NC-ND 4.0 (Articles) and AGPL-3.0 (Code)
+  {/* Crawler trap: invisible to people, disallowed by robots.txt. */}
+  <a href={trapLinkPath} style="display: none" aria-hidden="true" tabindex="-1">
+    archive
+  </a>
 </footer>
 <link
   rel="stylesheet"

@@ -9,9 +9,18 @@ export interface Props {
   title: string;
   description: string;
   image?: string;
+  canonical?: string | undefined;
+  noindex?: boolean | undefined;
 }
 
-const { title, description, image = '/头像方.png' } = Astro.props;
+const {
+  title,
+  description,
+  image = '/头像方.png',
+  canonical,
+  noindex = false,
+} = Astro.props;
+const pageUrl = canonical ? new URL(canonical, Astro.url) : Astro.url;
 ---
 
 <!-- Global Metadata -->
@@ -19,7 +28,8 @@ const { title, description, image = '/头像方.png' } = Astro.props;
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <link rel="icon" href="/favicon.ico" />
 <meta name="generator" content={Astro.generator} />
-<link rel="canonical" href={Astro.url} />
+<link rel="canonical" href={pageUrl} />
+{noindex && <meta name="robots" content="noindex, nofollow" />}
 
 <!-- Primary Meta Tags -->
 <title>{title}</title>
@@ -28,14 +38,14 @@ const { title, description, image = '/头像方.png' } = Astro.props;
 
 <!-- Open Graph / Facebook -->
 <meta property="og:type" content="website" />
-<meta property="og:url" content={Astro.url} />
+<meta property="og:url" content={pageUrl} />
 <meta property="og:title" content={title} />
 <meta property="og:description" content={description} />
 <meta property="og:image" content={new URL(image, Astro.url)} />
 
 <!-- Twitter -->
 <meta property="twitter:card" content="summary_large_image" />
-<meta property="twitter:url" content={Astro.url} />
+<meta property="twitter:url" content={pageUrl} />
 <meta property="twitter:title" content={title} />
 <meta property="twitter:description" content={description} />
 <meta property="twitter:image" content={new URL(image, Astro.url)} />

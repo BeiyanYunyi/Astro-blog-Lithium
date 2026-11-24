@@ -38,7 +38,11 @@ export default defineConfig({
   }),
   integrations: [
     mdx(),
-    sitemap({ customPages: postPages }),
+    sitemap({
+      customPages: postPages,
+      // The crawler wall is noindex and lists visitor network data.
+      filter: (page) => !new URL(page).pathname.startsWith('/wall-of-shame/'),
+    }),
     svelte({
       compilerOptions: { runes: true },
     }),

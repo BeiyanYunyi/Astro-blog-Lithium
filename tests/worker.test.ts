@@ -1276,12 +1276,14 @@ test('additive migration is repeatable and retains existing follower rows', asyn
   const before = await env.database.prepare('SELECT * FROM follower').first();
   await env.database.exec('DROP TABLE fedify_kv');
   await env.database.exec('DROP TABLE ap_inbox_credit');
+  await env.database.exec('DROP TABLE crawler_trap_hit');
   const sql = (
     await Promise.all(
       [
         '0001_fedify_kv.sql',
         '0002_comments_publications.sql',
         '0003_inbox_credit.sql',
+        '0004_crawler_trap.sql',
       ].map((name) =>
         readFile(new URL(`../migrations/${name}`, import.meta.url), 'utf8'),
       ),
@@ -1636,6 +1638,114 @@ test('Astro rejects cross-site form submissions and accepts same-origin or non-b
       );
     }
   }
+});
+
+test('crawler trap records, deduplicates, revokes and re-records visitors', async (t) => {
+  const env = await environment(t, { realAssets: true });
+  const robots = await worker.fetch(request('/robots.txt'), env);
+  assert.match(await robots.text(), /^Disallow: \/internal$/m);
+  const home = await (await worker.fetch(request('/'), env)).text();
+  assert.match(home, /href="\/internal\/n7q2\/"[^>]*display: none/);
+  assert.doesNotMatch(home, /Crawler trap/);
+  const sitemap = await (
+    await worker.fetch(request('/sitemap-0.xml'), env)
+  ).text();
+  assert.doesNotMatch(sitemap, /internal|wall-of-shame/);
+
+  const evilUa = `<script>alert(1)</script>${'x'.repeat(100)}`;
+  const visit = (path, ip, ua, method = 'GET') =>
+    worker.fetch(
+      request(path, {
+        method,
+        headers: { 'CF-Connecting-IP': ip, 'User-Agent': ua },
+      }),
+      env,
+    );
+  const rows = () =>
+    env.database
+      .prepare(
+        'SELECT ip, ua, via, hit_count, token, revoked_at FROM crawler_trap_hit ORDER BY id',
+      )
+      .all()
+      .then(({ results }) => results);
+
+  const first = await visit('/internal', '203.0.113.7', evilUa);
+  assert.equal(first.status, 200);
+  assert.equal(first.headers.get('Cache-Control'), 'no-store');
+  assert.match(first.headers.get('X-Robots-Tag'), /noindex/);
+  const firstHtml = await first.text();
+  assert.match(firstHtml, /rel="canonical" href="[^"]*\/wall-of-shame\/"/);
+  assert.match(firstHtml, /history\.replaceState/);
+  assert.ok(!firstHtml.includes('<script>alert(1)'), 'UA must be escaped');
+  assert.ok(firstHtml.includes('&lt;script&gt;alert(1)'));
+  assert.ok(!firstHtml.includes('203.0.113.7'), 'full IP must not be shown');
+  assert.ok(firstHtml.includes('203.0.113.0/24'));
+
+  const second = await visit('/internal/', '203.0.113.7', evilUa);
+  const token = (await second.text()).match(/name="token" value="([^"]+)"/)[1];
+  assert.match(token, /^rt-[0-9a-f-]{36}$/);
+  await visit('/internal/n7q2/', '2001:db8:abcd:12::1', 'GPTBot/1.2');
+  await visit('/internal/n7q2', '2001:db8:abcd:12::1', 'GPTBot/1.2', 'HEAD');
+  assert.equal(
+    (await visit('/internal/', '203.0.113.7', evilUa, 'POST')).status,
+    405,
+  );
+  let current = await rows();
+  assert.deepEqual(
+    current.map(({ ip, via, hit_count }) => [ip, via, hit_count]),
+    [
+      ['203.0.113.7', 'robots', 2],
+      ['2001:db8:abcd:12::1', 'link', 2],
+    ],
+  );
+  assert.equal(current[0].token, token, 'only the newest token is kept');
+
+  const wall = await worker.fetch(request('/wall-of-shame/'), env);
+  assert.equal(wall.status, 200);
+  assert.match(wall.headers.get('X-Robots-Tag'), /noindex/);
+  const wallHtml = await wall.text();
+  assert.ok(wallHtml.includes('2001:db8:abcd::/48'));
+  assert.ok(wallHtml.includes('GPTBot/1.2'));
+  assert.ok(!wallHtml.includes('name="token"'));
+
+  const revoke = (value, headers = {}) =>
+    worker.fetch(
+      new Request(`${origin}/api/crawler-trap/revoke`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          ...headers,
+        },
+        body: new URLSearchParams({ token: value }),
+      }),
+      env,
+    );
+  assert.equal(
+    (await revoke(token, { Origin: 'https://cross-site.example' })).status,
+    403,
+  );
+  const revoked = await revoke(token, { Origin: origin });
+  assert.equal(revoked.status, 303);
+  assert.equal(revoked.headers.get('Location'), '/wall-of-shame/?revoked=ok');
+  assert.equal(
+    (await revoke(token, { Origin: origin })).headers.get('Location'),
+    '/wall-of-shame/?revoked=missing',
+  );
+  assert.equal(
+    (await revoke('not-a-token', { Origin: origin })).headers.get('Location'),
+    '/wall-of-shame/?revoked=missing',
+  );
+  const afterRevoke = await (
+    await worker.fetch(request('/wall-of-shame/'), env)
+  ).text();
+  assert.ok(!afterRevoke.includes('203.0.113.0/24'));
+
+  await visit('/internal/', '203.0.113.7', evilUa);
+  current = await rows();
+  assert.equal(current.length, 3, 'a revisit after revoke starts a new row');
+  assert.notEqual(current[0].revoked_at, null);
+  assert.equal(current[2].revoked_at, null);
+  assert.equal(current[2].hit_count, 1);
 });
 
 test('instance matching respects hostname boundaries and normalization', () => {

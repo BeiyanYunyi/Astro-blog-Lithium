@@ -7,18 +7,34 @@ import Header from '@components/Header.astro';
 import SideBarLeft from '@components/SideBarLeft.astro';
 import { SITE_DESCRIPTION, SITE_TITLE } from '@config';
 
-export type Props = { title?: string; description?: string; image?: string };
+export type Props = {
+  title?: string;
+  description?: string;
+  image?: string;
+  canonical?: string;
+  noindex?: boolean;
+  comments?: boolean;
+};
 
 const {
   title = SITE_TITLE,
   description = SITE_DESCRIPTION,
   image = '/头像方.png',
+  canonical,
+  noindex,
+  comments = true,
 } = Astro.props;
 ---
 
 <html lang="zh-cmn-Hans-CN">
   <head>
-    <BaseHead title={title} description={description} image={image} />
+    <BaseHead
+      title={title}
+      description={description}
+      image={image}
+      canonical={canonical}
+      noindex={noindex}
+    />
   </head>
   <GlobalContainer>
     <Header />
@@ -26,7 +42,7 @@ const {
       <SideBarLeft />
       <div class="flex-auto min-w-0 mt-4 lg:(mt-0 ml-4)">
         <slot />
-        <Comments />
+        {comments && <Comments />}
       </div>
     </main>
     <Footer />
