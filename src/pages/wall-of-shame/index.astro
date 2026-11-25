@@ -26,9 +26,13 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex');
 >
   <article class="card p-6 prose prose-neutral dark:prose-invert max-w-full">
     <h1>Wall of Shame</h1>
-    {revoked === 'ok' && <p class="notice">已撤回你的访问记录，抱歉打扰。</p>}
+    {revoked === 'ok' && (
+      <p class="my-4 px-4 py-3 rounded-lg [background-color:#3b82f622]">
+        已撤回你的访问记录，抱歉打扰。
+      </p>
+    )}
     {revoked === 'missing' && (
-      <p class="notice">
+      <p class="my-4 px-4 py-3 rounded-lg [background-color:#3b82f622]">
         没有找到可撤回的记录：它可能已经被撤回，或者同一来源之后又访问过一次，旧的撤回凭据随之失效。
       </p>
     )}
@@ -36,12 +40,3 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex');
     <ShameWall rows={rows} />
   </article>
 </BaseLayout>
-
-<style>
-  .notice {
-    margin-block: 1rem;
-    padding: 0.75rem 1rem;
-    border-radius: 0.5rem;
-    background: #3b82f622;
-  }
-</style>

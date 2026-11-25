@@ -42,12 +42,21 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
       of Shame上（IP只展示到网段）。
     </p>
     {token ? (
-      <form method="post" action="/api/crawler-trap/revoke" class="revoke">
+      <form
+        method="post"
+        action="/api/crawler-trap/revoke"
+        class="my-4 px-4 py-3 rounded-lg [background-color:#3b82f622]"
+      >
         <p>
           如果你是人类——比如看到robots.txt里的路径，好奇点了进来——点下面的按钮就能撤回这条记录。撤回凭据只在这个页面里，离开或刷新后就无法撤回了。
         </p>
         <input type="hidden" name="token" value={token} />
-        <button type="submit">我是人类，撤回记录</button>
+        <button
+          type="submit"
+          class="px-4 py-2 rounded-full bg-blue-600 text-neutral-50 cursor-pointer hover:bg-blue-700"
+        >
+          我是人类，撤回记录
+        </button>
       </form>
     ) : (
       <p>这次访问没有拿到来源IP，因此没有记录。</p>
@@ -62,22 +71,3 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
   // chat previews land in the trap.
   history.replaceState(null, '', wallPath);
 </script>
-
-<style>
-  .revoke {
-    margin-block: 1rem;
-    padding: 0.75rem 1rem;
-    border-radius: 0.5rem;
-    background: #3b82f622;
-  }
-  button {
-    padding: 0.5rem 1rem;
-    border-radius: 9999px;
-    background: #2563eb;
-    color: #fafafa;
-    cursor: pointer;
-  }
-  button:hover {
-    background: #1d4ed8;
-  }
-</style>

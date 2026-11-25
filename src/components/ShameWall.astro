@@ -14,6 +14,7 @@ export interface Props {
 const { rows } = Astro.props;
 const now = Date.now();
 const uaPreviewLength = 72;
+const codeClass = 'text-[0.8125rem]';
 const formatTime = (value: number) =>
   `${new Date(value).toISOString().slice(0, 16).replace('T', ' ')} UTC`;
 const formatAgo = (value: number) => {
@@ -46,34 +47,43 @@ const sections: { via: TrapVia; title: string; note: string }[] = [
       <h2>{section.title}</h2>
       <p>{section.note}</p>
       {list.length === 0 ? (
-        <p class="not-prose summary">暂时还没有。</p>
+        <p class="not-prose mt-2 mb-4 text-[0.875rem] opacity-75">
+          暂时还没有。
+        </p>
       ) : (
         <>
-          <p class="not-prose summary">
+          <p class="not-prose mt-2 mb-4 text-[0.875rem] opacity-75">
             {list.length}个来源，共{hits}次访问
           </p>
-          <ol class="not-prose entries">
+          <ol class="not-prose grid gap-3 m-0 mb-8 p-0 list-none">
             {list.map((row) => (
-              <li class:list={['entry', { preview: looksLikePreview(row.ua) }]}>
-                <div class="entry-head">
-                  <span class="name">
+              <li
+                class:list={[
+                  'grid gap-[0.35rem] min-w-0 px-4 py-[0.9rem] border border-l-4 rounded-lg [border-color:#8884]',
+                  looksLikePreview(row.ua)
+                    ? '[border-left-color:#f59e0baa] opacity-80'
+                    : '[border-left-color:#ef4444aa]',
+                ]}
+              >
+                <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                  <span class="text-[1.125rem] font-bold break-anywhere">
                     {row.ua === '' ? '未发送UA' : uaName(row.ua)}
                   </span>
                   {looksLikePreview(row.ua) && (
                     <span
-                      class="tag"
+                      class="px-[0.4rem] rounded text-[0.75rem] [background-color:#f59e0b33]"
                       title="可能是有人分享了链接，由聊天软件或联邦宇宙实例抓取预览"
                     >
                       疑似链接预览
                     </span>
                   )}
-                  <span class="count">
-                    <b>{row.hit_count}</b>次
+                  <span class="ml-auto text-[0.875rem] whitespace-nowrap">
+                    <b class="mr-0.5 text-[1.25rem]">{row.hit_count}</b>次
                   </span>
                 </div>
-                <p class="origin">
+                <p class="m-0 break-anywhere">
                   {row.as_org ?? '未知网络'}
-                  <span class="muted">
+                  <span class="ml-2 text-[0.875rem] opacity-70">
                     {row.asn !== null && (
                       <a
                         href={`https://bgp.he.net/AS${row.asn}`}
@@ -87,8 +97,8 @@ const sections: { via: TrapVia; title: string; note: string }[] = [
                     {row.country}
                   </span>
                 </p>
-                <p class="meta">
-                  <code>{truncateIp(row.ip)}</code>
+                <p class="flex flex-wrap gap-x-4 gap-y-1 m-0 text-[0.8125rem] opacity-75">
+                  <code class={codeClass}>{truncateIp(row.ip)}</code>
                   <span>
                     最近
                     <time
@@ -110,14 +120,23 @@ const sections: { via: TrapVia; title: string; note: string }[] = [
                 </p>
                 {row.ua !== '' &&
                   (row.ua.length > uaPreviewLength ? (
-                    <details class="ua">
-                      <summary>
-                        <code>{row.ua.slice(0, uaPreviewLength)}…</code>
+                    <details class="group block text-[0.8125rem] opacity-75 break-anywhere">
+                      <summary class="cursor-pointer group-open:mb-1">
+                        <code class={codeClass}>
+                          {row.ua.slice(0, uaPreviewLength)}…
+                        </code>
                       </summary>
-                      <code>{row.ua}</code>
+                      <code class={codeClass}>{row.ua}</code>
                     </details>
                   ) : (
-                    <code class="ua">{row.ua}</code>
+                    <code
+                      class:list={[
+                        codeClass,
+                        'block opacity-75 break-anywhere',
+                      ]}
+                    >
+                      {row.ua}
+                    </code>
                   ))}
               </li>
             ))}
@@ -127,92 +146,3 @@ const sections: { via: TrapVia; title: string; note: string }[] = [
     </section>
   );
 })}
-
-<style>
-  .summary {
-    margin-block: 0.5rem 1rem;
-    font-size: 0.875rem;
-    opacity: 0.75;
-  }
-  .entries {
-    display: grid;
-    gap: 0.75rem;
-    margin: 0 0 2rem;
-    padding: 0;
-    list-style: none;
-  }
-  .entry {
-    display: grid;
-    gap: 0.35rem;
-    min-width: 0;
-    padding: 0.9rem 1rem;
-    border: 1px solid #8884;
-    border-left: 4px solid #ef4444aa;
-    border-radius: 0.5rem;
-  }
-  .entry.preview {
-    border-left-color: #f59e0baa;
-    opacity: 0.8;
-  }
-  .entry-head {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 0.25rem 0.75rem;
-  }
-  .name {
-    font-size: 1.125rem;
-    font-weight: 700;
-    overflow-wrap: anywhere;
-  }
-  .count {
-    margin-left: auto;
-    font-size: 0.875rem;
-    white-space: nowrap;
-  }
-  .count b {
-    margin-right: 0.125rem;
-    font-size: 1.25rem;
-  }
-  .origin {
-    margin: 0;
-    overflow-wrap: anywhere;
-  }
-  .origin .muted {
-    margin-left: 0.5rem;
-    font-size: 0.875rem;
-  }
-  .meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.25rem 1rem;
-    margin: 0;
-    font-size: 0.8125rem;
-    opacity: 0.75;
-  }
-  code {
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    font-size: 0.8125rem;
-  }
-  .ua {
-    display: block;
-    font-size: 0.8125rem;
-    opacity: 0.75;
-    overflow-wrap: anywhere;
-  }
-  .ua summary {
-    cursor: pointer;
-  }
-  .ua[open] summary {
-    margin-bottom: 0.25rem;
-  }
-  .muted {
-    opacity: 0.7;
-  }
-  .tag {
-    padding: 0 0.4rem;
-    border-radius: 0.25rem;
-    font-size: 0.75rem;
-    background: #f59e0b33;
-  }
-</style>

@@ -24,8 +24,6 @@ Use `pnpm` with Node `>=26`.
 
 Use oxfmt formatting configured in `.oxfmtrc.json` (two spaces, 80 columns, and single quotes in JavaScript) and oxlint’s default recommended (correctness) rules. File exclusions for linting are configured in `.oxlintrc.json`. Prefer TypeScript for logic and keep Astro components in `.astro`, interactive Svelte components in `.svelte` with TypeScript and Runes, and content in `.md` or `.mdx`. Use PascalCase for components (`PostCard.astro`), camelCase for utilities (`getAllPosts.ts`), and kebab-case or slug-style names for posts and route folders.
 
-Do not insert whitespace between CJK text and latin text. The blog uses `text-autospace: normal;`.
-
 ## Testing Guidelines
 
 Worker regression tests live in `tests/worker.test.ts`. Run `pnpm worker:check` and `pnpm test:worker` for server changes. Before opening a PR, run `pnpm build` and `pnpm check`, then manually verify affected pages, tag routes, RSS output, and any `src/pages/api/` endpoint you touched. If you add tests later, place them near the feature or under a top-level `tests/` directory and use `*.test.ts` naming.
@@ -39,3 +37,5 @@ Recent history uses Conventional Commit prefixes with gitmoji, such as `fix: �
 Post frontmatter must satisfy the content schema: `title`, `date`, `description`, optional `tag`, and optional `image`, and optional `draft` (defaults to `false`). Set `draft: true` to keep a post accessible by direct URL while excluding it from public listings, RSS, sitemap, and ActivityPub publication. When editing deployment-related code, review `astro.config.ts`, `cloudflare.config.ts`, and `setup.sql` together so Astro output, Cloudflare bindings, and database expectations stay aligned. Use the project-local `cf` CLI via `pnpm exec cf`; no global installation is required. Build Output lives in `.cloudflare/output/v1/`.
 
 Do not insert spaces between Chinese and Latin text or digits in posts, pages, or component copy (write `无视robots.txt的访问者`, not `无视 robots.txt 的访问者`). `src/styles/global.css` sets `text-autospace: normal`, so the browser adds that spacing itself.
+
+Use UnoCSS (TailwindCSS-like) as styling framework, instead of writing `<style>` tags.
