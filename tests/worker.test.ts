@@ -75,6 +75,7 @@ async function environment(
     realAssets = false,
     deliveryToken = 'local-test-token',
     blockedDomains = null,
+    turnstile = false,
   } = {},
 ) {
   const env = {
@@ -141,6 +142,12 @@ async function environment(
         PUBLIC_KEY: env.PUBLIC_KEY,
         PRIV_KEY: env.PRIV_KEY,
         ...(deliveryToken ? { DELIVERY_TOKEN: deliveryToken } : {}),
+        ...(turnstile
+          ? {
+              TURNSTILE_SITE_KEY: '1x00000000000000000000AA',
+              TURNSTILE_SECRET_KEY: 'test-turnstile-secret',
+            }
+          : {}),
       },
       d1Databases: ['ap'],
       queueProducers: { FEDERATION_QUEUE: 'blog-federation' },
@@ -1276,7 +1283,8 @@ test('additive migration is repeatable and retains existing follower rows', asyn
   const before = await env.database.prepare('SELECT * FROM follower').first();
   await env.database.exec('DROP TABLE fedify_kv');
   await env.database.exec('DROP TABLE ap_inbox_credit');
-  await env.database.exec('DROP TABLE crawler_trap_hit');
+  await env.database.exec('DROP TABLE crawler_trap_event');
+  await env.database.exec('DROP TABLE crawler_trap_visitor');
   const sql = (
     await Promise.all(
       [
@@ -1284,6 +1292,7 @@ test('additive migration is repeatable and retains existing follower rows', asyn
         '0002_comments_publications.sql',
         '0003_inbox_credit.sql',
         '0004_crawler_trap.sql',
+        '0005_crawler_trap_events.sql',
       ].map((name) =>
         readFile(new URL(`../migrations/${name}`, import.meta.url), 'utf8'),
       ),
@@ -1640,7 +1649,30 @@ test('Astro rejects cross-site form submissions and accepts same-origin or non-b
   }
 });
 
-test('crawler trap records, deduplicates, revokes and re-records visitors', async (t) => {
+const trapVisit = (env, path, ip, ua, method = 'GET') =>
+  worker.fetch(
+    request(path, {
+      method,
+      headers: { 'CF-Connecting-IP': ip, 'User-Agent': ua },
+    }),
+    env,
+  );
+const freshWall = (env) =>
+  worker.fetch(
+    request('/wall-of-shame/', { headers: { 'Cache-Control': 'no-cache' } }),
+    env,
+  );
+const trapEvents = (env) =>
+  env.database
+    .prepare(
+      `SELECT v.ip, v.via, e.kind, e.visit, e.detail
+      FROM crawler_trap_event e
+      JOIN crawler_trap_visitor v ON v.id = e.visitor_id ORDER BY e.id`,
+    )
+    .all()
+    .then(({ results }) => results);
+
+test('crawler trap appends hits, caches the wall, revokes and re-records visitors', async (t) => {
   const env = await environment(t, { realAssets: true });
   const robots = await worker.fetch(request('/robots.txt'), env);
   assert.match(await robots.text(), /^Disallow: \/internal$/m);
@@ -1653,21 +1685,7 @@ test('crawler trap records, deduplicates, revokes and re-records visitors', asyn
   assert.doesNotMatch(sitemap, /internal|wall-of-shame/);
 
   const evilUa = `<script>alert(1)</script>${'x'.repeat(100)}`;
-  const visit = (path, ip, ua, method = 'GET') =>
-    worker.fetch(
-      request(path, {
-        method,
-        headers: { 'CF-Connecting-IP': ip, 'User-Agent': ua },
-      }),
-      env,
-    );
-  const rows = () =>
-    env.database
-      .prepare(
-        'SELECT ip, ua, via, hit_count, token, revoked_at FROM crawler_trap_hit ORDER BY id',
-      )
-      .all()
-      .then(({ results }) => results);
+  const visit = (...args) => trapVisit(env, ...args);
 
   const first = await visit('/internal', '203.0.113.7', evilUa);
   assert.equal(first.status, 200);
@@ -1676,10 +1694,7 @@ test('crawler trap records, deduplicates, revokes and re-records visitors', asyn
   const firstHtml = await first.text();
   assert.match(firstHtml, /rel="canonical" href="[^"]*\/wall-of-shame\/"/);
   assert.match(firstHtml, /history\.replaceState/);
-  assert.ok(!firstHtml.includes('<script>alert(1)'), 'UA must be escaped');
-  assert.ok(firstHtml.includes('&lt;script&gt;alert(1)'));
-  assert.ok(!firstHtml.includes('203.0.113.7'), 'full IP must not be shown');
-  assert.ok(firstHtml.includes('203.0.113.0/24'));
+  assert.doesNotMatch(firstHtml, /trap-turnstile"/, 'no widget without keys');
 
   const second = await visit('/internal/', '203.0.113.7', evilUa);
   const token = (await second.text()).match(/name="token" value="([^"]+)"/)[1];
@@ -1690,23 +1705,51 @@ test('crawler trap records, deduplicates, revokes and re-records visitors', asyn
     (await visit('/internal/', '203.0.113.7', evilUa, 'POST')).status,
     405,
   );
-  let current = await rows();
+  let events = await trapEvents(env);
   assert.deepEqual(
-    current.map(({ ip, via, hit_count }) => [ip, via, hit_count]),
+    events.map(({ ip, via, kind, detail }) => [ip, via, kind, detail]),
     [
-      ['203.0.113.7', 'robots', 2],
-      ['2001:db8:abcd:12::1', 'link', 2],
+      ['203.0.113.7', 'robots', 'hit', null],
+      ['203.0.113.7', 'robots', 'hit', null],
+      ['2001:db8:abcd:12::1', 'link', 'hit', null],
+      ['2001:db8:abcd:12::1', 'link', 'hit', '{"method":"HEAD"}'],
     ],
   );
-  assert.equal(current[0].token, token, 'only the newest token is kept');
+  assert.equal(events[1].visit, token, 'each hit gets its own visit id');
+  assert.equal(
+    (
+      await env.database
+        .prepare('SELECT count(*) AS count FROM crawler_trap_visitor')
+        .first()
+    ).count,
+    2,
+  );
 
-  const wall = await worker.fetch(request('/wall-of-shame/'), env);
+  // The first trap page cached a wall built before most hits.
+  const cached = await worker.fetch(request('/wall-of-shame/'), env);
+  assert.match(cached.headers.get('Cache-Control'), /^public, max-age=\d+$/);
+  assert.ok(!(await cached.text()).includes('GPTBot/1.2'));
+
+  const wall = await freshWall(env);
   assert.equal(wall.status, 200);
   assert.match(wall.headers.get('X-Robots-Tag'), /noindex/);
+  assert.equal(wall.headers.get('Cache-Control'), 'public, max-age=3600');
   const wallHtml = await wall.text();
+  assert.ok(!wallHtml.includes('<script>alert(1)'), 'UA must be escaped');
+  assert.ok(wallHtml.includes('&lt;script&gt;alert(1)'));
+  assert.ok(!wallHtml.includes('203.0.113.7'), 'full IP must not be shown');
+  assert.ok(wallHtml.includes('203.0.113.0/24'));
   assert.ok(wallHtml.includes('2001:db8:abcd::/48'));
   assert.ok(wallHtml.includes('GPTBot/1.2'));
   assert.ok(!wallHtml.includes('name="token"'));
+  assert.match(wallHtml, /Turnstile实验：2次页面访问中，0次执行了JavaScript/);
+  assert.match(wallHtml, /Turnstile实验：1次页面访问中，0次执行了JavaScript/);
+  // A cached read now sees the refreshed wall.
+  assert.ok(
+    (
+      await (await worker.fetch(request('/wall-of-shame/'), env)).text()
+    ).includes('GPTBot/1.2'),
+  );
 
   const revoke = (value, headers = {}) =>
     worker.fetch(
@@ -1724,6 +1767,11 @@ test('crawler trap records, deduplicates, revokes and re-records visitors', asyn
     (await revoke(token, { Origin: 'https://cross-site.example' })).status,
     403,
   );
+  assert.equal(
+    (await revoke(events[0].visit, { Origin: origin })).headers.get('Location'),
+    '/wall-of-shame/?revoked=missing',
+    'a superseded visit cannot revoke',
+  );
   const revoked = await revoke(token, { Origin: origin });
   assert.equal(revoked.status, 303);
   assert.equal(revoked.headers.get('Location'), '/wall-of-shame/?revoked=ok');
@@ -1735,17 +1783,207 @@ test('crawler trap records, deduplicates, revokes and re-records visitors', asyn
     (await revoke('not-a-token', { Origin: origin })).headers.get('Location'),
     '/wall-of-shame/?revoked=missing',
   );
+  // Revoking drops the cached wall, so a plain read is already current.
   const afterRevoke = await (
-    await worker.fetch(request('/wall-of-shame/'), env)
+    await worker.fetch(request('/wall-of-shame/?revoked=ok'), env)
   ).text();
   assert.ok(!afterRevoke.includes('203.0.113.0/24'));
+  assert.ok(afterRevoke.includes('GPTBot/1.2'));
 
   await visit('/internal/', '203.0.113.7', evilUa);
-  current = await rows();
-  assert.equal(current.length, 3, 'a revisit after revoke starts a new row');
-  assert.notEqual(current[0].revoked_at, null);
-  assert.equal(current[2].revoked_at, null);
-  assert.equal(current[2].hit_count, 1);
+  events = await trapEvents(env);
+  assert.deepEqual(
+    events.slice(4).map(({ kind }) => kind),
+    ['revoke', 'hit'],
+    'revokes are appended and earlier events are kept',
+  );
+  const renewed = await (await freshWall(env)).text();
+  assert.ok(renewed.includes('203.0.113.0/24'));
+  assert.match(
+    renewed,
+    /Turnstile实验：1次页面访问中/,
+    'revoked visits leave the funnel',
+  );
+});
+
+test('crawler trap beacons record JavaScript and Turnstile outcomes once per visit', async (t) => {
+  const env = await environment(t, { turnstile: true });
+  const verified = [];
+  let verdict = {};
+  env.remoteFetch = async (outbound) => {
+    assert.equal(
+      outbound.url,
+      'https://challenges.cloudflare.com/turnstile/v0/siteverify',
+    );
+    verified.push(
+      Object.fromEntries(new URLSearchParams(await outbound.text())),
+    );
+    return Response.json(verdict);
+  };
+  const tokenOf = async (response) =>
+    (await response.text()).match(/name="token" value="([^"]+)"/)[1];
+  const beacon = (fields, headers = { Origin: origin }) =>
+    worker.fetch(
+      new Request(`${origin}/api/crawler-trap/turnstile`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          ...headers,
+        },
+        body: new URLSearchParams(fields),
+      }),
+      env,
+    );
+
+  const page = await trapVisit(env, '/internal/n7q2/', '198.51.100.4', 'Bot/1');
+  const html = await page.clone().text();
+  assert.match(html, /id="trap-turnstile"/);
+  assert.match(html, /turnstile\/v0\/api\.js\?render=explicit/);
+  const visit = await tokenOf(page);
+  assert.ok(html.includes(`"visit": "${visit}"`) || html.includes(visit));
+
+  assert.equal(
+    (await beacon({ visit, step: 'js' }, { Origin: 'https://evil.example' }))
+      .status,
+    403,
+  );
+  assert.equal((await beacon({ visit, step: 'js' })).status, 204);
+  assert.equal((await beacon({ visit, step: 'js' })).status, 204);
+  assert.equal((await beacon({ visit, step: 'nope' })).status, 400);
+  assert.equal(
+    (await beacon({ visit: 'rt-unknown', step: 'js' })).status,
+    204,
+    'unknown visits are ignored',
+  );
+
+  verdict = {
+    success: true,
+    action: 'trap',
+    cdata: 'rt-00000000-0000-0000-0000-000000000000',
+    hostname: new URL(origin).hostname,
+  };
+  assert.equal(
+    (await beacon({ visit, step: 'token', token: 'forged' })).status,
+    204,
+  );
+  assert.equal(verified[0].secret, 'test-turnstile-secret');
+  assert.equal(verified[0].response, 'forged');
+  assert.ok(verified[0].remoteip, 'siteverify gets the visitor IP');
+  verdict = { ...verdict, cdata: visit };
+  await beacon({ visit, step: 'token', token: 'good' });
+
+  const other = await tokenOf(
+    await trapVisit(env, '/internal/n7q2/', '198.51.100.5', 'Bot/2'),
+  );
+  await beacon({ visit: other, step: 'js' });
+  await beacon({ visit: other, step: 'error', code: '300030<x>' });
+  await trapVisit(env, '/internal/n7q2/', '198.51.100.6', 'curl/8');
+
+  const events = await trapEvents(env);
+  assert.deepEqual(
+    events.map(({ ip, kind, detail }) => [ip, kind, detail]),
+    [
+      ['198.51.100.4', 'hit', null],
+      ['198.51.100.4', 'js', null],
+      [
+        '198.51.100.4',
+        'ts_fail',
+        '{"source":"siteverify","codes":["cdata-mismatch"]}',
+      ],
+      ['198.51.100.4', 'ts_pass', null],
+      ['198.51.100.5', 'hit', null],
+      ['198.51.100.5', 'js', null],
+      ['198.51.100.5', 'ts_fail', '{"source":"client","code":"300030x"}'],
+      ['198.51.100.6', 'hit', null],
+    ],
+  );
+
+  const wall = await (await freshWall(env)).text();
+  assert.match(
+    wall,
+    /Turnstile实验：3次页面访问中，2次执行了JavaScript（67%），1次通过Turnstile（33%），1次未通过。/,
+  );
+  assert.match(wall, /通过Turnstile<\/span>/);
+  assert.match(wall, /未通过Turnstile<\/span>/);
+});
+
+test('crawler trap migration backfills legacy rows into the event log', async (t) => {
+  const env = await environment(t);
+  await env.database.exec('DROP TABLE crawler_trap_event');
+  await env.database.exec('DROP TABLE crawler_trap_visitor');
+  const migration = async (name) => {
+    const sql = await readFile(
+      new URL(`../migrations/${name}`, import.meta.url),
+      'utf8',
+    );
+    for (const statement of sql.split(';').filter((sql) => sql.trim()))
+      await env.database.prepare(statement).run();
+  };
+  await migration('0004_crawler_trap.sql');
+  const live = 'rt-11111111-1111-1111-1111-111111111111';
+  const gone = 'rt-22222222-2222-2222-2222-222222222222';
+  const again = 'rt-33333333-3333-3333-3333-333333333333';
+  await env.database.batch(
+    [
+      ['192.0.2.1', 'A', 'robots', 100, 300, 5, live, null],
+      ['192.0.2.2', 'B', 'link', 150, 150, 1, gone, 200],
+      ['192.0.2.2', 'B', 'link', 250, 260, 2, again, null],
+    ].map((row) =>
+      env.database
+        .prepare(
+          `INSERT INTO crawler_trap_hit
+            (ip, ua, via, asn, as_org, country, first_seen, last_seen,
+              hit_count, token, revoked_at)
+          VALUES (?1, ?2, ?3, 13335, 'Example', 'US', ?4, ?5, ?6, ?7, ?8)`,
+        )
+        .bind(...row),
+    ),
+  );
+  await migration('0005_crawler_trap_events.sql');
+  await migration('0005_crawler_trap_events.sql');
+
+  assert.deepEqual(
+    (await trapEvents(env)).map(({ ip, kind, visit }) => [ip, kind, visit]),
+    [
+      ['192.0.2.1', 'hit', 'rt-legacy-1'],
+      ['192.0.2.2', 'hit', gone],
+      ['192.0.2.2', 'revoke', gone],
+      ['192.0.2.2', 'hit', 'rt-legacy-3'],
+      ['192.0.2.2', 'hit', again],
+      ['192.0.2.1', 'hit', live],
+    ],
+  );
+  assert.equal(
+    (
+      await env.database
+        .prepare(
+          "SELECT count(*) AS count FROM sqlite_master WHERE name = 'crawler_trap_hit'",
+        )
+        .first()
+    ).count,
+    0,
+  );
+
+  const wall = await (await freshWall(env)).text();
+  assert.ok(wall.includes('192.0.2.0/24'));
+  assert.doesNotMatch(
+    wall,
+    /Turnstile实验/,
+    'legacy hits stay out of the funnel',
+  );
+  const revoked = await worker.fetch(
+    new Request(`${origin}/api/crawler-trap/revoke`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ token: live }),
+    }),
+    env,
+  );
+  assert.equal(
+    revoked.headers.get('Location'),
+    '/wall-of-shame/?revoked=ok',
+    'legacy revoke tokens keep working',
+  );
 });
 
 test('instance matching respects hostname boundaries and normalization', () => {

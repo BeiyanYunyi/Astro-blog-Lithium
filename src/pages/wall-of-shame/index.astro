@@ -3,7 +3,7 @@ import { env } from 'cloudflare:workers';
 import ShameIntro from '@components/ShameIntro.astro';
 import ShameWall from '@components/ShameWall.astro';
 import BaseLayout from '@layouts/BaseLayout.astro';
-import { listTrapHits } from '@server/crawlerTrap';
+import { readTrapWall, wallMaxAge, wantsFreshWall } from '@server/crawlerTrap';
 
 export const prerender = false;
 
@@ -13,9 +13,14 @@ if (!['GET', 'HEAD'].includes(Astro.request.method))
     headers: { Allow: 'GET, HEAD' },
   });
 
-const rows = await listTrapHits(env.ap);
+const wall = await readTrapWall(env.ap, Astro.url.origin, {
+  fresh: wantsFreshWall(Astro.request),
+});
 const revoked = Astro.url.searchParams.get('revoked');
-Astro.response.headers.set('Cache-Control', 'no-store');
+Astro.response.headers.set(
+  'Cache-Control',
+  `public, max-age=${wallMaxAge(wall)}`,
+);
 Astro.response.headers.set('X-Robots-Tag', 'noindex');
 ---
 
@@ -37,6 +42,6 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex');
       </p>
     )}
     <ShameIntro />
-    <ShameWall rows={rows} />
+    <ShameWall wall={wall} />
   </article>
 </BaseLayout>

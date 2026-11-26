@@ -48,21 +48,26 @@ CREATE TABLE IF NOT EXISTS ap_inbox_credit (
   last_failure_at INTEGER NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS crawler_trap_hit (
+CREATE TABLE IF NOT EXISTS crawler_trap_visitor (
   id INTEGER PRIMARY KEY,
   ip TEXT NOT NULL,
   ua TEXT NOT NULL,
   via TEXT NOT NULL CHECK (via IN ('robots', 'link')),
+  UNIQUE (ip, ua, via)
+);
+CREATE TABLE IF NOT EXISTS crawler_trap_event (
+  id INTEGER PRIMARY KEY,
+  ts INTEGER NOT NULL,
+  visitor_id INTEGER NOT NULL REFERENCES crawler_trap_visitor(id),
+  visit TEXT NOT NULL,
+  kind TEXT NOT NULL
+    CHECK (kind IN ('hit', 'js', 'ts_pass', 'ts_fail', 'revoke')),
   asn INTEGER,
   as_org TEXT,
   country TEXT,
-  first_seen INTEGER NOT NULL,
-  last_seen INTEGER NOT NULL,
-  hit_count INTEGER NOT NULL DEFAULT 1,
-  token TEXT NOT NULL UNIQUE,
-  revoked_at INTEGER
+  detail TEXT
 );
-CREATE UNIQUE INDEX IF NOT EXISTS crawler_trap_hit_active
-  ON crawler_trap_hit(ip, ua, via) WHERE revoked_at IS NULL;
-CREATE INDEX IF NOT EXISTS crawler_trap_hit_recent
-  ON crawler_trap_hit(last_seen) WHERE revoked_at IS NULL;
+CREATE UNIQUE INDEX IF NOT EXISTS crawler_trap_event_visit
+  ON crawler_trap_event(visit, kind);
+CREATE INDEX IF NOT EXISTS crawler_trap_event_visitor
+  ON crawler_trap_event(visitor_id, kind, id);

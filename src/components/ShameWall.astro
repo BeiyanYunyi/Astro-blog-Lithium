@@ -1,18 +1,22 @@
 ---
 import {
   looksLikePreview,
-  type TrapRow,
+  type TrapWall,
   type TrapVia,
   truncateIp,
   uaName,
 } from '@server/crawlerTrap';
 
 export interface Props {
-  rows: TrapRow[];
+  wall: TrapWall;
 }
 
-const { rows } = Astro.props;
+const { wall } = Astro.props;
+const { rows, funnel } = wall;
 const now = Date.now();
+const percent = (part: number, whole: number) =>
+  whole === 0 ? '0%' : `${Math.round((part / whole) * 100)}%`;
+const badgeClass = 'px-[0.4rem] rounded text-[0.75rem]';
 const uaPreviewLength = 72;
 const codeClass = 'text-[0.8125rem]';
 const formatTime = (value: number) =>
@@ -42,10 +46,16 @@ const sections: { via: TrapVia; title: string; note: string }[] = [
 {sections.map((section) => {
   const list = rows.filter((row) => row.via === section.via);
   const hits = list.reduce((sum, row) => sum + row.hit_count, 0);
+  const stats = funnel.find((item) => item.via === section.via);
   return (
     <section>
       <h2>{section.title}</h2>
       <p>{section.note}</p>
+      {stats && stats.visits > 0 && (
+        <p class="not-prose mt-2 mb-1 text-[0.875rem] opacity-75">
+          {`Turnstile实验：${stats.visits}次页面访问中，${stats.js}次执行了JavaScript（${percent(stats.js, stats.visits)}），${stats.passed}次通过Turnstile（${percent(stats.passed, stats.visits)}），${stats.failed}次未通过。`}
+        </p>
+      )}
       {list.length === 0 ? (
         <p class="not-prose mt-2 mb-4 text-[0.875rem] opacity-75">
           暂时还没有。
@@ -71,10 +81,34 @@ const sections: { via: TrapVia; title: string; note: string }[] = [
                   </span>
                   {looksLikePreview(row.ua) && (
                     <span
-                      class="px-[0.4rem] rounded text-[0.75rem] [background-color:#f59e0b33]"
+                      class={`${badgeClass} [background-color:#f59e0b33]`}
                       title="可能是有人分享了链接，由聊天软件或联邦宇宙实例抓取预览"
                     >
                       疑似链接预览
+                    </span>
+                  )}
+                  {row.js_count > 0 && (
+                    <span
+                      class={`${badgeClass} [background-color:#3b82f633]`}
+                      title={`${row.js_count}次访问执行了页面里的JavaScript`}
+                    >
+                      执行JS
+                    </span>
+                  )}
+                  {row.pass_count > 0 && (
+                    <span
+                      class={`${badgeClass} [background-color:#22c55e33]`}
+                      title={`${row.pass_count}次访问通过了Turnstile`}
+                    >
+                      通过Turnstile
+                    </span>
+                  )}
+                  {row.fail_count > 0 && row.pass_count === 0 && (
+                    <span
+                      class={`${badgeClass} [background-color:#ef444433]`}
+                      title={`${row.fail_count}次访问未通过Turnstile`}
+                    >
+                      未通过Turnstile
                     </span>
                   )}
                   <span class="ml-auto text-[0.875rem] whitespace-nowrap">
@@ -146,3 +180,10 @@ const sections: { via: TrapVia; title: string; note: string }[] = [
     </section>
   );
 })}
+
+<p class="not-prose mt-2 text-[0.8125rem] opacity-60">
+  每小时更新，本次更新于
+  <time datetime={new Date(wall.generatedAt).toISOString()}>
+    {formatTime(wall.generatedAt)}
+  </time>
+</p>

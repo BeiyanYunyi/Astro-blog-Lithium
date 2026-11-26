@@ -7,4 +7,7 @@ export interface Env {
   PRIV_KEY: string;
   ASSETS: Fetcher;
   DELIVERY_TOKEN?: string;
+  /** Turnstile widget on crawler-trap pages. Both unset disables it. */
+  TURNSTILE_SITE_KEY?: string;
+  TURNSTILE_SECRET_KEY?: string;
 }

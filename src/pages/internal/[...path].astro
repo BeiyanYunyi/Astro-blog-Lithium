@@ -4,10 +4,11 @@ import ShameIntro from '@components/ShameIntro.astro';
 import ShameWall from '@components/ShameWall.astro';
 import BaseLayout from '@layouts/BaseLayout.astro';
 import {
-  listTrapHits,
+  readTrapWall,
   recordTrapHit,
   trapVia,
   trapVisitor,
+  turnstileAction,
   wallPath,
 } from '@server/crawlerTrap';
 
@@ -21,9 +22,19 @@ if (!['GET', 'HEAD'].includes(Astro.request.method))
 
 const visitor = trapVisitor(Astro.request, Astro.clientAddress);
 const token = visitor
-  ? await recordTrapHit(env.ap, visitor, trapVia(Astro.url.pathname))
+  ? await recordTrapHit(
+      env.ap,
+      visitor,
+      trapVia(Astro.url.pathname),
+      Astro.request.method,
+    )
   : null;
-const rows = await listTrapHits(env.ap);
+// Always served from cache: a crawler must not be able to force a rebuild.
+const wall = await readTrapWall(env.ap, Astro.url.origin);
+const siteKey =
+  token && env.TURNSTILE_SITE_KEY && env.TURNSTILE_SECRET_KEY
+    ? env.TURNSTILE_SITE_KEY
+    : null;
 Astro.response.headers.set('Cache-Control', 'no-store');
 Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
 ---
@@ -39,35 +50,75 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
     <h1>你好，你刚刚上墙了</h1>
     <p>
       你访问的地址被本站的robots.txt明确禁止抓取，所以这次访问的来源IP、ASN与User-Agent已被记录，并公开展示在下面的Wall
-      of Shame上（IP只展示到网段）。
+      of
+      Shame上（IP只展示到网段）。墙每小时更新一次，这次访问可能要过一会儿才会出现。
     </p>
     {token ? (
-      <form
-        method="post"
-        action="/api/crawler-trap/revoke"
-        class="my-4 px-4 py-3 rounded-lg [background-color:#3b82f622]"
-      >
-        <p>
-          如果你是人类——比如看到robots.txt里的路径，好奇点了进来——点下面的按钮就能撤回这条记录。撤回凭据只在这个页面里，离开或刷新后就无法撤回了。
-        </p>
-        <input type="hidden" name="token" value={token} />
-        <button
-          type="submit"
-          class="px-4 py-2 rounded-full bg-blue-600 text-neutral-50 cursor-pointer hover:bg-blue-700"
+      <>
+        <form
+          method="post"
+          action="/api/crawler-trap/revoke"
+          class="my-4 px-4 py-3 rounded-lg [background-color:#3b82f622]"
         >
-          我是人类，撤回记录
-        </button>
-      </form>
+          <p>
+            如果你是人类——比如看到robots.txt里的路径，好奇点了进来——点下面的按钮就能撤回这条记录。撤回凭据只在这个页面里，离开或刷新后就无法撤回了。
+          </p>
+          <input type="hidden" name="token" value={token} />
+          <button
+            type="submit"
+            class="px-4 py-2 rounded-full bg-blue-600 text-neutral-50 cursor-pointer hover:bg-blue-700"
+          >
+            我是人类，撤回记录
+          </button>
+        </form>
+        {siteKey && (
+          <section class="my-4">
+            <p>
+              顺便做个实验：下面是Cloudflare
+              Turnstile。这个页面会记下访问者是否执行了JavaScript、能否通过Turnstile，统计结果列在墙上。
+            </p>
+            <div id="trap-turnstile" class="min-h-[65px]"></div>
+          </section>
+        )}
+      </>
     ) : (
       <p>这次访问没有拿到来源IP，因此没有记录。</p>
     )}
     <ShameIntro />
-    <ShameWall rows={rows} />
+    <ShameWall wall={wall} />
   </article>
 </BaseLayout>
 
-<script is:inline define:vars={{ wallPath }}>
+<script
+  is:inline
+  define:vars={{ wallPath, visit: token, siteKey, action: turnstileAction }}
+>
   // Keep the trap URL out of the address bar, so a shared link does not make
   // chat previews land in the trap.
   history.replaceState(null, '', wallPath);
+  if (visit) {
+    const send = (fields) =>
+      fetch('/api/crawler-trap/turnstile', {
+        method: 'POST',
+        body: new URLSearchParams({ visit, ...fields }),
+        keepalive: true,
+      }).catch(() => {});
+    send({ step: 'js' });
+    if (siteKey) {
+      window.onTrapTurnstile = () =>
+        window.turnstile.render('#trap-turnstile', {
+          sitekey: siteKey,
+          action,
+          cData: visit,
+          callback: (token) => send({ step: 'token', token }),
+          'error-callback': (code) => send({ step: 'error', code: `${code}` }),
+          'timeout-callback': () => send({ step: 'error', code: 'timeout' }),
+        });
+      const script = document.createElement('script');
+      script.src =
+        'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=onTrapTurnstile';
+      script.async = true;
+      document.head.append(script);
+    }
+  }
 </script>
