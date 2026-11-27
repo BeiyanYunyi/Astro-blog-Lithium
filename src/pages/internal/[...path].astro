@@ -97,12 +97,15 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
   // chat previews land in the trap.
   history.replaceState(null, '', wallPath);
   if (visit) {
-    const send = (fields) =>
-      fetch('/api/crawler-trap/turnstile', {
-        method: 'POST',
-        body: new URLSearchParams({ visit, ...fields }),
-        keepalive: true,
-      }).catch(() => {});
+    // A beacon survives the page being closed right after load, as headless
+    // crawlers tend to do. Fall back to fetch where beacons are unavailable
+    // or refused.
+    const send = (fields) => {
+      const url = '/api/crawler-trap/turnstile';
+      const body = new URLSearchParams({ visit, ...fields });
+      if (navigator.sendBeacon?.(url, body)) return;
+      fetch(url, { method: 'POST', body, keepalive: true }).catch(() => {});
+    };
     send({ step: 'js' });
     if (siteKey) {
       window.onTrapTurnstile = () =>

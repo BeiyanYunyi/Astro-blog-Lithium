@@ -1839,6 +1839,7 @@ test('crawler trap beacons record JavaScript and Turnstile outcomes once per vis
   const html = await page.clone().text();
   assert.match(html, /id="trap-turnstile"/);
   assert.match(html, /turnstile\/v0\/api\.js\?render=explicit/);
+  assert.match(html, /navigator\.sendBeacon/);
   const visit = await tokenOf(page);
   assert.ok(html.includes(`"visit": "${visit}"`) || html.includes(visit));
 
