@@ -65,8 +65,8 @@ const eastAsianLetter =
   /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/u;
 const ideographic =
   /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}\p{Extended_Pictographic}\u3000-\u303f\uff01-\uff60\ufffc]/u;
-const westernAtStart = /^(?:\p{Script=Latin}|\p{Number})/u;
-const westernAtEnd = /(?:\p{Script=Latin}|\p{Number})\p{Mark}*$/u;
+const westernAtStart = /^[\p{Script=Latin}\p{Number}%+]/u;
+const westernAtEnd = /[\p{Script=Latin}\p{Number}%+]\p{Mark}*$/u;
 const noBreakAtStart = /^[\u00a0\u2007\u202f\u2060\ufeff]/u;
 const noBreakAtEnd = /[\u00a0\u2007\u202f\u2060\ufeff]$/u;
 const emptyGlue: Glue = { width: 0, stretch: 0, shrink: 0, cappedStretch: 0 };

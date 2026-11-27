@@ -123,6 +123,18 @@ test('moves a hyphenated English term onto a line where it fits', () => {
   );
 });
 
+test('spaces percent and plus next to Han without opening gaps within Western text', () => {
+  assert.deepEqual(
+    layout('约80%的比例', 240)[0]?.adjustments,
+    [4, 0, 0, 4, 0, 0, 0],
+  );
+  assert.deepEqual(
+    layout('敏感词+人工审查', 240)[0]?.adjustments,
+    [0, 0, 4, 4, 0, 0, 0, 0],
+  );
+  assert.deepEqual(layout('增长+5%', 240)[0]?.adjustments, [0, 4, 0, 0, 0]);
+});
+
 test('bounds explicit and implicit mixed-script spacing and varies it per line', () => {
   const sample = '甲 A乙 BC丙 D丁 Foo戊 Bar己 Q庚辛壬癸';
   const latin = /^[A-Za-z]/;
