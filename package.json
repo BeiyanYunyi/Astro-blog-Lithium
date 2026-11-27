@@ -27,6 +27,7 @@
     "@astrojs/rss": "^4.0.19",
     "@astrojs/sitemap": "^3.7.6",
     "@astrojs/svelte": "^9.1.6",
+    "@chenglou/pretext": "^1.0.0",
     "@fedify/cfworkers": "^2.4.6",
     "@fedify/fedify": "^2.4.6",
     "@fedify/vocab": "^2.4.6",

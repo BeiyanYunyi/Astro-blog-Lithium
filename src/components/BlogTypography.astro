@@ -1,0 +1,7 @@
+<script>
+  if (new URLSearchParams(window.location.search).has('pretext')) {
+    void import('@utils/blogTypography').then(({ setupBlogTypography }) => {
+      setupBlogTypography();
+    });
+  }
+</script>

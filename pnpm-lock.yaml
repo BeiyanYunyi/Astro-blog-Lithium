@@ -224,6 +224,9 @@ importers:
       '@astrojs/svelte':
         specifier: ^9.1.6
         version: 9.1.6(@types/node@26.6.6)(astro@7.4.13(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.19.2)(yaml@2.9.1))(esbuild@0.28.2)(jiti@2.7.0)(svelte@5.59.1)(tsx@4.19.2)(typescript@7.0.2)(yaml@2.9.1)
+      '@chenglou/pretext':
+        specifier: ^1.0.0
+        version: 1.0.0
       '@fedify/cfworkers':
         specifier: ^2.4.6
         version: 2.4.6(@cloudflare/workers-types@5.20261123.1)(@fedify/fedify@2.4.6)
@@ -531,6 +534,9 @@ packages:
 
   '@cfworker/json-schema@4.1.6':
     resolution: {integrity: sha512-YzVGTHXf4bzlyAL5KAvHYCdNbbt6zM5cYkAgxqxQPDQM6aZ4ShIIN5yJ+6q7YeonnevxT8k/LmD2tJi/jOiKkg==}
+
+  '@chenglou/pretext@1.0.0':
+    resolution: {integrity: sha512-BxKiDMxWJhyzL8asvcgg3T9YnUU7OUFsKO8oRaR2SYAPX4Sh2wM9gqTBjrBaZ4fnl84cEQ8czC0Q1M83z3chsA==}
 
   '@clack/core@1.6.0':
     resolution: {integrity: sha512-4GZynIB2IIe431odxesswvWTCP6orvqd6e2b07b3VFWBQRqUqIHc/EPIZwFoKS692QBp+ooPuXKaJV8g4kXuYA==}
@@ -4121,6 +4127,8 @@ snapshots:
       fontkitten: 1.0.3
 
   '@cfworker/json-schema@4.1.6': {}
+
+  '@chenglou/pretext@1.0.0': {}
 
   '@clack/core@1.6.0':
     dependencies:

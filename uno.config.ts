@@ -50,7 +50,7 @@ export default defineConfig({
     presetIcons(),
     presetSodesu(),
   ],
-  safelist: safeList,
+  safelist: [...safeList, 'blog-typeset', 'blog-typeset-wrap', 'print:hidden'],
   transformers: [transformerDirectives(), transformerVariantGroup()],
   rules: [
     [
@@ -62,7 +62,16 @@ export default defineConfig({
     ],
     ['pre-wrap', { 'white-space': 'pre-wrap' }],
   ],
-  shortcuts: { card: 'bg-white dark:bg-stone-800 rounded-md shadow-app' },
+  shortcuts: {
+    card: 'bg-white dark:bg-stone-800 rounded-md shadow-app',
+    'blog-typeset-wrap': '[@media_screen]:[overflow-wrap:anywhere]',
+    'blog-typeset': [
+      '[@media_screen]:!whitespace-nowrap',
+      '[@media_screen]:[text-autospace:no-autospace]',
+      '[@media_screen]:[text-spacing-trim:space-all]',
+      '[@media_screen]:[&_code]:!whitespace-pre',
+    ],
+  },
   layers: { shortcuts: -1 },
   theme: {
     fontFamily: {

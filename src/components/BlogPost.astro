@@ -6,6 +6,7 @@ import headingsToToc from '@utils/headingsToToc';
 import svgPathToName from '@utils/svgPathToName';
 import type { MarkdownHeading } from 'astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import BlogTypography from './BlogTypography.astro';
 import CoverImage from './CoverImage.astro';
 import FootnotePopovers from './FootnotePopovers.astro';
 import TocHighlight from './TocHighlight.svelte';
@@ -52,7 +53,7 @@ const toc = headingsToToc(headings);
             <ArticleTags tag={tag} />
           </div>
         </header>
-        <div class="p-6">
+        <div class="p-6" data-blog-typography>
           <slot />
           <ArticleTags tag={tag} />
         </div>
@@ -80,6 +81,7 @@ const toc = headingsToToc(headings);
     )}
     {toc && <TocHighlight headings={headings} client:only="svelte" />}
   </div>
+  <BlogTypography />
   <script>
     import getWordCount from '@utils/getWordCount';
 
