@@ -54,6 +54,7 @@ export default defineConfig({
     ...safeList,
     'blog-typeset',
     'blog-typeset-wrap',
+    'blog-letter-spacing',
     'print:hidden',
     "after:content-['-']",
     'after:generated-newline',
@@ -75,6 +76,10 @@ export default defineConfig({
   shortcuts: {
     card: 'bg-white dark:bg-stone-800 rounded-md shadow-app',
     'blog-typeset-wrap': '[@media_screen]:[overflow-wrap:anywhere]',
+    'blog-letter-spacing': [
+      '[@media_screen]:[letter-spacing:var(--blog-letter-spacing)]',
+      '[@media_screen]:[margin-inline-end:var(--blog-letter-spacing-end)]',
+    ],
     'blog-typeset': [
       '[@media_screen]:!whitespace-nowrap',
       '[@media_screen]:[text-autospace:no-autospace]',

@@ -14,6 +14,7 @@ type Edit = {
   node: HTMLElement;
   position: Position;
   side: 'before' | 'after';
+  endOffset?: number;
 };
 type Run = { tokens: Token[]; hardBreak: Position | undefined };
 type Word = { token: Token; style: CSSStyleDeclaration; lang: string };
@@ -24,6 +25,7 @@ type Paragraph = {
 };
 
 const han = /\p{Script=Han}/u;
+const hanGrapheme = /^\p{Unified_Ideograph}\p{Variation_Selector}*$/u;
 const eastAsian =
   /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/u;
 const punctuation = /^[\p{Punctuation}－～]\p{Variation_Selector}*$/u;
@@ -381,6 +383,22 @@ function spacing(position: Position, side: Edit['side'], amount: number): Edit {
   return { node, position, side };
 }
 
+function spacedText(
+  start: { node: Text; offset: number },
+  endOffset: number,
+  baseSpacing: number,
+  amount: number,
+): Edit {
+  const node = document.createElement('span');
+  node.className = 'blog-letter-spacing';
+  node.style.setProperty('--blog-letter-spacing', `${baseSpacing + amount}px`);
+  // Inline letter spacing also advances the last glyph. Keep the original
+  // spacing at the end of the span so only its internal gaps are adjusted.
+  node.style.setProperty('--blog-letter-spacing-end', `${-amount}px`);
+  node.textContent = start.node.data.slice(start.offset, endOffset);
+  return { node, position: start, side: 'before', endOffset };
+}
+
 function hyphen(position: Position): Edit {
   const node = document.createElement('span');
   // Generated content is neither copied nor part of the text.
@@ -398,14 +416,21 @@ function lineBreak(position: Position): Edit {
 }
 
 function applyEdits(edits: Edit[]) {
-  const textEdits = new Map<Text, { offset: number; node: Node }[]>();
+  const textEdits = new Map<
+    Text,
+    { offset: number; endOffset: number; node: Node }[]
+  >();
   const afterElement = new Map<Element, Node>();
   const added: Node[] = [];
-  for (const { node, position, side } of edits) {
+  for (const { node, position, side, endOffset } of edits) {
     added.push(node);
     if ('offset' in position) {
       const edits = textEdits.get(position.node) ?? [];
-      edits.push({ offset: position.offset, node });
+      edits.push({
+        offset: position.offset,
+        endOffset: endOffset ?? position.offset,
+        node,
+      });
       textEdits.set(position.node, edits);
     } else if (side === 'before') {
       position.node.before(node);
@@ -421,14 +446,16 @@ function applyEdits(edits: Edit[]) {
     originals.set(text, text.data);
     const fragment = document.createDocumentFragment();
     let start = 0;
-    for (const { offset, node } of edits.sort((a, b) => a.offset - b.offset)) {
+    for (const { offset, endOffset, node } of edits.sort(
+      (a, b) => a.offset - b.offset,
+    )) {
       if (offset > start) {
         const chunk = document.createTextNode(text.data.slice(start, offset));
         fragment.append(chunk);
         added.push(chunk);
       }
       fragment.append(node);
-      start = offset;
+      start = endOffset;
     }
     if (start < text.length) {
       const rest = document.createTextNode(text.data.slice(start));
@@ -499,19 +526,65 @@ function measureInBrowser(runs: Run[], punctuationOnly = false): Run[] {
   }));
 }
 
-function renderRuns(runs: Run[], width: number, em: number, hanWidth: number) {
+function renderRuns(
+  runs: Run[],
+  width: number,
+  em: number,
+  hanWidth: number,
+  mergeSpacing: boolean,
+) {
   const edits: Edit[] = [];
   const lineEnds: { node: HTMLElement; justified: boolean }[] = [];
+  const baseSpacings = new Map<Element, number>();
   for (const { tokens, hardBreak } of runs) {
     if (tokens.length) {
       const lines = layoutChineseParagraph(tokens, width, em, hanWidth);
       if (!lines) return;
       for (const [index, line] of lines.entries()) {
-        for (const [index, after] of line.adjustments.entries()) {
+        for (let index = 0; index < line.adjustments.length; index++) {
           const token = tokens[line.start + index]!;
           const before = line.beforeAdjustments[index]!;
           if (before) edits.push(spacing(token.start, 'before', before));
-          if (after) edits.push(spacing(token.end, 'after', after));
+          const amount = line.adjustments[index]!;
+          if (mergeSpacing && amount && hanGrapheme.test(token.text)) {
+            const { start } = token;
+            let end = token.end;
+            if ('offset' in start && 'offset' in end) {
+              while (
+                index + 1 < line.adjustments.length &&
+                line.adjustments[index] === amount &&
+                !line.beforeAdjustments[index + 1]
+              ) {
+                const next = tokens[line.start + index + 1]!;
+                if (
+                  !hanGrapheme.test(next.text) ||
+                  !('offset' in next.start) ||
+                  !('offset' in next.end) ||
+                  next.start.node !== start.node ||
+                  next.start.offset !== end.offset
+                )
+                  break;
+                index++;
+                end = next.end;
+              }
+              if (end !== token.end) {
+                const parent = start.node.parentElement!;
+                let base = baseSpacings.get(parent);
+                if (base === undefined) {
+                  base =
+                    Number.parseFloat(getComputedStyle(parent).letterSpacing) ||
+                    0;
+                  baseSpacings.set(parent, base);
+                }
+                edits.push(spacedText(start, end.offset, base, amount));
+              }
+            }
+          }
+          const after = line.adjustments[index]!;
+          if (after)
+            edits.push(
+              spacing(tokens[line.start + index]!.end, 'after', after),
+            );
         }
         const end = tokens[line.end - 1]!.end;
         if (line.hyphenated) edits.push(hyphen(end));
@@ -524,7 +597,11 @@ function renderRuns(runs: Run[], width: number, em: number, hanWidth: number) {
     if (hardBreak) edits.push(lineBreak(hardBreak));
   }
   if (!edits.length) return;
-  return { restore: applyEdits(edits), lineEnds };
+  return {
+    restore: applyEdits(edits),
+    lineEnds,
+    merged: baseSpacings.size > 0,
+  };
 }
 
 function typeset(paragraph: HTMLParagraphElement, state: Paragraph) {
@@ -543,17 +620,24 @@ function typeset(paragraph: HTMLParagraphElement, state: Paragraph) {
   // Match the browser's punctuation advance when it differs from Canvas.
   if (firstMeasurement) state.runs = measureInBrowser(state.runs, true);
   /** Render, rejecting overflow, and report how far justified lines miss the edge. */
-  const render = (runs: Run[]) => {
-    const result = renderRuns(runs, state.width, em, hanWidth);
+  const render = (
+    runs: Run[],
+    mergeSpacing = true,
+  ): { restore: () => void; misalignment: number } | undefined => {
+    const result = renderRuns(runs, state.width, em, hanWidth, mergeSpacing);
     if (!result) return undefined;
     const right =
       paragraph.getBoundingClientRect().left + leftInset + state.width;
     let misalignment = 0;
     for (const { node, justified } of result.lineEnds) {
       const offset = node.getBoundingClientRect().right - right;
-      if (offset > 1) {
+      if (
+        offset > 1 ||
+        (result.merged && justified && Math.abs(offset) > 0.5)
+      ) {
         result.restore();
-        return undefined;
+        // Keep explicit gaps if the browser advances inline spacing differently.
+        return result.merged ? render(runs, false) : undefined;
       }
       if (justified) misalignment = Math.max(misalignment, Math.abs(offset));
     }
