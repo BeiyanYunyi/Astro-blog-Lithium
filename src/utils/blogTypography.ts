@@ -312,9 +312,31 @@ function readRuns(paragraph: HTMLParagraphElement): Run[] | null {
         (node.matches(inlineTags) &&
           getComputedStyle(node).display === 'inline-block')
       ) {
-        const boxes = node.getClientRects();
-        const box = boxes[0];
-        if (boxes.length !== 1 || !box || box.width === 0) return false;
+        // Measure the box on one line. Formulas such as KaTeX leave break
+        // opportunities between their parts and report several fragments,
+        // even on a single line, so take the union of fragments that share
+        // the line.
+        const element = node as HTMLElement;
+        const { whiteSpace } = element.style;
+        element.style.whiteSpace = 'nowrap';
+        const boxes = [...node.getClientRects()];
+        element.style.whiteSpace = whiteSpace;
+        const first = boxes[0];
+        if (
+          !first ||
+          boxes.some(
+            ({ top, bottom }) =>
+              Math.abs(top - first.top) > 1 ||
+              Math.abs(bottom - first.bottom) > 1,
+          )
+        )
+          return false;
+        const left = Math.min(...boxes.map(({ left }) => left));
+        const box = {
+          left,
+          width: Math.max(...boxes.map(({ right }) => right)) - left,
+        };
+        if (box.width === 0) return false;
         const footnote = node.matches(footnoteLink)
           ? node
           : node.querySelector(footnoteLink);
