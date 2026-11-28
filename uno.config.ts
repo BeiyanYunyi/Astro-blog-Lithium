@@ -56,6 +56,7 @@ export default defineConfig({
     'blog-typeset-wrap',
     'print:hidden',
     "after:content-['-']",
+    'after:generated-newline',
   ],
   transformers: [transformerDirectives(), transformerVariantGroup()],
   rules: [
@@ -67,6 +68,9 @@ export default defineConfig({
       },
     ],
     ['pre-wrap', { 'white-space': 'pre-wrap' }],
+    // A preserved newline in generated content forces a line break that is
+    // not copied with the selection.
+    ['generated-newline', { content: '"\\a"', 'white-space': 'pre' }],
   ],
   shortcuts: {
     card: 'bg-white dark:bg-stone-800 rounded-md shadow-app',

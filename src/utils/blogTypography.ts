@@ -390,8 +390,9 @@ function hyphen(position: Position): Edit {
 }
 
 function lineBreak(position: Position): Edit {
-  const node = document.createElement('br');
-  node.className = 'print:hidden';
+  const node = document.createElement('span');
+  // A generated newline breaks the line without adding copyable text.
+  node.className = 'print:hidden after:generated-newline';
   node.setAttribute('aria-hidden', 'true');
   return { node, position, side: 'after' };
 }
