@@ -511,30 +511,47 @@ function typeset(paragraph: HTMLParagraphElement, state: Paragraph) {
   // Use the DOM advance for punctuation cells. At small sizes, the browser
   // can advance punctuation differently from the Canvas measurement.
   if (firstMeasurement) state.runs = measureInBrowser(state.runs, true);
+  /** Render, rejecting overflow, and report how far justified lines miss the edge. */
   const render = (runs: Run[]) => {
     const result = renderRuns(runs, state.width, em, hanWidth);
     if (!result) return undefined;
     const right =
       paragraph.getBoundingClientRect().left + leftInset + state.width;
-    if (
-      result.lineEnds.some(
-        (end) => end.getBoundingClientRect().right > right + 1,
-      )
-    ) {
-      result.restore();
-      return undefined;
+    let misalignment = 0;
+    for (const end of result.lineEnds) {
+      const offset = end.getBoundingClientRect().right - right;
+      if (offset > 1) {
+        result.restore();
+        return undefined;
+      }
+      // Only lines ending in a line break are justified.
+      if (end.nodeName === 'BR')
+        misalignment = Math.max(misalignment, Math.abs(offset));
     }
-    return result.restore;
+    return { restore: result.restore, misalignment };
   };
 
-  let restore = render(state.runs);
-  if (!restore) {
-    // CSS shaping and Canvas measurement can differ. Retry with the widths
-    // the browser actually lays out before allowing nowrap on this paragraph.
+  let rendered = render(state.runs);
+  if (!rendered || rendered.misalignment > 0.5) {
+    // CSS shaping and Canvas measurement can differ, which overflows lines
+    // or leaves them short of the edge. Retry with the widths the browser
+    // actually lays out, and keep whichever aligns better.
+    const canvasMisalignment = rendered?.misalignment;
+    rendered?.restore();
     const browserRuns = measureInBrowser(state.runs);
-    restore = render(browserRuns);
-    if (restore) state.runs = browserRuns;
+    rendered = render(browserRuns);
+    if (
+      rendered &&
+      (canvasMisalignment === undefined ||
+        rendered.misalignment <= canvasMisalignment)
+    ) {
+      state.runs = browserRuns;
+    } else if (canvasMisalignment !== undefined) {
+      rendered?.restore();
+      rendered = render(state.runs);
+    }
   }
+  const restore = rendered?.restore;
   if (!restore) {
     paragraph.classList.remove('blog-typeset');
     return;
