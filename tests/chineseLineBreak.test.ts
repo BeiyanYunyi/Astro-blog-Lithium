@@ -222,3 +222,28 @@ test('a runt penalty keeps a lone character off the last line', () => {
     '戌亥天',
   ]);
 });
+
+test('curly quotes narrow to 3/4 of a Han cell when a line must shrink', () => {
+  const tokens: ChineseLayoutToken[] = Array.from('甲乙“丙丁”戊己', (text) => ({
+    text,
+    width: /[“”]/u.test(text) ? 9 : 16,
+  }));
+  const cells = (width: number) => {
+    const lines = layoutChineseParagraph(tokens, width, 16);
+    assert.equal(lines?.length, 1);
+    const { beforeAdjustments, adjustments } = lines![0]!;
+    // The cell of a quote runs from the end of the Han character before it
+    // to the start of the one after it.
+    let next = 0;
+    const origins = tokens.map(({ width }, index) => {
+      const origin = next + beforeAdjustments[index]!;
+      next = origin + width + adjustments[index]!;
+      return origin;
+    });
+    return [origins[3]! - origins[1]! - 16, origins[6]! - origins[4]! - 16];
+  };
+  assert.deepEqual(cells(128), [16, 16]);
+  for (const cell of cells(124)) assert.ok(Math.abs(cell - 14) < 1e-6);
+  for (const cell of cells(120)) assert.ok(Math.abs(cell - 12) < 1e-6);
+  assert.ok(layoutChineseParagraph(tokens, 118, 16)!.length > 1);
+});

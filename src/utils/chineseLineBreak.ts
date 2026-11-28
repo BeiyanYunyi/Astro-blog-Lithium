@@ -527,6 +527,20 @@ export function layoutChineseParagraph(
       compressiblePairs[index],
     ),
   );
+  // A curly quote's cell may narrow from a full Han cell to 3/4 of one when
+  // its line has to shrink. The space comes off its blank side, through the
+  // glue there: before an opening quote, after a closing one. Quotes next to
+  // other punctuation are already squeezed by the pair compression.
+  const quoteShrink = quoteCells.map((cell, index) => {
+    if (!cell) return 0;
+    const gap = cell.opening ? index - 1 : index;
+    if (gap < 0 || gap >= tokens.length - 1) return 0;
+    if (compressiblePairs[gap] !== undefined) return 0;
+    const shrink = Math.min(hanWidth / 4, cell.blank);
+    const glue = glues[gap]!;
+    glues[gap] = { ...glue, shrink: glue.shrink + shrink };
+    return shrink;
+  });
   const prefixes: Metrics[] = [{ ...emptyGlue, minimumWidth: 0 }];
   for (const [index, token] of tokens.entries()) {
     const previous = prefixes[index]!;
@@ -554,6 +568,7 @@ export function layoutChineseParagraph(
           advance -
             before -
             after -
+            quoteShrink[index]! -
             (token.text === ' ' ? glue.shrink - Math.min(0, glue.width) : 0),
         ),
     });
