@@ -16,6 +16,7 @@ type Edit = {
   side: 'before' | 'after';
 };
 type Run = { tokens: Token[]; hardBreak: Position | undefined };
+type Word = { token: Token; style: CSSStyleDeclaration; lang: string };
 type Paragraph = {
   width: number;
   runs?: Run[] | null;
@@ -30,6 +31,8 @@ const wordPunctuation = /^[.'’_:/@%+-]$/u;
 const rightToLeft = /[\p{Script=Arabic}\p{Script=Hebrew}\p{Bidi_Control}]/u;
 const explicitBreak = /^[\r\n]+$/;
 const collapsible = /^[\t\f\r ]+$/;
+const latinWord = /^(?=.*\p{Script=Latin})[\p{L}\p{M}\p{N}.'’_:/@%+-]+$/u;
+const explicitHyphen = /[-‐]$/u;
 const segmenter =
   typeof Intl.Segmenter === 'function'
     ? new Intl.Segmenter('zh', { granularity: 'grapheme' })
@@ -95,6 +98,115 @@ function glyphInk(text: string, style: CSSStyleDeclaration) {
   return { ink };
 }
 
+const hyphenationBreaks = new Map<string, number[]>();
+
+function hyphenationLanguage(node: Node) {
+  const lang =
+    node.parentElement?.closest('[lang]')?.getAttribute('lang') ?? '';
+  // Latin words in Chinese prose are mostly English.
+  return !lang || /^(?:zh|ja|ko)\b/i.test(lang) ? 'en' : lang;
+}
+
+/**
+ * Ask the browser where it may break each word instead of computing
+ * hyphenation points: lay the words out with `hyphens: auto` in a column
+ * narrower than any fragment, so every opportunity becomes a line break,
+ * and read the offsets back from the line each grapheme lands on.
+ */
+function probeHyphenation(words: Word[], graphemes: Intl.Segmenter) {
+  const missing = new Map<string, { text: string; lang: string }>();
+  for (const { token, lang } of words) {
+    const key = `${lang}\0${token.text}`;
+    if (!hyphenationBreaks.has(key))
+      missing.set(key, { text: token.text, lang });
+  }
+  if (!missing.size) return;
+
+  const host = document.createElement('div');
+  host.setAttribute('aria-hidden', 'true');
+  host.style.cssText =
+    'position:absolute;top:0;left:0;width:0;visibility:hidden;' +
+    'hyphens:auto;-webkit-hyphens:auto;white-space:normal;' +
+    'word-break:normal;overflow-wrap:normal';
+  const probes = [...missing].map(([key, { text, lang }]) => {
+    const probe = document.createElement('div');
+    probe.lang = lang;
+    probe.textContent = text;
+    host.append(probe);
+    return { key, node: probe.firstChild as Text };
+  });
+  document.body.append(host);
+  const range = document.createRange();
+  for (const { key, node } of probes) {
+    const breaks: number[] = [];
+    let top: number | undefined;
+    for (const { segment, index } of graphemes.segment(node.data)) {
+      range.setStart(node, index);
+      range.setEnd(node, index + segment.length);
+      const rect = range.getBoundingClientRect();
+      if (top !== undefined && rect.top > top + 1) breaks.push(index);
+      top = rect.top;
+    }
+    hyphenationBreaks.set(key, breaks);
+  }
+  host.remove();
+}
+
+/** Split words at the breaks the browser allows into discretionary fragments. */
+function splitWords(runs: Run[], words: Word[], graphemes: Intl.Segmenter) {
+  if (!words.length) return runs;
+  probeHyphenation(words, graphemes);
+  const fragments = new Map<Token, Token[]>();
+  for (const { token, style, lang } of words) {
+    const breaks = hyphenationBreaks.get(`${lang}\0${token.text}`);
+    const { text, start } = token;
+    if (!breaks?.length || !('offset' in start)) continue;
+
+    const parts: Token[] = [];
+    let from = 0;
+    let left = 0;
+    const cut = (offset: number, hyphen?: Token['hyphen']) => {
+      // Measure prefixes so the fragments keep the kerning of the word.
+      const right =
+        offset === text.length
+          ? token.width
+          : textWidth(text.slice(0, offset), style);
+      parts.push({
+        text: text.slice(from, offset),
+        width: Math.max(0, right - left),
+        start: { node: start.node, offset: start.offset + from },
+        end: { node: start.node, offset: start.offset + offset },
+        ...(hyphen ? { hyphen } : {}),
+      });
+      from = offset;
+      left = right;
+    };
+    for (const offset of breaks) {
+      const before = text.slice(0, offset);
+      const explicit = explicitHyphen.test(before);
+      // Keep hyphenation inside letters and breaks after a typed hyphen;
+      // ignore other opportunities such as after a slash.
+      if (
+        !explicit &&
+        !(/\p{L}\p{M}*$/u.test(before) && /^\p{L}/u.test(text.slice(offset)))
+      )
+        continue;
+      cut(offset, {
+        width: explicit ? 0 : textWidth('-', style),
+        automatic: !explicit,
+      });
+    }
+    if (!parts.length) continue;
+    cut(text.length);
+    fragments.set(token, parts);
+  }
+  if (!fragments.size) return runs;
+  return runs.map(({ tokens, hardBreak }) => ({
+    hardBreak,
+    tokens: tokens.flatMap((token) => fragments.get(token) ?? [token]),
+  }));
+}
+
 function tokenize(text: string, segmenter: Intl.Segmenter) {
   const parts = [...segmenter.segment(text)];
   const tokens: { text: string; index: number }[] = [];
@@ -137,6 +249,7 @@ function readRuns(paragraph: HTMLParagraphElement): Run[] | null {
   }
 
   const runs: Run[] = [];
+  const words: Word[] = [];
   let tokens: Token[] = [];
   let pendingSpace: Token | undefined;
   const push = (token: Token) => {
@@ -177,13 +290,16 @@ function readRuns(paragraph: HTMLParagraphElement): Run[] | null {
               end,
             };
           } else {
-            push({
+            const token: Token = {
               text,
               width: textWidth(text, style),
               ...(punctuation.test(text) ? glyphInk(text, style) : {}),
               start,
               end,
-            });
+            };
+            push(token);
+            if (latinWord.test(text))
+              words.push({ token, style, lang: hyphenationLanguage(node) });
           }
         }
         continue;
@@ -231,7 +347,7 @@ function readRuns(paragraph: HTMLParagraphElement): Run[] | null {
 
   if (!visit(paragraph)) return null;
   endRun();
-  return runs;
+  return splitWords(runs, words, graphemes);
 }
 
 function spacing(position: Position, side: Edit['side'], amount: number): Edit {
@@ -241,6 +357,14 @@ function spacing(position: Position, side: Edit['side'], amount: number): Edit {
   node.className = 'print:hidden';
   node.setAttribute('aria-hidden', 'true');
   return { node, position, side };
+}
+
+function hyphen(position: Position): Edit {
+  const node = document.createElement('span');
+  // Generated content is neither copied nor part of the text.
+  node.className = "print:hidden after:content-['-']";
+  node.setAttribute('aria-hidden', 'true');
+  return { node, position, side: 'after' };
 }
 
 function lineBreak(position: Position): Edit {
@@ -336,6 +460,7 @@ function renderRuns(runs: Run[], width: number, em: number, hanWidth: number) {
           if (after) edits.push(spacing(token.end, 'after', after));
         }
         const end = tokens[line.end - 1]!.end;
+        if (line.hyphenated) edits.push(hyphen(end));
         const marker =
           index < lines.length - 1 ? lineBreak(end) : spacing(end, 'after', 0);
         edits.push(marker);

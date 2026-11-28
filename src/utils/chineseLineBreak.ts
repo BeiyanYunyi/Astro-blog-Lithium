@@ -5,6 +5,11 @@ export interface ChineseLayoutToken {
   ink?: { left: number; right: number };
   /** Inline annotations share the preceding token's line. */
   annotation?: 'script' | 'footnote';
+  /**
+   * A discretionary break after this token inside a word. `width` is the
+   * hyphen added at the end of the line, 0 after an explicit hyphen.
+   */
+  hyphen?: { width: number; automatic: boolean };
 }
 
 export interface ChineseLayoutLine {
@@ -15,6 +20,8 @@ export interface ChineseLayoutLine {
   beforeAdjustments: number[];
   /** Space in pixels after each token, including quote alignment and trim. */
   adjustments: number[];
+  /** Whether the line ends at an automatic hyphenation point. */
+  hyphenated: boolean;
 }
 
 interface Glue {
@@ -31,6 +38,12 @@ interface Metrics extends Glue {
 interface Breakpoint {
   end: number;
   next: number;
+  /** Penalty for breaking here, as in Knuth–Plass. */
+  penalty: number;
+  /** Width added to the line when breaking here, e.g. a hyphen. */
+  width: number;
+  /** Flagged penalties (hyphens) incur double hyphen demerits. */
+  flagged: boolean;
 }
 
 interface QuoteCell {
@@ -47,6 +60,8 @@ interface State {
   ratio: number;
   fitness: number;
   demerits: number;
+  flagged: boolean;
+  hyphenated: boolean;
 }
 
 // W3C CLReq §6.1 and §6.3 distinguish break prohibitions from the
@@ -71,6 +86,15 @@ const noBreakAtStart = /^[\u00a0\u2007\u202f\u2060\ufeff]/u;
 const noBreakAtEnd = /[\u00a0\u2007\u202f\u2060\ufeff]$/u;
 const emptyGlue: Glue = { width: 0, stretch: 0, shrink: 0, cappedStretch: 0 };
 const epsilon = 1e-6;
+
+// The parameters of typeset's common.py and full.py (TeX82 values).
+const linePenalty = 10;
+const hyphenPenalty = 50;
+// typeset.py's penalty for a lone last word or character.
+const runtPenalty = 50;
+const infiniteBadness = 10000;
+const doubleHyphenDemerits = 3000; // alpha
+const adjacentDemerits = 3000; // gamma
 
 function canBreakAfter(
   left: string,
@@ -225,23 +249,65 @@ function gapBetween(
   return emptyGlue;
 }
 
-function breakpoints(tokens: readonly ChineseLayoutToken[]): Breakpoint[] {
+function breakpoints(
+  tokens: readonly ChineseLayoutToken[],
+  hyphenate: boolean,
+): Breakpoint[] {
   const points: Breakpoint[] = [];
   let next = 0;
   while (tokens[next]?.text === ' ') next++;
-  points.push({ end: 0, next });
+  const plain = { penalty: 0, width: 0, flagged: false };
+  points.push({ end: 0, next, ...plain });
 
   for (let index = next; index < tokens.length; index = next) {
     const end = index + 1;
     next = end;
     while (tokens[next]?.text === ' ') next++;
 
+    const left = tokens[index]!;
     const right = tokens[next];
-    if (!right || canBreakAfter(tokens[index]!.text, right, next > end)) {
-      points.push({ end, next });
+    if (!right || canBreakAfter(left.text, right, next > end)) {
+      points.push({ end, next, ...plain });
+    } else if (
+      left.hyphen &&
+      next === end &&
+      (hyphenate || !left.hyphen.automatic)
+    ) {
+      points.push({
+        end,
+        next,
+        penalty: hyphenPenalty,
+        width: left.hyphen.width,
+        flagged: true,
+      });
     }
   }
+
+  // Like typeset.py's runt penalty: charge the last break between words or
+  // characters, so a lone word or character on the last line costs more.
+  for (let index = points.length - 2; index > 0; index--) {
+    const point = points[index]!;
+    if (point.flagged) continue;
+    point.penalty += runtPenalty;
+    break;
+  }
   return points;
+}
+
+/** typeset's badness(): rounded, and infinite for overfull lines. */
+function badness(ratio: number): number {
+  if (!Number.isFinite(ratio) || ratio < -1) return infiniteBadness;
+  return Math.min(
+    infiniteBadness,
+    Math.floor(100 * Math.abs(ratio) ** 3 + 0.5),
+  );
+}
+
+/** typeset's demerits(); the paragraph end is a forced break. */
+function lineDemerits(badness: number, penalty: number, forced: boolean) {
+  const demerits = (linePenalty + badness) ** 2;
+  if (forced) return demerits;
+  return penalty >= 0 ? demerits + penalty ** 2 : demerits - penalty ** 2;
 }
 
 function fitnessClass(ratio: number): number {
@@ -283,6 +349,8 @@ function chooseBreaks(
     ratio: 0,
     fitness: 1,
     demerits: 0,
+    flagged: false,
+    hyphenated: false,
   };
   // Keep the best path per fitness class so an adjacent line can select a
   // different predecessor when jumping between loose and tight lines.
@@ -291,13 +359,23 @@ function chooseBreaks(
   const last = points.length - 1;
 
   for (let from = 0; from < last; from++) {
-    const previousStates = paths[from]!;
+    // Like full.py, keep a fitness class only if it can still beat the best
+    // path here after paying the adjacent demerits.
+    let least = Infinity;
+    for (const state of paths[from]!) {
+      if (state) least = Math.min(least, state.demerits);
+    }
+    const previousStates = paths[from]!.filter(
+      (state): state is State =>
+        state !== undefined && state.demerits <= least + adjacentDemerits,
+    );
     if (previousStates.length === 0) continue;
 
     const start = points[from]!.next;
     const before = prefixes[start]!;
     for (let to = from + 1; to <= last; to++) {
-      const end = points[to]!.end;
+      const point = points[to]!;
+      const end = point.end;
       const after = prefixes[end]!;
       if (after.minimumWidth - before.minimumWidth > width + epsilon) break;
 
@@ -307,7 +385,8 @@ function chooseBreaks(
         before.width -
         discardedGlue.width -
         leading[start]! -
-        trailing[end - 1]!;
+        trailing[end - 1]! +
+        point.width;
       const difference = width - naturalWidth;
       const final = to === last;
       const stretch = after.stretch - before.stretch - discardedGlue.stretch;
@@ -334,21 +413,21 @@ function chooseBreaks(
       ratio = Math.max(-1, ratio);
 
       const fitness = fitnessClass(ratio);
-      const badness = 100 * Math.abs(ratio) ** 3;
-      const shortLastLine = final && from > 0 && naturalWidth < 2 * em;
-      const lineDemerits =
-        (10 + badness + 100 * (unfilled / em) ** 2) ** 2 +
-        (shortLastLine ? 1200 : 0);
+      // An underfull line of the last pass is also charged for the space it
+      // leaves unfilled beyond the tolerance.
+      const base = lineDemerits(
+        badness(ratio) + 100 * (unfilled / em) ** 2,
+        point.penalty,
+        final,
+      );
       const candidates = paths[to]!;
       for (const previous of previousStates) {
-        if (!previous) continue;
-        const abruptChange =
-          !final &&
-          previous.previous &&
-          Math.abs(previous.fitness - fitness) > 1;
-        const demerits =
-          previous.demerits + lineDemerits + (abruptChange ? 3000 : 0);
-        if (demerits < (candidates[fitness]?.demerits ?? Infinity)) {
+        let demerits = previous.demerits + base;
+        if (point.flagged && previous.flagged) demerits += doubleHyphenDemerits;
+        if (Math.abs(previous.fitness - fitness) > 1)
+          demerits += adjacentDemerits;
+        // "<=": among equals the later predecessor wins, like TeX.
+        if (demerits <= (candidates[fitness]?.demerits ?? Infinity)) {
           candidates[fitness] = {
             previous,
             start,
@@ -356,6 +435,8 @@ function chooseBreaks(
             ratio,
             fitness,
             demerits,
+            flagged: point.flagged,
+            hyphenated: point.width > 0,
           };
         }
       }
@@ -364,7 +445,7 @@ function chooseBreaks(
 
   let best: State | undefined;
   for (const state of paths[last]!) {
-    if (state && (!best || state.demerits < best.demerits)) best = state;
+    if (state && (!best || state.demerits <= best.demerits)) best = state;
   }
   return best;
 }
@@ -391,8 +472,11 @@ export function layoutChineseParagraph(
     return null;
   }
 
-  const points = breakpoints(tokens);
-  if (points.length < 2) return null;
+  const points = breakpoints(tokens, false);
+  const hyphenatedPoints = tokens.some(({ hyphen }) => hyphen?.automatic)
+    ? breakpoints(tokens, true)
+    : points;
+  if (hyphenatedPoints.length < 2) return null;
 
   const quoteCells = tokens.map((token) => quoteCell(token, hanWidth));
   const leading = tokens.map((token, index) =>
@@ -475,12 +559,22 @@ export function layoutChineseParagraph(
     });
   }
 
-  // Keep legal breaks even when a narrow column must leave a short line.
+  // Like TeX, hyphenate words only when the first pass fails. Keep legal
+  // breaks even when a narrow column must leave a short line.
   let state =
     chooseBreaks(points, prefixes, glues, leading, trailing, width, em, 1) ??
-    chooseBreaks(points, prefixes, glues, leading, trailing, width, em, 3) ??
     chooseBreaks(
-      points,
+      hyphenatedPoints,
+      prefixes,
+      glues,
+      leading,
+      trailing,
+      width,
+      em,
+      3,
+    ) ??
+    chooseBreaks(
+      hyphenatedPoints,
       prefixes,
       glues,
       leading,
@@ -494,7 +588,7 @@ export function layoutChineseParagraph(
 
   const lines: ChineseLayoutLine[] = [];
   while (state.previous) {
-    const { start, end, ratio } = state;
+    const { start, end, ratio, hyphenated } = state;
     const adjustments = glues
       .slice(start, end)
       .map(
@@ -517,6 +611,7 @@ export function layoutChineseParagraph(
       end,
       beforeAdjustments,
       adjustments,
+      hyphenated,
     });
     state = state.previous;
   }

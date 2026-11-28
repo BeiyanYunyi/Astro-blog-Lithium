@@ -163,3 +163,62 @@ test('bounds explicit and implicit mixed-script spacing and varies it per line',
     }
   }
 });
+
+function hanTokens(text: string): ChineseLayoutToken[] {
+  return Array.from(text, (text) => ({ text, width: 16 }));
+}
+
+function lineTexts(tokens: ChineseLayoutToken[], width: number) {
+  const lines = layoutChineseParagraph(tokens, width, 16);
+  assert.ok(lines);
+  return lines.map(
+    ({ start, end, hyphenated }) =>
+      tokens
+        .slice(start, end)
+        .map(({ text }) => text)
+        .join('') + (hyphenated ? '-' : ''),
+  );
+}
+
+test('hyphenates a word only when the first pass fails', () => {
+  const automatic = { width: 6, automatic: true };
+  const tokens: ChineseLayoutToken[] = [
+    ...hanTokens('甲乙丙丁戊己'),
+    { text: 'hyph', width: 32, hyphen: automatic },
+    { text: 'en', width: 16, hyphen: automatic },
+    { text: 'ation', width: 40 },
+    ...hanTokens('庚辛壬癸子丑'),
+  ];
+  assert.deepEqual(lineTexts(tokens, 400), [
+    '甲乙丙丁戊己hyphenation庚辛壬癸子丑',
+  ]);
+  assert.deepEqual(lineTexts(tokens, 160), [
+    '甲乙丙丁戊己hyphen-',
+    'ation庚辛壬癸子丑',
+  ]);
+});
+
+test('breaks after an explicit hyphen without adding another', () => {
+  const tokens: ChineseLayoutToken[] = [
+    ...hanTokens('甲乙丙丁戊己'),
+    { text: 'Decoder-', width: 64, hyphen: { width: 0, automatic: false } },
+    { text: 'only', width: 32 },
+    ...hanTokens('庚辛壬癸子丑'),
+  ];
+  assert.deepEqual(lineTexts(tokens, 168), [
+    '甲乙丙丁戊己Decoder-',
+    'only庚辛壬癸子丑',
+  ]);
+});
+
+test('a runt penalty keeps a lone character off the last line', () => {
+  // Shrinking the punctuation would otherwise leave 天 alone.
+  const tokens = hanTokens(
+    '甲乙，丙丁戊，己庚辛，壬癸子丑，寅卯辰。巳午未，申酉戌亥天',
+  );
+  assert.deepEqual(lineTexts(tokens, 216), [
+    '甲乙，丙丁戊，己庚辛，壬癸',
+    '子丑，寅卯辰。巳午未，申酉',
+    '戌亥天',
+  ]);
+});

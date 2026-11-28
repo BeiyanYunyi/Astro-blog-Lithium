@@ -50,7 +50,13 @@ export default defineConfig({
     presetIcons(),
     presetSodesu(),
   ],
-  safelist: [...safeList, 'blog-typeset', 'blog-typeset-wrap', 'print:hidden'],
+  safelist: [
+    ...safeList,
+    'blog-typeset',
+    'blog-typeset-wrap',
+    'print:hidden',
+    "after:content-['-']",
+  ],
   transformers: [transformerDirectives(), transformerVariantGroup()],
   rules: [
     [
