@@ -491,6 +491,22 @@ export function layoutChineseParagraph(
   const afterBlank = tokens.map((token, index) =>
     punctuationBlank(token, quoteCells[index], 'after', trailing[index]!),
   );
+  // At the start or end of a line, punctuation that takes a full Han cell,
+  // quotes included, narrows to its glyph so the ink meets the line edge.
+  const fullCell = tokens.map(
+    (token, index) =>
+      quoteCells[index] !== undefined ||
+      (token.ink !== undefined &&
+        !token.annotation &&
+        adjacentPunctuation.test(token.text) &&
+        token.width >= (hanWidth * 3) / 4),
+  );
+  const lineStartTrim = leading.map((trim, index) =>
+    fullCell[index] ? Math.max(trim, beforeBlank[index]!) : trim,
+  );
+  const lineEndTrim = trailing.map((trim, index) =>
+    fullCell[index] ? Math.max(trim, afterBlank[index]!) : trim,
+  );
   const compressiblePairs = tokens.map((token, index) => {
     const next = tokens[index + 1];
     if (!next) return undefined;
@@ -547,11 +563,11 @@ export function layoutChineseParagraph(
     const glue = glues[index]!;
     const advance = quoteCells[index] ? hanWidth : token.width;
     const before = Math.max(
-      leading[index]!,
+      lineStartTrim[index]!,
       Math.min(compressiblePairs[index - 1] ?? 0, beforeBlank[index]!),
     );
     const after = Math.max(
-      trailing[index]!,
+      lineEndTrim[index]!,
       Math.min(compressiblePairs[index] ?? 0, afterBlank[index]!),
     );
     prefixes.push({
@@ -577,13 +593,22 @@ export function layoutChineseParagraph(
   // Like TeX, hyphenate words only when the first pass fails. Keep legal
   // breaks even when a narrow column must leave a short line.
   let state =
-    chooseBreaks(points, prefixes, glues, leading, trailing, width, em, 1) ??
+    chooseBreaks(
+      points,
+      prefixes,
+      glues,
+      lineStartTrim,
+      lineEndTrim,
+      width,
+      em,
+      1,
+    ) ??
     chooseBreaks(
       hyphenatedPoints,
       prefixes,
       glues,
-      leading,
-      trailing,
+      lineStartTrim,
+      lineEndTrim,
       width,
       em,
       3,
@@ -592,8 +617,8 @@ export function layoutChineseParagraph(
       hyphenatedPoints,
       prefixes,
       glues,
-      leading,
-      trailing,
+      lineStartTrim,
+      lineEndTrim,
       width,
       em,
       3,
@@ -614,12 +639,12 @@ export function layoutChineseParagraph(
             : ratio * (glue.stretch - glue.cappedStretch) +
               Math.min(1, ratio) * glue.cappedStretch),
       );
-    adjustments[adjustments.length - 1] = -trailing[end - 1]!;
+    adjustments[adjustments.length - 1] = -lineEndTrim[end - 1]!;
     const beforeAdjustments = quoteCells
       .slice(start, end)
       .map((cell, index) => {
         adjustments[index] = adjustments[index]! + (cell?.after ?? 0);
-        return (cell?.before ?? 0) - (index === 0 ? leading[start]! : 0);
+        return (cell?.before ?? 0) - (index === 0 ? lineStartTrim[start]! : 0);
       });
     lines.push({
       start,

@@ -69,7 +69,7 @@ function positionTokens(tokens: ChineseLayoutToken[]) {
 
 test('isolated quotes reserve a Han cell and align to the quoted text', () => {
   for (const width of [9, 16]) {
-    const [, opening, , closing] = quoteFixture('甲“乙”', width);
+    const [, opening, , closing] = quoteFixture('甲“乙”丙', width);
     assert.equal(opening!.end - opening!.start, 16);
     assert.equal(opening!.inkEnd, opening!.end);
     assert.equal(closing!.end - closing!.start, 16);
@@ -246,4 +246,62 @@ test('curly quotes narrow to 3/4 of a Han cell when a line must shrink', () => {
   for (const cell of cells(124)) assert.ok(Math.abs(cell - 14) < 1e-6);
   for (const cell of cells(120)) assert.ok(Math.abs(cell - 12) < 1e-6);
   assert.ok(layoutChineseParagraph(tokens, 118, 16)!.length > 1);
+});
+
+/** The advance of each line, from its first origin to the end of its last token. */
+function lineExtents(tokens: ChineseLayoutToken[], width: number) {
+  const lines = layoutChineseParagraph(tokens, width, 16);
+  assert.ok(lines);
+  return lines.map(({ start, end, beforeAdjustments, adjustments }) => {
+    let extent = 0;
+    for (let index = start; index < end; index++) {
+      extent +=
+        beforeAdjustments[index - start]! +
+        tokens[index]!.width +
+        adjustments[index - start]!;
+    }
+    return {
+      text: tokens
+        .slice(start, end)
+        .map(({ text }) => text)
+        .join(''),
+      extent,
+    };
+  });
+}
+
+test('full-cell punctuation at a line edge narrows to its glyph', () => {
+  // The closing quote's glyph covers half a cell; its ink meets the edge.
+  const quoted = Array.from('甲乙丙丁戊”己庚辛壬癸子', (text) => ({
+    text,
+    width: text === '”' ? 9 : 16,
+  }));
+  const [first] = lineExtents(quoted, 88);
+  assert.equal(first!.text, '甲乙丙丁戊”');
+  assert.ok(Math.abs(first!.extent - 88) < 1e-6);
+
+  // A full stop whose ink ends 10px before its advance.
+  const stopped: ChineseLayoutToken[] = Array.from(
+    '甲乙丙丁戊。己庚辛壬癸子',
+    (text) =>
+      text === '。'
+        ? { text, width: 16, ink: { left: 2, right: 6 } }
+        : { text, width: 16 },
+  );
+  const [line] = lineExtents(stopped, 86);
+  assert.equal(line!.text, '甲乙丙丁戊。');
+  assert.ok(Math.abs(line!.extent - 86) < 1e-6);
+});
+
+test('an opening quote at a paragraph start narrows to its glyph', () => {
+  // Opening quotes cannot start a later line, only the paragraph.
+  const tokens = Array.from('“甲乙丙”丁戊', (text) => ({
+    text,
+    width: /[“”]/u.test(text) ? 9 : 16,
+  }));
+  const lines = layoutChineseParagraph(tokens, 200, 16);
+  assert.ok(lines);
+  // The quote's face is the last 8px of its 9px advance: shifting the glyph
+  // back by 1px puts that face at the line start.
+  assert.ok(Math.abs(lines[0]!.beforeAdjustments[0]! + 1) < 1e-6);
 });
