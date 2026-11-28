@@ -446,31 +446,62 @@ function applyEdits(edits: Edit[]) {
 }
 
 function measureInBrowser(runs: Run[], punctuationOnly = false): Run[] {
-  const range = document.createRange();
-  return runs.map(({ tokens, hardBreak }) => ({
-    hardBreak,
-    tokens: tokens.map((token) => {
+  const sources = new Map<Token, Element>();
+  const probes = new Map<Element, Map<string, HTMLElement>>();
+  for (const { tokens } of runs) {
+    for (const token of tokens) {
       if (
         punctuationOnly &&
         token.annotation !== 'footnote' &&
         !punctuation.test(token.text)
       )
-        return token;
-      const { start, end } = token;
-      if (!('offset' in start)) {
-        return { ...token, width: start.node.getBoundingClientRect().width };
+        continue;
+      if (!('offset' in token.start)) {
+        sources.set(token, token.start.node);
+        continue;
       }
-      if (!('offset' in end)) return token;
-      range.setStart(start.node, start.offset);
-      range.setEnd(end.node, end.offset);
-      return { ...token, width: range.getBoundingClientRect().width };
+      const parent = token.start.node.parentElement!;
+      let byText = probes.get(parent);
+      if (!byText) {
+        byText = new Map();
+        probes.set(parent, byText);
+      }
+      let probe = byText.get(token.text);
+      if (!probe) {
+        // WebKit may round the edges of text ranges. Measure a box whose
+        // width is the text advance, with the typography of the source text.
+        probe = document.createElement('span');
+        probe.style.cssText =
+          'position:absolute;left:0;top:0;width:max-content;' +
+          'visibility:hidden;white-space:pre';
+        probe.textContent = token.text;
+        parent.append(probe);
+        byText.set(token.text, probe);
+      }
+      sources.set(token, probe);
+    }
+  }
+
+  const widths = new Map<Element, number>();
+  for (const source of sources.values()) {
+    if (!widths.has(source))
+      widths.set(source, source.getBoundingClientRect().width);
+  }
+  for (const byText of probes.values()) {
+    for (const probe of byText.values()) probe.remove();
+  }
+  return runs.map(({ tokens, hardBreak }) => ({
+    hardBreak,
+    tokens: tokens.map((token) => {
+      const source = sources.get(token);
+      return source ? { ...token, width: widths.get(source)! } : token;
     }),
   }));
 }
 
 function renderRuns(runs: Run[], width: number, em: number, hanWidth: number) {
   const edits: Edit[] = [];
-  const lineEnds: HTMLElement[] = [];
+  const lineEnds: { node: HTMLElement; justified: boolean }[] = [];
   for (const { tokens, hardBreak } of runs) {
     if (tokens.length) {
       const lines = layoutChineseParagraph(tokens, width, em, hanWidth);
@@ -484,10 +515,10 @@ function renderRuns(runs: Run[], width: number, em: number, hanWidth: number) {
         }
         const end = tokens[line.end - 1]!.end;
         if (line.hyphenated) edits.push(hyphen(end));
-        const marker =
-          index < lines.length - 1 ? lineBreak(end) : spacing(end, 'after', 0);
+        const justified = index < lines.length - 1;
+        const marker = justified ? lineBreak(end) : spacing(end, 'after', 0);
         edits.push(marker);
-        lineEnds.push(marker.node);
+        lineEnds.push({ node: marker.node, justified });
       }
     }
     if (hardBreak) edits.push(lineBreak(hardBreak));
@@ -509,8 +540,7 @@ function typeset(paragraph: HTMLParagraphElement, state: Paragraph) {
   const hanWidth = textWidth('汉', style) || em;
   const leftInset = paragraph.clientLeft + Number.parseFloat(style.paddingLeft);
   paragraph.classList.add('blog-typeset');
-  // Use the DOM advance for punctuation cells. At small sizes, the browser
-  // can advance punctuation differently from the Canvas measurement.
+  // Match the browser's punctuation advance when it differs from Canvas.
   if (firstMeasurement) state.runs = measureInBrowser(state.runs, true);
   /** Render, rejecting overflow, and report how far justified lines miss the edge. */
   const render = (runs: Run[]) => {
@@ -519,15 +549,13 @@ function typeset(paragraph: HTMLParagraphElement, state: Paragraph) {
     const right =
       paragraph.getBoundingClientRect().left + leftInset + state.width;
     let misalignment = 0;
-    for (const end of result.lineEnds) {
-      const offset = end.getBoundingClientRect().right - right;
+    for (const { node, justified } of result.lineEnds) {
+      const offset = node.getBoundingClientRect().right - right;
       if (offset > 1) {
         result.restore();
         return undefined;
       }
-      // Only lines ending in a line break are justified.
-      if (end.nodeName === 'BR')
-        misalignment = Math.max(misalignment, Math.abs(offset));
+      if (justified) misalignment = Math.max(misalignment, Math.abs(offset));
     }
     return { restore: result.restore, misalignment };
   };
