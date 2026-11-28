@@ -83,6 +83,8 @@ export default defineConfig({
     'blog-typeset': [
       '[@media_screen]:!whitespace-nowrap',
       '[@media_screen]:[text-autospace:no-autospace]',
+      // Keep kerning consistent between width probes and mixed-script text.
+      '[@media_screen]:[font-kerning:normal]',
       '[@media_screen]:[text-spacing-trim:space-all]',
       '[@media_screen]:[&_code]:!whitespace-pre',
     ],
